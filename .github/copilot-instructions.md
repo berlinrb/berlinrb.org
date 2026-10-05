@@ -16,6 +16,9 @@ identifiers beyond values already intentionally public in the repository.
   organizers, affiliations, and contact channels are factual public claims.
   Change them only from explicit maintainer-provided evidence. Do not infer an
   event from Luma, social media, a proposal, or an issue comment.
+- The "Past meetups" list in `index.html` is generated from Luma by
+  `bin/past-meetups` and updated through automated pull requests. Do not edit
+  it by hand; review those pull requests against the Luma calendar.
 - Keep repeated facts consistent across visible HTML, metadata, JSON-LD, the
   press kit page, and `press/about-berlinrb.txt`. The deployment workflow builds
   the downloadable archive and sitemap from these sources.

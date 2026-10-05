@@ -1,0 +1,34 @@
+name: Update past meetups
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: past-meetups
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - name: Fetch past meetups from Luma
+        run: bin/past-meetups
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          branch: automation/past-meetups
+          delete-branch: true
+          commit-message: "chore: update past meetups from Luma"
+          title: Update past meetups from Luma
+          body: |
+            Past in-person meetups from the [Luma calendar](https://luma.com/berlinrb), fetched by `bin/past-meetups`.
+
+            Check the names, dates, and addresses before merging.
