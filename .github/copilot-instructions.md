@@ -37,7 +37,7 @@ identifiers beyond values already intentionally public in the repository.
 
 - The Luma calendar is the event source and embedded third-party surface. Keep
   a direct Luma link as a fallback, a descriptive iframe title, lazy loading,
-  keyboard access, and a usable layout when the embed or remote font fails.
+  keyboard access, and a usable layout when the embed or web font fails.
 - Plausible is the only analytics integration. Do not add cookies, fingerprinting,
   ad pixels, attendee tracking, session replay, or a consent-requiring data
   flow without explicit maintainer approval and corresponding public disclosure.
