@@ -413,6 +413,10 @@ a:hover {
     width: min(100%, 300px);
   }
 
+  .footer-main {
+    flex-direction: column;
+  }
+
   .footer-main,
   .footer-links,
   .footer-social,
