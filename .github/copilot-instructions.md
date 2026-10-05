@@ -49,7 +49,7 @@ identifiers beyond values already intentionally public in the repository.
   typography, spacing, colors, or brand presentation is an interface redesign.
   Call it out and require before-and-after evidence at representative desktop
   and mobile widths.
-- Keep relative links valid on both `/` and `/press/`. Do not commit generated
+- Keep relative links valid on `/`, `/press/`, `/imprint/`, and `/privacy/`. Do not commit generated
   `sitemap.xml`, the press-kit zip, or deployment build directories unless the
   repository explicitly changes their ownership.
 

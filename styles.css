@@ -617,3 +617,19 @@ a:hover {
     border-top: 0;
   }
 }
+
+/* Imprint and privacy */
+
+.legal p {
+  margin: 0 0 14px;
+  max-width: 68ch;
+}
+
+.legal p:last-child {
+  margin-bottom: 0;
+}
+
+.legal ul {
+  margin: 0 0 14px;
+  padding-left: 22px;
+}
