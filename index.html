@@ -6,7 +6,8 @@
     <title>Berlin.rb &middot; Ruby Meetup for the Berlin Ruby Community</title>
     <meta name="description" content="Berlin.rb is a regular Ruby meetup for the Berlin Ruby community. Talks, project show-and-tells, and casual get-togethers. Free and open to everyone.">
     <link rel="canonical" href="https://berlinrb.org/">
-    <meta name="theme-color" content="#fbfaf7">
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
@@ -189,7 +190,7 @@
     <main>
       <section class="hero">
         <div class="intro">
-          <h1 class="mark"><img class="logo" src="assets/logo.svg" alt="Berlin.rb" width="666" height="805"><span class="visually-hidden">Ruby meetup for the Berlin Ruby community</span></h1>
+          <h1 class="mark"><picture><source srcset="assets/logo-dark.svg" media="(prefers-color-scheme: dark)"><img class="logo" src="assets/logo.svg" alt="Berlin.rb" width="666" height="805"></picture><span class="visually-hidden">Ruby meetup for the Berlin Ruby community</span></h1>
           <p class="lead">A new, regular meetup for Berlin&rsquo;s Ruby community. Talks, project show-and-tells, and casual get-togethers. Free and open to everyone.</p>
           <div class="actions">
             <div class="action-links">
@@ -211,6 +212,19 @@
               aria-hidden="false"
               tabindex="0"
             ></iframe>
+            <script>
+              (() => {
+                const calendar = document.currentScript.previousElementSibling
+                const darkMode = matchMedia("(prefers-color-scheme: dark)")
+                const applyTheme = () => {
+                  const url = new URL(calendar.src)
+                  url.searchParams.set("lt", darkMode.matches ? "dark" : "light")
+                  calendar.src = url
+                }
+                if (darkMode.matches) applyTheme()
+                darkMode.addEventListener("change", applyTheme)
+              })()
+            </script>
           </div>
         </div>
       </section>

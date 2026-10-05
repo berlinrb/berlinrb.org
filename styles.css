@@ -11,14 +11,35 @@
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --ink: #171717;
   --muted: #69665f;
   --paper: #fbfaf7;
+  --surface: #fff;
   --ruby: #c7162b;
   --ruby-deep: #a91224;
+  --button: var(--ruby);
+  --button-hover: var(--ruby-deep);
   --gold: #f2c94c;
   --line: rgba(23, 23, 23, 0.12);
+  --glow: rgba(199, 22, 43, 0.065);
+  --glow-soft: rgba(199, 22, 43, 0.035);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #ecebe7;
+    --muted: #a7a39a;
+    --paper: #141311;
+    --surface: #1c1b19;
+    --ruby: #f25466;
+    --ruby-deep: #ff7a88;
+    --button: #c7162b;
+    --button-hover: #db2a3f;
+    --line: rgba(236, 235, 231, 0.14);
+    --glow: rgba(199, 22, 43, 0.16);
+    --glow-soft: rgba(199, 22, 43, 0.08);
+  }
 }
 
 * {
@@ -41,8 +62,8 @@ body {
   place-items: start center;
   background-color: var(--paper);
   background-image:
-    linear-gradient(135deg, rgba(199, 22, 43, 0.065), transparent 36%),
-    linear-gradient(315deg, rgba(199, 22, 43, 0.035), transparent 44%);
+    linear-gradient(135deg, var(--glow), transparent 36%),
+    linear-gradient(315deg, var(--glow-soft), transparent 44%);
   background-repeat: no-repeat;
   color: var(--ink);
   font-family:
@@ -121,7 +142,7 @@ a:hover {
 
 .button {
   display: inline-block;
-  background: var(--ruby);
+  background: var(--button);
   color: #fff;
   font-weight: 700;
   font-size: 0.98rem;
@@ -131,7 +152,7 @@ a:hover {
 }
 
 .button:hover {
-  background: var(--ruby-deep);
+  background: var(--button-hover);
   text-decoration: none;
 }
 
@@ -175,7 +196,7 @@ a:hover {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .calendar iframe {
@@ -502,7 +523,13 @@ a:hover {
 }
 
 .preview-square img {
-  outline: 1px dashed var(--line);
+  outline: 1px dashed rgba(23, 23, 23, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  .preview-dark {
+    border-color: var(--line);
+  }
 }
 
 .logo-card .downloads {
@@ -545,7 +572,7 @@ a:hover {
   margin-top: 18px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--surface);
   padding: 18px 20px;
 }
 
