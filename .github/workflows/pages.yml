@@ -25,6 +25,20 @@ jobs:
         with:
           fetch-depth: 0 # sitemap lastmod comes from each page's last commit
       - uses: actions/configure-pages@v5
+      - name: Check that /cfp redirects to the form the site opens
+        run: |
+          form_ids=$(grep -oh 'data-tally-open="[^"]*"' index.html */index.html | cut -d'"' -f2 | sort -u)
+          if [ "$(printf '%s\n' "$form_ids" | grep -c .)" -ne 1 ]; then
+            echo "::error::Expected exactly one Tally form id across the pages, found: $(echo $form_ids)"
+            exit 1
+          fi
+          form_url="https://tally.so/r/$form_ids"
+          for expected in "content=\"0; url=$form_url\"" "href=\"$form_url\""; do
+            if ! grep -qF "$expected" cfp/index.html; then
+              echo "::error file=cfp/index.html::/cfp is missing $expected"
+              exit 1
+            fi
+          done
       - name: Build the press kit zip
         run: |
           mkdir -p build/berlinrb-press-kit
