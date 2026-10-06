@@ -333,35 +333,46 @@ a:hover {
 /* Footer */
 
 .footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px 24px;
+  display: grid;
+  gap: 20px;
   margin-top: 36px;
   color: var(--muted);
   font-size: 0.92rem;
 }
 
+.footer-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 32px;
+}
+
+.footer-links,
+.footer-social,
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+}
+
 .footer a {
   color: inherit;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   min-width: 0;
   overflow-wrap: anywhere;
   text-decoration: none;
 }
 
-.footer a:hover {
+.footer a:hover,
+.footer a[aria-current="page"] {
   color: var(--ink);
 }
 
-.footer a::before {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  content: "";
+.footer-legal {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  font-size: 0.8rem;
 }
 
 /* Small screens: stack the hero, center the identity */
@@ -400,6 +411,17 @@ a:hover {
 
   .ruby-europe-banner img {
     width: min(100%, 300px);
+  }
+
+  .footer-main {
+    flex-direction: column;
+  }
+
+  .footer-main,
+  .footer-links,
+  .footer-social,
+  .footer-legal {
+    justify-content: center;
   }
 }
 
