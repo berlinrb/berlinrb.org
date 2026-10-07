@@ -1,0 +1,88 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/inline"
+
+gemfile do
+  source "https://rubygems.org"
+  gem "http", "~> 6.0"
+  gem "thor", "~> 1.5"
+end
+
+require "erb"
+require "time"
+
+class PastMeetups < Thor
+  CALENDAR_ID = "cal-21caVAhECUCuGR6"
+  INDEX       = File.expand_path("../index.html", __dir__)
+  MARKERS     = %r((<!-- past-meetups:start -->).*?(\n *<!-- past-meetups:end -->))m
+  INDENT      = " " * 10
+
+  def self.exit_on_failure? = true
+
+  default_command :update
+
+  desc "update", "Write past in-person meetups from the Luma calendar into index.html"
+  option :calendar, default: CALENDAR_ID, desc: "Luma calendar API ID"
+  def update
+    ENV["TZ"] = "Europe/Berlin"
+    events = []
+    cursor = nil
+    loop do
+      response = HTTP.get \
+        "https://api.lu.ma/calendar/get-items",
+        params: {
+          calendar_api_id:   options[:calendar],
+          period:            "past",
+          pagination_limit:  50,
+          pagination_cursor: cursor
+        }.compact
+      raise Thor::Error, "Luma responded with #{response.status}: #{response.to_s[0, 200]}" unless response.status.success?
+      data = response.parse(:json)
+      events.concat(data.fetch("entries").map { _1.fetch("event").merge(_1.slice("guest_count")) })
+      break unless data["has_more"] && cursor = data["next_cursor"]
+    end
+
+    items = events
+      .select { _1["location_type"] == "offline" && _1["visibility"] == "public" }
+      .sort_by { _1.fetch("start_at") }
+      .reverse
+      .map do |event|
+        name = event
+          .fetch("name")
+          .sub(%r(\s*\(in person\))i, "")
+          .gsub(%r(\p{Extended_Pictographic}️?), "")
+          .strip
+        starts_at = Time.iso8601(event.fetch("start_at")).localtime
+        address   = event.dig("geo_address_info", "short_address")
+        guests    = event["guest_count"]
+        [
+          %(<li>),
+          %(  <a class="past-meetup" href="https://luma.com/#{ERB::Util.url_encode(event.fetch("url"))}">),
+          %(    <time class="past-meetup-date" datetime="#{starts_at.strftime("%F")}"><span class="past-meetup-day">#{starts_at.day}</span> <span class="past-meetup-month">#{starts_at.strftime("%b")}</span> <span class="past-meetup-year">#{starts_at.year}</span></time>),
+          %(    <span class="past-meetup-body">),
+          %(      <span class="past-meetup-name">#{ERB::Util.h(name)}</span>),
+          %(      <span class="past-meetup-meta">),
+          (%(        <span>#{ERB::Util.h(address)}</span>) if address),
+          (%(        <span>#{guests} #{guests == 1 ? "signup" : "signups"}</span>) if guests&.positive?),
+          %(      </span>),
+          %(    </span>),
+          %(  </a>),
+          %(</li>)
+        ].compact.map { INDENT + _1 }
+      end
+    list =
+      if items.empty?
+        [%(#{INDENT}<li>No past meetups yet.</li>)]
+      else
+        items.flatten
+      end
+
+    html = File.read(INDEX)
+    raise Thor::Error, "Past meetup markers not found in #{INDEX}" unless html.match?(MARKERS)
+    File.write(INDEX, html.sub(MARKERS) { "#{$1}\n#{list.join("\n")}#{$2}" })
+    say "Wrote #{items.size} past meetup(s) to #{File.basename(INDEX)}."
+  end
+end
+
+PastMeetups.start
