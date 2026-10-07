@@ -58,10 +58,16 @@ class PastMeetups < Thor
         guests    = event["guest_count"]
         [
           %(<li>),
-          %(  <a href="https://luma.com/#{ERB::Util.url_encode(event.fetch("url"))}">#{ERB::Util.h(name)}</a>),
-          %(  <time datetime="#{starts_at.strftime("%F")}">#{starts_at.strftime("%-d %B %Y")}</time>),
-          (%(  <span>#{ERB::Util.h(address)}</span>) if address),
-          (%(  <span>#{guests} #{guests == 1 ? "attendee" : "attendees"}</span>) if guests&.positive?),
+          %(  <a class="past-meetup" href="https://luma.com/#{ERB::Util.url_encode(event.fetch("url"))}">),
+          %(    <time class="past-meetup-date" datetime="#{starts_at.strftime("%F")}"><span class="past-meetup-day">#{starts_at.day}</span> <span class="past-meetup-month">#{starts_at.strftime("%b")}</span> <span class="past-meetup-year">#{starts_at.year}</span></time>),
+          %(    <span class="past-meetup-body">),
+          %(      <span class="past-meetup-name">#{ERB::Util.h(name)}</span>),
+          %(      <span class="past-meetup-meta">),
+          (%(        <span>#{ERB::Util.h(address)}</span>) if address),
+          (%(        <span>#{guests} #{guests == 1 ? "signup" : "signups"}</span>) if guests&.positive?),
+          %(      </span>),
+          %(    </span>),
+          %(  </a>),
           %(</li>)
         ].compact.map { INDENT + _1 }
       end
