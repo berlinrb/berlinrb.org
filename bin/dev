@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+# Serve the static site locally. Usage: bin/dev [--open] [port]
+set -e
+cd "$(dirname "$0")/.."
+
+port="${PORT:-8000}"
+open_browser=false
+for arg in "$@"; do
+  case "$arg" in
+    --open) open_browser=true ;;
+    *) port="$arg" ;;
+  esac
+done
+
+url="http://127.0.0.1:$port/"
+
+if $open_browser; then
+  (
+    until curl -s -o /dev/null "$url"; do sleep 0.2; done
+    if command -v open >/dev/null; then open "$url"; else xdg-open "$url"; fi
+  ) &
+fi
+
+exec python3 -m http.server "$port" --bind 127.0.0.1

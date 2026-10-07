@@ -40,7 +40,7 @@ identifiers beyond values already intentionally public in the repository.
 
 - The Luma calendar is the event source and embedded third-party surface. Keep
   a direct Luma link as a fallback, a descriptive iframe title, lazy loading,
-  keyboard access, and a usable layout when the embed or remote font fails.
+  keyboard access, and a usable layout when the embed or web font fails.
 - Plausible is the only analytics integration. Do not add cookies, fingerprinting,
   ad pixels, attendee tracking, session replay, or a consent-requiring data
   flow without explicit maintainer approval and corresponding public disclosure.
@@ -52,7 +52,7 @@ identifiers beyond values already intentionally public in the repository.
   typography, spacing, colors, or brand presentation is an interface redesign.
   Call it out and require before-and-after evidence at representative desktop
   and mobile widths.
-- Keep relative links valid on both `/` and `/press/`. Do not commit generated
+- Keep relative links valid on `/`, `/press/`, `/imprint/`, and `/privacy/`. Do not commit generated
   `sitemap.xml`, the press-kit zip, or deployment build directories unless the
   repository explicitly changes their ownership.
 

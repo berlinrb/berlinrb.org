@@ -39,7 +39,7 @@ jobs:
           {
             echo '<?xml version="1.0" encoding="UTF-8"?>'
             echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-            for page in index.html press/index.html; do
+            for page in index.html press/index.html imprint/index.html privacy/index.html; do
               printf '  <url><loc>https://berlinrb.org/%s</loc><lastmod>%s</lastmod></url>\n' \
                 "${page%index.html}" "$(git log -1 --format=%cs -- "$page")"
             done

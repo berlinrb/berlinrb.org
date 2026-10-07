@@ -6,7 +6,8 @@
     <title>Berlin.rb &middot; Ruby Meetup for the Berlin Ruby Community</title>
     <meta name="description" content="Berlin.rb is a regular Ruby meetup for the Berlin Ruby community. Talks, project show-and-tells, and casual get-togethers. Free and open to everyone.">
     <link rel="canonical" href="https://berlinrb.org/">
-    <meta name="theme-color" content="#fbfaf7">
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
@@ -36,9 +37,7 @@
     </script>
     <link rel="preconnect" href="https://luma.com">
     <script async src="https://tally.so/widgets/embed.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&amp;display=swap" rel="stylesheet">
+    <link rel="preload" href="assets/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
     <script type="application/ld+json">
     {
@@ -191,7 +190,7 @@
     <main>
       <section class="hero">
         <div class="intro">
-          <h1 class="mark"><img class="logo" src="assets/logo.svg" alt="Berlin.rb" width="666" height="805"><span class="visually-hidden">Ruby meetup for the Berlin Ruby community</span></h1>
+          <h1 class="mark"><picture><source srcset="assets/logo-dark.svg" media="(prefers-color-scheme: dark)"><img class="logo" src="assets/logo.svg" alt="Berlin.rb" width="666" height="805"></picture><span class="visually-hidden">Ruby meetup for the Berlin Ruby community</span></h1>
           <p class="lead">A new, regular meetup for Berlin&rsquo;s Ruby community. Talks, project show-and-tells, and casual get-togethers. Free and open to everyone.</p>
           <div class="actions">
             <div class="action-links">
@@ -213,6 +212,19 @@
               aria-hidden="false"
               tabindex="0"
             ></iframe>
+            <script>
+              (() => {
+                const calendar = document.currentScript.previousElementSibling
+                const darkMode = matchMedia("(prefers-color-scheme: dark)")
+                const applyTheme = () => {
+                  const url = new URL(calendar.src)
+                  url.searchParams.set("lt", darkMode.matches ? "dark" : "light")
+                  calendar.src = url
+                }
+                if (darkMode.matches) applyTheme()
+                darkMode.addEventListener("change", applyTheme)
+              })()
+            </script>
           </div>
         </div>
       </section>
@@ -329,14 +341,24 @@
       </section>
 
       <footer class="footer">
-        <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>
-        <a href="https://luma.com/berlinrb">Luma calendar</a>
-        <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>
-        <a href="press/">Press kit</a>
-        <a href="https://www.youtube.com/@berlinrb_org">YouTube</a>
-        <a href="https://x.com/berlinrb_org">X</a>
-        <a href="https://bsky.app/profile/berlinrb.bsky.social">Bluesky</a>
-        <a href="https://www.linkedin.com/company/berlinrb">LinkedIn</a>
+        <div class="footer-main">
+          <nav class="footer-links" aria-label="Berlin.rb">
+            <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>
+            <a href="https://luma.com/berlinrb">Luma calendar</a>
+            <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>
+            <a href="press/">Press kit</a>
+          </nav>
+          <nav class="footer-social" aria-label="Social media">
+            <a href="https://www.youtube.com/@berlinrb_org">YouTube</a>
+            <a href="https://x.com/berlinrb_org">X</a>
+            <a href="https://bsky.app/profile/berlinrb.bsky.social">Bluesky</a>
+            <a href="https://www.linkedin.com/company/berlinrb">LinkedIn</a>
+          </nav>
+        </div>
+        <p class="footer-legal">
+          <a href="imprint/">Imprint</a>
+          <a href="privacy/">Privacy</a>
+        </p>
       </footer>
     </main>
   </body>
