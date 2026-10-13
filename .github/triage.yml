@@ -1,3 +1,4 @@
+extends: crmne/github-automation:triage/account.yml
 report_bots:
   - honeybadger[bot]
 
@@ -33,8 +34,7 @@ instructions: |
   present. Ask for one missing non-sensitive fact only when it prevents useful
   investigation, never for information already supplied. Choose source files
   for a useful technical answer and cite only what those files establish;
-  otherwise leave reply null. Leave uncertain diagnoses, product decisions,
-  duplicate detection, and closure to the maintainer. Do not promise
+  otherwise leave reply null. Leave uncertain diagnoses and product decisions to the maintainer. Do not promise
   implementation, releases, or tests. Never repeat secrets or private data.
   Keep replies short, direct, and free of status chatter, implementation
   plans, headings, and em dashes.
