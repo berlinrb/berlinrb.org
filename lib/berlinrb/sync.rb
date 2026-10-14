@@ -135,7 +135,7 @@ module Berlinrb
     # one written from Basecamp, a to-do asks for it to be pasted into Luma.
     # The to-do is completed once Luma matches.
     LUMA_TODOLIST = "Luma descriptions"
-    LUMA_ASSIGNEE = 52479905 # Carmine
+    LUMA_ASSIGNEE = 52488656 # Viktor, who looks after Luma
     TODOSET       = "9950099724"
 
     def sync_luma_todos
@@ -153,7 +153,7 @@ module Berlinrb
           @log << "Luma to-dos: ##{meetup["number"]} matches Basecamp, completed the to-do"
         else
           description = %(<p>Luma's description no longer matches the talks in Basecamp. Copy everything below the line into the description of <a href="https://luma.com/#{meetup["luma"]}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. This to-do completes itself once Luma matches.</p><hr>#{wanted.delete("\n")})
-          next if todo && LumaDescription.same?(todo["description"], description)
+          next if todo && LumaDescription.same?(todo["description"], description) && todo["assignees"]&.map { _1["id"] } == [LUMA_ASSIGNEE]
           body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
           if todo
             basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}.json", method: :put, body: body)
