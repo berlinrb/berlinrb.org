@@ -95,8 +95,11 @@ module Berlinrb
           meetup["ends_at"] = Time.iso8601(event["end_at"]).localtime.strftime("%H:%M") if event["end_at"]
           meetup["luma"] = event["url"]
           address = event["geo_address_info"] || {}
-          meetup["venue"] ||= address["address"]
-          meetup["address"] = address["short_address"] if address["short_address"]
+          # Until a venue is set, Luma only knows the city.
+          if address["short_address"].to_s.include?(",")
+            meetup["venue"] ||= address["address"]
+            meetup["address"] = address["short_address"]
+          end
           meetup["signups"] = entry["guest_count"] if starts_at.to_date < @today && entry["guest_count"].to_i.positive?
           announce(meetup, event["api_id"]) if starts_at.to_date >= @today
         else

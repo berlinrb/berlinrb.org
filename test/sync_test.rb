@@ -32,16 +32,17 @@ class SyncTest < Minitest::Test
       when /videos\.xml/ then FEED
       when /i\.ytimg\.com/ then "jpeg"
       when /period=past/ then JSON.dump(entries: [luma("Berlin.rb #2 (in person)", "2026-10-13T16:30:00Z", "offline", 64)])
-      when /period=future/ then JSON.dump(entries: [luma("Berlin.rb #3 (in person)", "2026-11-10T17:30:00Z", "offline", 20), luma("Berlin.rb #3 (livestream)", "2026-11-10T17:30:00Z", "online", 5)])
+      when /period=future/ then JSON.dump(entries: [luma("Berlin.rb #3 (in person)", "2026-11-10T17:30:00Z", "offline", 20, city_only: true), luma("Berlin.rb #3 (livestream)", "2026-11-10T17:30:00Z", "online", 5)])
       when /event\/get/ then JSON.dump(event: { description: "With Andrzej Krzywda from Arkency" })
       end
     end
     Berlinrb::Sync.new(@meetups, today: Date.new(2026, 10, 14), http: http, basecamp: -> { cards })
   end
 
-  def luma(name, start, type, guests)
+  def luma(name, start, type, guests, city_only: false)
+    place = city_only ? { address: "Berlin", short_address: "Berlin" } : { address: "Venue", short_address: "Street 1, Berlin" }
     { event: { api_id: "evt-#{name.hash}", name: name, url: name[/#(\d)/, 1] + type, start_at: start, end_at: start.sub(/T\d\d/, "T20"),
-               location_type: type, visibility: "public", geo_address_info: { address: "Venue", short_address: "Street 1, Berlin" } },
+               location_type: type, visibility: "public", geo_address_info: place },
       guest_count: guests }
   end
 
@@ -63,6 +64,7 @@ class SyncTest < Minitest::Test
     assert_equal ["2026-10-13", "18:30", "Venue", "Street 1, Berlin", 64], two.values_at("date", "starts_at", "venue", "address", "signups")
     three = @meetups.find(3)
     assert_nil three["signups"], "upcoming signups change daily and stay off the site"
+    assert_nil three["venue"], "a city alone is not a venue"
     assert_equal "3online", three["livestream_luma"]
     assert_equal [true, nil], three["talks"].map { _1["announced"] }
   end
