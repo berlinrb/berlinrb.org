@@ -2,9 +2,10 @@
 <%- if meetup -%>
 <%- talks = site.talks_for(meetup) -%>
 <article class="next-meetup" aria-labelledby="next-title">
-  <p class="next-badge"><%= meetup["date"] == site.today ? "Tonight" : "Next meetup" %></p>
+  <p class="next-badge" data-live-start="<%= site.iso_time(meetup, "starts_at", "18:30") %>" data-live-end="<%= site.iso_time(meetup, "ends_at", "22:00") %>" data-live-text="Happening now"><%= meetup["date"] == site.today ? "Tonight" : "Next meetup" %></p>
   <h2 id="next-title"><a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a></h2>
   <p class="next-when"><time datetime="<%= meetup["date"] %>"><%= meetup["date"].strftime("%a %-d %b") %></time> &middot; <%= meetup["starts_at"] || "18:30" %></p>
+  <p class="next-going" data-live-going="<%= meetup["date"] %>" hidden></p>
   <p class="next-where"><%= h([meetup["venue"], meetup["address"]].compact.uniq.join(", ").then { _1.empty? ? "Venue to be announced" : _1 }) %></p>
   <p class="next-label">On stage</p>
 <%- if talks.any? -%>

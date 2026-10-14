@@ -1,8 +1,8 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import worker, { talkCard, companyCard } from "../src/index.js"
+import worker, { talkCard, companyCard, lumaCounts, stageMinutes } from "../src/index.js"
 
-const env = { SITE: "https://berlinrb.org", BASECAMP_ACCOUNT: "1", BASECAMP_PROJECT: "2", TALKS_TRIAGE: "3", COMPANIES_TRIAGE: "4", BASECAMP_TOKEN: "t" }
+const env = { TALKS_TABLE: "9", STAGE_MINUTES: "80", SITE: "https://berlinrb.org", BASECAMP_ACCOUNT: "1", BASECAMP_PROJECT: "2", TALKS_TRIAGE: "3", COMPANIES_TRIAGE: "4", BASECAMP_TOKEN: "t" }
 
 test("a talk becomes a card in the sync's format, escaped", () => {
   const card = talkCard({ name: "Ada", email: "ada@example.com", title: "Ruby <3", abstract: "One\n\nTwo", format: "Short (20 min)", dates: ["2026-11-10", "nope"], first_talk: "1" })
@@ -50,4 +50,19 @@ test("a plain form post is redirected back, and the honeypot is ignored silently
   assert.equal(response.status, 303)
   assert.equal(response.headers.get("Location"), "https://berlinrb.org/get-involved/?sent=1")
   assert.equal(called, false)
+})
+
+test("Luma counts are keyed by the in-person date, with the livestream's count", async () => {
+  globalThis.fetch = async () => new Response(JSON.stringify({ has_more: false, entries: [
+    { event: { name: "Berlin.rb #3 (in person)", visibility: "public", location_type: "offline", start_at: "2026-11-10T17:30:00Z" }, guest_count: 42 },
+    { event: { name: "Berlin.rb #3 (livestream)", visibility: "public", location_type: "online", start_at: "2026-11-10T17:30:00Z" }, guest_count: 7 }
+  ] }))
+  assert.deepEqual(await lumaCounts(), { "2026-11-10": { going: 42, online: 7 } })
+})
+
+test("stage time used adds up the Scheduled cards' formats", async () => {
+  globalThis.fetch = async (url) => new Response(JSON.stringify(String(url).endsWith("/9.json")
+    ? { lists: [{ title: "Done", cards_url: "done" }, { title: "Scheduled", cards_url: "scheduled" }] }
+    : [{ due_on: "2026-12-08", content: "<p><strong>Format:</strong> Short (20 min)</p>" }, { due_on: "2026-12-08", content: "" }, { due_on: null }]))
+  assert.deepEqual(await stageMinutes(env), { "2026-12-08": 60 })
 })

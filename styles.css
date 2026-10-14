@@ -1685,3 +1685,54 @@ p.next-talks {
     justify-content: center;
   }
 }
+
+/* Live numbers */
+
+.next-going {
+  margin: 10px 0 0;
+  color: var(--ruby);
+  font-weight: 700;
+}
+
+.coming-going {
+  color: var(--ruby);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.live-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 0;
+  border-radius: 999px;
+  background: var(--glow);
+  padding: 6px 14px;
+  color: var(--ruby);
+  font-weight: 700;
+}
+
+.live-now::before,
+.next-badge.is-live::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ruby);
+  content: "";
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+.live-now[hidden] {
+  display: none;
+}
+
+@keyframes live-pulse {
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-now::before,
+  .next-badge.is-live::before {
+    animation: none;
+  }
+}

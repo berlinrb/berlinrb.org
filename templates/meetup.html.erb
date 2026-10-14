@@ -30,12 +30,17 @@
 <%- end -%>
   </dl>
 <%- if upcoming -%>
+  <p class="live-now" data-live-start="<%= site.iso_time(meetup, "starts_at", "18:30") %>" data-live-end="<%= site.iso_time(meetup, "ends_at", "22:00") %>" hidden>Happening now<%= ". Can't make it? Watch the livestream." if meetup["livestream_luma"] %></p>
+  <p class="next-going" data-live-going="<%= meetup["date"] %>" hidden></p>
   <div class="action-links">
 <%- if meetup["luma"] -%>
     <a class="button" href="<%= site.luma_url(meetup["luma"]) %>">Sign up on Luma</a>
 <%- end -%>
 <%- if meetup["livestream_luma"] -%>
     <a class="button button-secondary" href="<%= site.luma_url(meetup["livestream_luma"]) %>">Join the livestream</a>
+<%- end -%>
+<%- if site.free_minutes(meetup).positive? -%>
+    <a class="button button-secondary" href="/get-involved/?date=<%= meetup["date"] %>#speak">Speak at this meetup</a>
 <%- end -%>
   </div>
   <p class="hint">Free and open to everyone. Talks start at 19:00, then we mingle until 22:00.</p>

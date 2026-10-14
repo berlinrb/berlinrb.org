@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="/styles.css">
     <script defer src="/assets/gallery.js"></script>
     <script defer src="/assets/forms.js"></script>
+    <script defer src="/assets/live.js"></script>
+    <meta name="berlinrb-api" content="<%= site.api("") %>">
     <script type="application/ld+json">
 <%= site.json_ld({ "@context" => "https://schema.org", "@graph" => ld }).gsub(/^/, "    ") %>
     </script>

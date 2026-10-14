@@ -36,6 +36,22 @@
   format?.addEventListener("change", fitDates)
   if (format) fitDates()
 
+  // Stage time as it is in Basecamp right now, not as of the last build.
+  document.addEventListener("berlinrb:live", ({ detail }) => {
+    document.querySelectorAll(".date-option").forEach((option) => {
+      const free = detail[option.querySelector("input").value]?.free
+      if (free == null) return
+      option.dataset.free = free
+      option.querySelector(".date-free").textContent = free ? `${free} min free` : "Full"
+    })
+    if (format) fitDates()
+  })
+
+  // "Speak at this meetup" links pass the date along.
+  const wanted = params.get("date")
+  const option = wanted && document.querySelector(`.date-option input[value="${CSS.escape(wanted)}"]`)
+  if (option && !option.disabled) option.checked = true
+
   document.querySelectorAll(".involve-form").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault()

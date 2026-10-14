@@ -5,8 +5,9 @@ const FORMATS = ["Lightning (5 min)", "Short (20 min)", "Talk (40 min)", "Long (
 const LIMITS = { name: 120, email: 200, title: 200, abstract: 4000, company: 160, address: 300, notes: 3000, links: 500, capacity: 10, cover: 120 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url)
+    if (request.method === "GET" && url.pathname === "/live") return live(env, ctx)
     const cors = corsHeaders(request, env)
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors })
     if (request.method !== "POST" || !["/talks", "/companies"].includes(url.pathname)) {
@@ -44,6 +45,85 @@ export default {
     }
     return reply(request, env, cors, 200)
   }
+}
+
+// Live numbers for the upcoming meetups, keyed by date: who's going in
+// person and on the livestream (from Luma), and the stage time still free
+// (from the Scheduled column in Basecamp). Cached for five minutes.
+const LIVE_SECONDS = 300
+
+async function live(env, ctx) {
+  const cache = caches.default
+  const key = new Request(`${env.SITE}/live-cache`)
+  const cached = await cache.match(key)
+  if (cached) return cached
+
+  const meetups = {}
+  const [luma, stage] = await Promise.allSettled([lumaCounts(), stageMinutes(env)])
+  if (luma.status === "fulfilled") Object.assign(meetups, luma.value)
+  else console.error("Luma", luma.reason)
+  if (stage.status === "fulfilled") {
+    for (const [date, used] of Object.entries(stage.value)) {
+      meetups[date] = { ...meetups[date], free: Math.max(Number(env.STAGE_MINUTES || 80) - used, 0) }
+    }
+  } else console.error("Basecamp", stage.reason)
+
+  const response = new Response(JSON.stringify({ updated_at: new Date().toISOString(), meetups }), {
+    headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${LIVE_SECONDS}`, "Access-Control-Allow-Origin": "*" }
+  })
+  ctx?.waitUntil?.(cache.put(key, response.clone()))
+  return response
+}
+
+export async function lumaCounts() {
+  const entries = []
+  let cursor
+  do {
+    const query = new URLSearchParams({ calendar_api_id: "cal-21caVAhECUCuGR6", period: "future", pagination_limit: "50" })
+    if (cursor) query.set("pagination_cursor", cursor)
+    const response = await fetch(`https://api.lu.ma/calendar/get-items?${query}`, { headers: { "User-Agent": "berlinrb.org (hello@berlinrb.org)" } })
+    if (!response.ok) throw new Error(`Luma responded with ${response.status}`)
+    const data = await response.json()
+    entries.push(...data.entries)
+    cursor = data.has_more ? data.next_cursor : null
+  } while (cursor)
+
+  const dates = {}
+  const online = {}
+  for (const { event, guest_count: guests } of entries) {
+    const number = event.name.match(/#(\d+)/)?.[1]
+    if (!number || event.visibility !== "public") continue
+    if (event.location_type === "offline") dates[number] = { date: berlinDate(event.start_at), going: guests || 0 }
+    else online[number] = guests || 0
+  }
+  return Object.fromEntries(Object.entries(dates).map(([number, { date, going }]) => [date, { going, online: online[number] ?? null }]))
+}
+
+export async function stageMinutes(env) {
+  const base = `https://3.basecampapi.com/${env.BASECAMP_ACCOUNT}`
+  const get = async (url) => {
+    const response = await fetch(url, { headers: { Authorization: `Bearer ${env.BASECAMP_TOKEN}`, "User-Agent": "berlinrb.org forms (hello@berlinrb.org)" } })
+    if (!response.ok) throw new Error(`Basecamp responded with ${response.status}`)
+    return response
+  }
+  const table = await (await get(`${base}/buckets/${env.BASECAMP_PROJECT}/card_tables/${env.TALKS_TABLE}.json`)).json()
+  const scheduled = table.lists.find((list) => list.title === "Scheduled")
+  const used = {}
+  let url = scheduled?.cards_url
+  while (url) {
+    const response = await get(url)
+    for (const card of await response.json()) {
+      if (!card.due_on) continue
+      const minutes = Number(card.content?.match(/Format:<\/strong>[^<(]*\((\d+) min\)/)?.[1] || 40)
+      used[card.due_on] = (used[card.due_on] || 0) + minutes
+    }
+    url = response.headers.get("Link")?.match(/<([^>]+)>;\s*rel="next"/)?.[1]
+  }
+  return used
+}
+
+function berlinDate(iso) {
+  return new Date(iso).toLocaleDateString("en-CA", { timeZone: "Europe/Berlin" })
 }
 
 export async function readFields(request) {

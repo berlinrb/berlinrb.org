@@ -107,6 +107,11 @@ module Berlinrb
 
     def next_meetup = upcoming.first
     def api(path) = "#{API}#{path}"
+
+    # "2026-11-10T18:30:00+01:00", for the "Happening now" check in live.js.
+    def iso_time(meetup, key, fallback)
+      "#{meetup["date"]}T#{meetup[key] || fallback}:00#{offset(meetup["date"])}"
+    end
     def formats = FORMATS
     def latest_talk = past.lazy.flat_map { talks_for(_1).select { |talk| talk["video"] } }.first
     def recent_photos(count) = past.flat_map { |meetup| photos(meetup).map { _1.merge("meetup" => meetup) } }.first(count)

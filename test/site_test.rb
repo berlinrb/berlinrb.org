@@ -85,6 +85,15 @@ class SiteTest < Minitest::Test
     assert_includes read("index.html"), %(<header class="site-header">)
   end
 
+  def test_upcoming_meetups_carry_live_hooks
+    upcoming = read("meetups/3/index.html")
+    assert_includes upcoming, %(data-live-going="2026-11-10")
+    assert_includes upcoming, %(data-live-start="2026-11-10T18:30:00+01:00")
+    assert_includes upcoming, %(<meta name="berlinrb-api" content="https://api.berlinrb.org">)
+    refute_includes upcoming, "Speak at this meetup", "#3 is full"
+    refute_includes read("meetups/1/index.html"), "data-live-going"
+  end
+
   def test_sitemap_lists_generated_pages
     sitemap = read("sitemap.xml")
     assert_includes sitemap, "https://berlinrb.org/meetups/1/"
