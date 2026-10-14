@@ -54,8 +54,15 @@ module Berlinrb
     def upcoming?(meetup) = meetup["date"] >= today
 
     # A talk is public once its meetup is over or Luma has announced it.
+    # In the order the Luma description lists the speakers, which is the
+    # running order.
     def public_talks(meetup)
-      meetup["talks"].select { _1["title"] && (!upcoming?(meetup) || _1["announced"]) }
+      text = Meetups.slug(meetup["about"].to_s.gsub(/<[^>]+>/, " "))
+      meetup["talks"]
+        .select { _1["title"] && (!upcoming?(meetup) || _1["announced"]) }
+        .each_with_index
+        .sort_by { |talk, index| [text.index(Meetups.slug(talk["speaker"])) || text.size, index] }
+        .map(&:first)
     end
 
     def talks

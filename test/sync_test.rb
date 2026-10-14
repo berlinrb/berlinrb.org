@@ -55,8 +55,7 @@ class SyncTest < Minitest::Test
     assert_equal "live2", @meetups.find(2)["livestream"]
     assert_equal "talk1", @meetups.find(1)["talks"].first["video"]
     assert_equal "HiFuMi", @meetups.find(1)["talks"].first["title"]
-    viktor = @meetups.find(1)["talks"].last
-    assert_equal ["Viktor Schmidt", "Ablefy Digital Businesses", "talk2"], viktor.values_at("speaker", "title", "video")
+    assert_equal 1, @meetups.find(1)["talks"].size, "a video without a Basecamp talk is not added"
     assert File.exist?(File.join(@dir, "talk1.jpg"))
   end
 
@@ -87,6 +86,22 @@ class SyncTest < Minitest::Test
     assert_equal 2, @meetups.find(3)["talks"].size
   end
 
+  def test_basecamp_api_reads_scheduled_and_done_columns_with_a_token
+    sync = Berlinrb::Sync.new(@meetups)
+    responses = {
+      "https://3.basecampapi.com/6219432/buckets/47498411/card_tables/10403432462.json" =>
+        { "lists" => [{ "title" => "Ideas", "cards_url" => "ideas" }, { "title" => "Done", "cards_url" => "done" }] },
+      "done" => [{ "title" => "Pawel Strzalkowski: HiFuMi", "due_on" => "2026-09-08", "content" => "" }]
+    }
+    sync.define_singleton_method(:basecamp_request) do |url|
+      Struct.new(:body, :link) { def [](_) = link }.new(JSON.dump(responses.fetch(url)), nil)
+    end
+
+    cards = with_env("BASECAMP_TOKEN" => "token") { sync.basecamp_cards }
+
+    assert_equal [["Pawel Strzalkowski: HiFuMi", "Done"]], cards.map { [_1["title"], _1.dig("parent", "title")] }
+  end
+
   def test_basecamp_is_skipped_when_the_cli_is_not_signed_in
     sync = sync(cards: nil)
     sync.instance_variable_set(:@basecamp, -> {})
@@ -96,6 +111,14 @@ class SyncTest < Minitest::Test
   end
 
   private
+
+  def with_env(values)
+    old = values.keys.to_h { [_1, ENV[_1]] }
+    values.each { ENV[_1] = _2 }
+    yield
+  ensure
+    old.each { ENV[_1] = _2 }
+  end
 
   def stub_const(mod, name, value)
     old = mod.send(:remove_const, name)

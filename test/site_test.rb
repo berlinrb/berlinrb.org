@@ -14,6 +14,8 @@ class SiteTest < Minitest::Test
     meetups = Berlinrb::Meetups.new([
       { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups_in_person" => 100, "signups_online" => 11, "about" => "<p>From Luma</p>",
         "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "Ruby is where you ship AI.", "video" => "abc" }] },
+      { "number" => 2, "date" => "2026-10-13", "about" => "<p><strong>Rafał Cymerys</strong>, then Stephen Margheim</p>",
+        "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How" }, { "speaker" => "Rafal Cymerys", "title" => "Let Your Software" }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
         "talks" => [{ "speaker" => "Andrzej Krzywda", "title" => "Secret", "announced" => false },
                     { "speaker" => "Marco Roth", "title" => "Herb", "announced" => true }] }
@@ -66,6 +68,10 @@ class SiteTest < Minitest::Test
     assert_includes read("photos/index.html"), "/photos/1/thumbs/a.jpg"
     assert File.exist?(File.join(@out, "photos/1/a.jpg"))
     refute_includes read("meetups/3/index.html"), %(class="gallery")
+  end
+
+  def test_talks_follow_the_order_of_the_luma_description
+    assert_equal ["Rafal Cymerys", "Stephen Margheim"], @site.talks_for(@site.meetups.find { _1["number"] == 2 }).map { _1["speaker"] }
   end
 
   def test_sitemap_lists_generated_pages

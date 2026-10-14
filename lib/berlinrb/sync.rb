@@ -14,7 +14,9 @@ module Berlinrb
   class Sync
     LUMA_CALENDAR   = "cal-21caVAhECUCuGR6"
     YOUTUBE_CHANNEL = "UCXkuEpnMwzTqGiXRYavRnjw"
-    BASECAMP        = %w[basecamp -a 6219432 -p 47498411]
+    BASECAMP_ACCOUNT = "6219432"
+    BASECAMP_PROJECT = "47498411"
+    BASECAMP        = %W[basecamp -a #{BASECAMP_ACCOUNT} -p #{BASECAMP_PROJECT}]
     TALKS_TABLE     = "10403432462"
     THUMBNAILS      = File.expand_path("../../assets/videos", __dir__)
     TIME_ZONE       = "Europe/Berlin"
@@ -39,7 +41,7 @@ module Berlinrb
 
     def sync_basecamp
       cards = @basecamp.call
-      return @log << "Basecamp: skipped, the basecamp CLI is not signed in" unless cards
+      return @log << "Basecamp: skipped, no BASECAMP_TOKEN and the basecamp CLI is not signed in" unless cards
       cards.each do |card|
         next unless %w[Scheduled Done].include?(card.dig("parent", "title")) && card["due_on"]
         meetup = @meetups.on(card["due_on"])
@@ -71,11 +73,44 @@ module Berlinrb
       fields.transform_values(&:strip).reject { _2.empty? }
     end
 
+    # With BASECAMP_TOKEN set (in CI) the cards come from the API, otherwise
+    # from a signed-in basecamp CLI.
     def basecamp_cards
+      ENV["BASECAMP_TOKEN"].to_s.empty? ? basecamp_cli_cards : basecamp_api_cards
+    end
+
+    def basecamp_cli_cards
       out, status = Open3.capture2(*BASECAMP, "cards", "list", "--card-table", TALKS_TABLE, "-q", err: File::NULL)
       JSON.parse(out) if status.success?
     rescue Errno::ENOENT, JSON::ParserError
       nil
+    end
+
+    def basecamp_api_cards
+      table = basecamp_api("buckets/#{BASECAMP_PROJECT}/card_tables/#{TALKS_TABLE}.json")
+      table.fetch("lists").select { %w[Scheduled Done].include?(_1["title"]) }.flat_map do |column|
+        cards = []
+        url = column.fetch("cards_url")
+        while url
+          response = basecamp_request(url)
+          cards.concat(JSON.parse(response.body))
+          url = response["Link"].to_s[/<([^>]+)>;\s*rel="next"/, 1]
+        end
+        cards.map { _1.merge("parent" => { "title" => column["title"] }) }
+      end
+    rescue StandardError => error
+      @log << "Basecamp: API failed (#{error.message})"
+      nil
+    end
+
+    def basecamp_api(path) = JSON.parse(basecamp_request("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/#{path}").body)
+
+    def basecamp_request(url)
+      uri = URI(url)
+      request = Net::HTTP::Get.new(uri, "Authorization" => "Bearer #{ENV.fetch("BASECAMP_TOKEN")}", "User-Agent" => "berlinrb.org sync (hello@berlinrb.org)")
+      response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { _1.request(request) }
+      raise "Basecamp responded with #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+      response
     end
 
     # Luma: every Berlin.rb #N event. In person events give the date, venue and
@@ -205,7 +240,6 @@ module Berlinrb
         meetup["livestream"] = video[:id]
       elsif (match = video[:title].match(/\A(?<title>.+?)\s+[–—-]\s+(?<speaker>[^–—|]+?)\s*\|\s*Berlin\.rb\z/))
         talk = talk_for(match[:speaker], video) or return
-        talk["title"] ||= match[:title]
         talk["video"] = video[:id]
       else
         return
@@ -213,17 +247,16 @@ module Berlinrb
       thumbnail(video[:id])
     end
 
+    # Talks come from Basecamp. A video only attaches to a talk already there,
+    # so recordings nobody scheduled (a host's welcome, say) stay off the site.
     def talk_for(speaker, video)
-      candidates = @meetups.list
+      talks = @meetups.list
         .select { _1["date"] && Date.parse(_1["date"].to_s) <= video[:published] }
-        .sort_by { _1["date"].to_s }
-      talks = candidates.flat_map { |meetup| meetup["talks"].map { [meetup, _1] } }
-      found = talks.find { |_, talk| talk["video"] == video[:id] } ||
-              talks.find { |_, talk| !talk["video"] && Meetups.same_person?(talk["speaker"], speaker) }
-      return found.last if found
-      meetup = candidates.last or return
-      @log << "YouTube: added #{speaker} to ##{meetup["number"]} from #{video[:id]}"
-      (meetup["talks"] << { "speaker" => speaker.strip }).last
+        .flat_map { |meetup| meetup["talks"] }
+      talk = talks.find { _1["video"] == video[:id] } ||
+             talks.find { !_1["video"] && Meetups.same_person?(_1["speaker"], speaker) }
+      @log << "YouTube: no talk by #{speaker.strip} for #{video[:id]}" unless talk
+      talk
     end
 
     def thumbnail(id)

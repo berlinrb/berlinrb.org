@@ -20,15 +20,19 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ruby
-      - name: Fetch meetups from Luma and recordings from YouTube
-        run: bin/sync luma youtube
+      - name: Fetch talks from Basecamp, meetups from Luma and recordings from YouTube
+        run: bin/sync
+        env:
+          # Refreshed from a maintainer's signed-in basecamp CLI by
+          # bin/refresh-basecamp-token. Without it the Basecamp step is skipped.
+          BASECAMP_TOKEN: ${{ secrets.BASECAMP_TOKEN }}
       - uses: peter-evans/create-pull-request@v8
         with:
           branch: automation/site-data
           delete-branch: true
-          commit-message: "Update meetups and talks from Luma and YouTube"
-          title: Update meetups and talks from Luma and YouTube
+          commit-message: "Update meetups and talks"
+          title: Update meetups and talks
           body: |
-            Meetups from the [Luma calendar](https://luma.com/berlinrb) and recordings from the [YouTube channel](https://www.youtube.com/@berlinrb_org), fetched by `bin/sync`.
+            Talks from the Basecamp Talks card table, meetups from the [Luma calendar](https://luma.com/berlinrb) and recordings from the [YouTube channel](https://www.youtube.com/@berlinrb_org), fetched by `bin/sync`.
 
             Check the dates, venues, and that each video landed on the right talk before merging.
