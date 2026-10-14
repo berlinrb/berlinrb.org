@@ -1,15 +1,67 @@
+<%- recorded = site.talks.reject { site.upcoming?(_1["meetup"]) || !_1["title"] } -%>
+<%- featured = recorded.find { _1["video"] } -%>
+<%- livestreams = site.past.select { _1["livestream"] } -%>
 <section class="page-hero">
   <p class="eyebrow">Recordings</p>
   <h1>Talks</h1>
-  <p class="lead">Every talk given at Berlin.rb, newest first. Recordings are also on <a href="https://www.youtube.com/@berlinrb_org">our YouTube channel</a>.</p>
+  <p class="lead">Every talk given at Berlin.rb, newest first. Also on <a href="https://www.youtube.com/@berlinrb_org">our YouTube channel</a>.</p>
 </section>
+<%- if featured -%>
 
-<section class="page-section" aria-label="All talks">
-  <ol class="talk-list">
-<%- site.talks.reject { site.upcoming?(_1["meetup"]) || !_1["title"] }.each do |talk| -%>
-    <li>
+<section class="featured-talk" aria-label="Latest recording">
+  <a class="video-link" href="<%= site.talk_path(featured) %>" tabindex="-1" aria-hidden="true">
+<%- if site.thumbnail?(featured["video"]) -%>
+    <img src="<%= site.thumbnail(featured["video"]) %>" alt="" width="1280" height="720">
+<%- end -%>
+  </a>
+  <div>
+    <p class="eyebrow">Latest &middot; Berlin.rb #<%= featured["meetup"]["number"] %> &middot; <%= site.short_date(featured["meetup"]["date"]) %></p>
+    <h2><a href="<%= site.talk_path(featured) %>"><%= h featured["title"] %></a></h2>
+    <p class="latest-speaker"><%= h featured["speaker"] %></p>
+    <a class="button button-light" href="<%= site.video_url(featured["video"]) %>">Watch on YouTube</a>
+  </div>
+</section>
+<%- end -%>
+
+<section class="page-section" aria-labelledby="all-talks-title">
+  <div class="section-head">
+    <h2 id="all-talks-title">All recordings</h2>
+<%- if livestreams.any? -%>
+    <div class="filters" data-filters="talks" role="group" aria-label="Filter recordings" hidden>
+      <button type="button" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" data-filter="talk" aria-pressed="false">Talks</button>
+      <button type="button" data-filter="livestream" aria-pressed="false">Livestreams</button>
+    </div>
+<%- end -%>
+  </div>
+  <ul class="talk-grid" data-filter-items="talks">
+<%- recorded.each do |talk| -%>
+    <li data-kind="talk">
 <%= site.render_talk_card(talk, meetup: true).gsub(/^(?=.)/, "      ") %>
     </li>
 <%- end -%>
-  </ol>
+<%- livestreams.each do |meetup| -%>
+    <li data-kind="livestream">
+      <article class="talk-card">
+        <a class="video-link" href="<%= site.video_url(meetup["livestream"]) %>" tabindex="-1" aria-hidden="true">
+<%- if site.thumbnail?(meetup["livestream"]) -%>
+          <img src="<%= site.thumbnail(meetup["livestream"]) %>" alt="" width="1280" height="720" loading="lazy">
+<%- end -%>
+        </a>
+        <div class="talk-card-body">
+          <p class="talk-card-meta"><a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a> &middot; <time datetime="<%= meetup["date"] %>"><%= site.short_date(meetup["date"]) %></time></p>
+          <h3><a href="<%= site.video_url(meetup["livestream"]) %>">Berlin.rb #<%= meetup["number"] %> livestream</a></h3>
+          <p class="talk-card-speaker">The whole evening</p>
+        </div>
+      </article>
+    </li>
+<%- end -%>
+    <li data-kind="talk">
+      <a class="your-talk" href="/get-involved/#speak">
+        <span class="involve-title">Your talk here?</span>
+        <span class="involve-text">New recordings appear here a few days after each meetup.</span>
+        <span class="involve-cta">Submit a proposal &rarr;</span>
+      </a>
+    </li>
+  </ul>
 </section>

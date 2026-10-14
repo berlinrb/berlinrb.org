@@ -28,6 +28,13 @@
         element.textContent = parts.join(" · ")
         element.hidden = false
       })
+      document.querySelectorAll("[data-live-stats]").forEach((element) => {
+        const meetup = meetups[element.dataset.liveStats]
+        if (!meetup || !(meetup.going || meetup.online)) return
+        element.querySelector('[data-stat="going"]').textContent = meetup.going
+        element.querySelector('[data-stat="online"]').textContent = meetup.online ?? 0
+        element.hidden = false
+      })
       document.dispatchEvent(new CustomEvent("berlinrb:live", { detail: meetups }))
     })
     .catch(() => {})

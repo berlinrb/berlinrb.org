@@ -10,10 +10,21 @@
   <p class="note">Photos from our meetups will appear here.</p>
 </section>
 <%- end -%>
+<%- if with_photos.size > 1 -%>
+
+<div class="filters" data-filters="photos" role="group" aria-label="Filter by meetup" hidden>
+  <button type="button" data-filter="all" aria-pressed="true">All meetups</button>
+<%- with_photos.each do |meetup| -%>
+  <button type="button" data-filter="<%= meetup["number"] %>" aria-pressed="false">Berlin.rb #<%= meetup["number"] %></button>
+<%- end -%>
+</div>
+<%- end -%>
+<div data-filter-items="photos">
 <%- with_photos.each do |meetup| -%>
 
-<section class="page-section" aria-labelledby="photos-<%= meetup["number"] %>">
+<section class="page-section" data-kind="<%= meetup["number"] %>" aria-labelledby="photos-<%= meetup["number"] %>">
   <h2 id="photos-<%= meetup["number"] %>"><a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a> <span class="heading-date"><%= site.short_date(meetup["date"]) %></span></h2>
 <%= site.render_gallery(meetup) %>
 </section>
 <%- end -%>
+</div>

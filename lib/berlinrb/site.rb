@@ -113,7 +113,8 @@ module Berlinrb
       "#{meetup["date"]}T#{meetup[key] || fallback}:00#{offset(meetup["date"])}"
     end
     def formats = FORMATS
-    def latest_talk = past.lazy.flat_map { talks_for(_1).select { |talk| talk["video"] } }.first
+    # The talks from the most recent meetup that had any.
+    def latest_talks = past.lazy.map { talks_for(_1) }.find(&:any?) || []
     def recent_photos(count) = past.flat_map { |meetup| photos(meetup).map { _1.merge("meetup" => meetup) } }.first(count)
 
     def signups(meetup)

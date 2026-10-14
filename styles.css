@@ -1125,7 +1125,7 @@ a:hover {
 .site-logo img {
   display: block;
   width: auto;
-  height: 56px;
+  height: 76px;
 }
 
 .site-nav {
@@ -1360,11 +1360,26 @@ p.next-talks {
   color: #ff8593;
 }
 
-.latest-talk-body {
+.latest-talks-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 40px);
-  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: clamp(20px, 3vw, 32px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.latest-talks-list .video-link {
+  margin-bottom: 16px;
+}
+
+.latest-from {
+  margin: -8px 0 24px;
+  color: #b8b3a8;
+}
+
+.latest-from a {
+  color: #ff8593;
 }
 
 .latest-talk .eyebrow {
@@ -1372,10 +1387,9 @@ p.next-talks {
 }
 
 .latest-talk h3 {
-  margin: 0 0 10px;
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  line-height: 1.2;
 }
 
 .latest-talk h3 a {
@@ -1389,8 +1403,9 @@ p.next-talks {
 }
 
 .latest-abstract {
-  margin: 14px 0 24px;
+  margin: 10px 0 0;
   color: #c9c5bb;
+  font-size: 0.94rem;
 }
 
 .button-light {
@@ -1672,7 +1687,6 @@ p.next-talks {
 
 @media (max-width: 840px) {
   .home-hero,
-  .latest-talk-body,
   .involve-split {
     grid-template-columns: 1fr;
   }
@@ -1735,4 +1749,182 @@ p.next-talks {
   .next-badge.is-live::before {
     animation: none;
   }
+}
+
+/* Mockup details: stats, featured talk, filters, thanks */
+
+.live-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin: 20px 0 0;
+  border-block: 1px solid var(--line);
+  padding: 16px 0;
+}
+
+.live-stats[hidden] {
+  display: none;
+}
+
+.live-number {
+  display: block;
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.live-label {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.meetup-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  gap: 14px;
+}
+
+.meetup-facts > div {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 16px 18px;
+}
+
+.featured-talk {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 36px);
+  align-items: center;
+  margin-top: clamp(28px, 4vw, 40px);
+  border-radius: 20px;
+  background: #171717;
+  padding: clamp(18px, 3vw, 24px);
+  color: #f4f2ec;
+}
+
+.featured-talk .eyebrow {
+  color: #b8b3a8;
+}
+
+.featured-talk h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.12;
+}
+
+.featured-talk h2 a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.featured-talk .button {
+  margin-top: 20px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filters[hidden] {
+  display: none;
+}
+
+.filters button {
+  min-height: 40px;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 0 16px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filters button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.page-hero + .filters,
+.page-hero ~ .filters {
+  margin-top: 24px;
+}
+
+.talk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.talk-grid li[hidden] {
+  display: none;
+}
+
+.talk-grid .talk-card {
+  grid-template-columns: 1fr;
+  align-content: start;
+  align-items: start;
+  height: 100%;
+}
+
+.your-talk {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  min-height: 240px;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.your-talk:hover {
+  border-color: var(--ruby);
+}
+
+.thanks-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: clamp(20px, 3vw, 28px);
+}
+
+.thanks-card p:not(.eyebrow) {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.thanks-card .eyebrow {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 840px) {
+  .featured-talk {
+    grid-template-columns: 1fr;
+  }
+}
+
+.meetup-facts:not(:has(div)) {
+  display: none;
 }

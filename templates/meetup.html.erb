@@ -22,16 +22,31 @@
       <dd><%= h meetup["sponsors"].join(", ") %></dd>
     </div>
 <%- end -%>
+<%- if !upcoming && talks.any? { _1["video"] } -%>
+    <div>
+      <dt>Recorded talks</dt>
+      <dd><%= talks.count { _1["video"] } %></dd>
+    </div>
+<%- end -%>
 <%- if !upcoming && site.signups(meetup) -%>
     <div>
       <dt>Signups</dt>
       <dd><%= site.signups(meetup) %><%- if meetup["signups_in_person"] && meetup["signups_online"] -%> <span class="fact-detail">(<%= meetup["signups_in_person"] %> in person, <%= meetup["signups_online"] %> online)</span><%- end -%></dd>
     </div>
 <%- end -%>
+<%- if meetup["luma"] && !upcoming -%>
+    <div>
+      <dt>Links</dt>
+      <dd><a href="<%= site.luma_url(meetup["luma"]) %>">Event on Luma</a></dd>
+    </div>
+<%- end -%>
   </dl>
 <%- if upcoming -%>
   <p class="live-now" data-live-start="<%= site.iso_time(meetup, "starts_at", "18:30") %>" data-live-end="<%= site.iso_time(meetup, "ends_at", "22:00") %>" hidden>Happening now<%= ". Can't make it? Watch the livestream." if meetup["livestream_luma"] %></p>
-  <p class="next-going" data-live-going="<%= meetup["date"] %>" hidden></p>
+  <div class="live-stats" data-live-stats="<%= meetup["date"] %>" hidden>
+    <div><span class="live-number" data-stat="going"></span><span class="live-label">going in person</span></div>
+    <div><span class="live-number" data-stat="online"></span><span class="live-label">on the livestream</span></div>
+  </div>
   <div class="action-links">
 <%- if meetup["luma"] -%>
     <a class="button" href="<%= site.luma_url(meetup["luma"]) %>">Sign up on Luma</a>
@@ -44,8 +59,6 @@
 <%- end -%>
   </div>
   <p class="hint">Free and open to everyone. Talks start at 19:00, then we mingle until 22:00.</p>
-<%- elsif meetup["luma"] -%>
-  <p class="hint">The event page is <a href="<%= site.luma_url(meetup["luma"]) %>">on Luma</a>.</p>
 <%- end -%>
 </section>
 
@@ -87,6 +100,23 @@
 <%- end -%>
     <span class="video-label">Watch the livestream on YouTube</span>
   </a>
+</section>
+<%- end -%>
+<%- if !upcoming && (meetup["host"] || meetup["sponsors"]&.any?) -%>
+<%- sponsors = meetup["sponsors"] || [] -%>
+
+<section class="page-section">
+  <div class="thanks-card">
+    <div>
+      <p class="eyebrow">Thank you</p>
+<%- if meetup["host"] && sponsors == [meetup["host"]] -%>
+      <p><strong><%= h meetup["host"] %></strong> hosted us and covered the evening.</p>
+<%- else -%>
+      <p><%= meetup["host"] ? "<strong>#{h meetup["host"]}</strong> hosted us" : "" %><%= meetup["host"] && sponsors.any? ? ", and " : "" %><%= sponsors.any? ? "<strong>#{h sponsors.join(", ")}</strong> sponsored the evening" : "" %>.</p>
+<%- end -%>
+    </div>
+    <a class="button button-secondary" href="/get-involved/#host">Host a meetup</a>
+  </div>
 </section>
 <%- end -%>
 

@@ -1,25 +1,29 @@
-<%- talk = site.latest_talk -%>
-<%- if talk -%>
+<%- talks = site.latest_talks -%>
+<%- if talks.any? -%>
+<%- meetup = talks.first["meetup"] -%>
 <section class="latest-talk" aria-labelledby="latest-title">
   <div class="section-head">
-    <h2 id="latest-title">Latest talk</h2>
+    <h2 id="latest-title">Latest talks</h2>
     <a href="/talks/">All talks &rarr;</a>
   </div>
-  <div class="latest-talk-body">
-    <a class="video-link" href="<%= site.talk_path(talk) %>" aria-label="Watch <%= h talk["title"] %>">
+  <p class="latest-from">From <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a> on <%= site.long_date(meetup["date"]) %><%= " at #{h meetup["venue"]}" if meetup["venue"] %>.</p>
+  <ul class="latest-talks-list">
+<%- talks.each do |talk| -%>
+    <li>
+<%- if talk["video"] -%>
+      <a class="video-link" href="<%= site.talk_path(talk) %>" tabindex="-1" aria-hidden="true">
 <%- if site.thumbnail?(talk["video"]) -%>
-      <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720" loading="lazy">
+        <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720" loading="lazy">
 <%- end -%>
-    </a>
-    <div>
-      <p class="eyebrow">Berlin.rb #<%= talk["meetup"]["number"] %> &middot; <%= site.short_date(talk["meetup"]["date"]) %></p>
+      </a>
+<%- end -%>
       <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
       <p class="latest-speaker"><%= h talk["speaker"] %></p>
 <%- unless talk["abstract"].to_s.empty? -%>
-      <p class="latest-abstract"><%= h site.excerpt(talk["abstract"], 36) %></p>
+      <p class="latest-abstract"><%= h site.excerpt(talk["abstract"], 26) %></p>
 <%- end -%>
-      <a class="button button-light" href="<%= site.talk_path(talk) %>">Watch the talk</a>
-    </div>
-  </div>
+    </li>
+<%- end -%>
+  </ul>
 </section>
 <%- end -%>

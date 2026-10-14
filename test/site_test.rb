@@ -87,11 +87,19 @@ class SiteTest < Minitest::Test
 
   def test_upcoming_meetups_carry_live_hooks
     upcoming = read("meetups/3/index.html")
-    assert_includes upcoming, %(data-live-going="2026-11-10")
+    assert_includes upcoming, %(data-live-stats="2026-11-10")
     assert_includes upcoming, %(data-live-start="2026-11-10T18:30:00+01:00")
     assert_includes upcoming, %(<meta name="berlinrb-api" content="https://api.berlinrb.org">)
     refute_includes upcoming, "Speak at this meetup", "#3 is full"
-    refute_includes read("meetups/1/index.html"), "data-live-going"
+    refute_includes read("meetups/1/index.html"), "data-live-stats"
+  end
+
+  def test_talks_page_features_the_latest_recording_and_thanks_hosts
+    talks = read("talks/index.html")
+    assert_includes talks, %(class="featured-talk")
+    assert_includes talks, %(data-kind="talk")
+    meetup = read("meetups/1/index.html")
+    assert_includes meetup, "<dt>Recorded talks</dt>"
   end
 
   def test_sitemap_lists_generated_pages
