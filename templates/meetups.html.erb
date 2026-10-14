@@ -16,7 +16,7 @@
         <span class="meetup-body">
           <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
 <%- if site.talks_for(meetup).any? -%>
-          <span class="meetup-talks"><%= h site.talk_names(meetup).join(" · ") %></span>
+          <span class="meetup-talks"><%= site.talk_names(meetup).map { %(<span class="talk-line">#{h _1}</span>) }.join %></span>
 <%- end -%>
           <span class="meetup-meta">
 <%- if meetup["venue"] -%>

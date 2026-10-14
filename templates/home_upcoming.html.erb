@@ -13,7 +13,7 @@
         <span class="coming-date"><%= meetup["date"].strftime("%a %-d %b") %></span>
         <span class="coming-name">Berlin.rb #<%= meetup["number"] %></span>
         <span class="coming-going" data-live-going="<%= meetup["date"] %>" hidden></span>
-        <span class="coming-talks"><%= talks.any? ? h(site.talk_names(meetup).join(" · ")) : "Talks to be announced" %></span>
+        <span class="coming-talks"><%= talks.any? ? site.talk_names(meetup).map { %(<span class="talk-line">#{h _1}</span>) }.join : "Talks to be announced" %></span>
       </a>
     </li>
 <%- end -%>

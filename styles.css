@@ -1104,6 +1104,10 @@ a:hover {
   line-height: 1.4;
 }
 
+.talk-line {
+  display: block;
+}
+
 .fact-detail {
   color: var(--muted);
   font-weight: 500;

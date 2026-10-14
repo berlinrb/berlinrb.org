@@ -65,6 +65,13 @@ class SiteTest < Minitest::Test
     refute_includes past, "/meetups/3/"
   end
 
+def test_meetup_cards_put_each_talk_on_its_own_line
+  two = %(<span class="talk-line">Let Your Software (Rafal Cymerys)</span><span class="talk-line">The ZARchitecture (Stephen Margheim)</span>)
+  assert_includes read("meetups/index.html"), two
+  assert_includes read("index.html")[/past-meetups:start.*past-meetups:end/m], two
+  refute_includes read("meetups/index.html"), "(Rafal Cymerys) · "
+end
+
   def test_meetup_photos_appear_on_the_meetup_and_photos_pages
     assert_includes read("meetups/1/index.html"), %(<a href="/photos/1/a.jpg"><img src="/photos/1/thumbs/a.jpg")
     assert_includes read("photos/index.html"), "/photos/1/thumbs/a.jpg"
