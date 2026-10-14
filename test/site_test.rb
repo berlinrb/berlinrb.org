@@ -18,7 +18,8 @@ class SiteTest < Minitest::Test
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How" }, { "speaker" => "Rafal Cymerys", "title" => "Let Your Software" }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
         "talks" => [{ "speaker" => "Andrzej Krzywda", "title" => "Secret", "announced" => false },
-                    { "speaker" => "Marco Roth", "title" => "Herb", "announced" => true }] }
+                    { "speaker" => "Marco Roth", "title" => "Herb", "announced" => true },
+                    { "speaker" => "Alex Adam", "announced" => true }] }
     ])
     @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), root: @root, out: @out)
     @site.build
@@ -46,6 +47,8 @@ class SiteTest < Minitest::Test
   def test_upcoming_talks_stay_hidden_until_announced
     upcoming = read("meetups/3/index.html")
     assert_includes upcoming, "Herb"
+    assert_includes upcoming, "<h3>Alex Adam</h3>"
+    assert_includes upcoming, "Talk to be announced"
     refute_includes upcoming, "Secret"
     assert_includes upcoming, "https://luma.com/05tfdlpk"
     refute File.exist?(File.join(@out, "talks/andrzej-krzywda-secret/index.html"))
@@ -56,7 +59,7 @@ class SiteTest < Minitest::Test
     upcoming = home[/upcoming-meetups:start.*upcoming-meetups:end/m]
     past = home[/past-meetups:start.*past-meetups:end/m]
     assert_includes upcoming, "/meetups/3/"
-    assert_includes upcoming, "Marco Roth"
+    assert_includes upcoming, "Herb (Marco Roth) · Alex Adam"
     assert_includes past, "/meetups/1/"
     assert_includes past, "111 signups"
     assert_includes past, "RubyLLM 2.0 (Carmine Paolino)"

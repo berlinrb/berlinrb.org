@@ -7,7 +7,7 @@
 
 <section class="page-section" aria-label="All talks">
   <ol class="talk-list">
-<%- site.talks.reject { site.upcoming?(_1["meetup"]) }.each do |talk| -%>
+<%- site.talks.reject { site.upcoming?(_1["meetup"]) || !_1["title"] }.each do |talk| -%>
     <li>
 <%= site.render_talk_card(talk, meetup: true).gsub(/^(?=.)/, "      ") %>
     </li>

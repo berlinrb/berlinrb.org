@@ -40,7 +40,7 @@ module Berlinrb
       STATIC.each { |path| FileUtils.cp_r(File.join(@root, path), @out) if File.exist?(File.join(@root, path)) }
       write("index.html", home(File.read(File.join(@root, "index.html"))))
       @meetups.each { |meetup| write("meetups/#{meetup["number"]}/index.html", page("meetup", meetup: meetup)) }
-      talks.each { |talk| write("#{talk_path(talk)}index.html", page("talk", talk: talk)) }
+      talks.select { _1["title"] }.each { |talk| write("#{talk_path(talk)}index.html", page("talk", talk: talk)) }
       write("talks/index.html", page("talks"))
       write("photos/index.html", page("photos"))
       write("sitemap.xml", sitemap)
@@ -59,7 +59,7 @@ module Berlinrb
     def public_talks(meetup)
       text = Meetups.slug(meetup["about"].to_s.gsub(/<[^>]+>/, " "))
       meetup["talks"]
-        .select { _1["title"] && (!upcoming?(meetup) || _1["announced"]) }
+        .select { upcoming?(meetup) ? _1["announced"] : _1["title"] }
         .each_with_index
         .sort_by { |talk, index| [text.index(Meetups.slug(talk["speaker"])) || text.size, index] }
         .map(&:first)
@@ -86,11 +86,11 @@ module Berlinrb
     # "RubyLLM 2.0: Beyond Agents" is "RubyLLM 2.0" in lists, unless the card
     # sets a short title.
     def short_title(talk)
-      talk["short_title"] || talk["title"].split(/:\s|\s[-–—]\s/).first.strip
+      talk["short_title"] || talk["title"]&.split(/:\s|\s[-–—]\s/)&.first&.strip
     end
 
     def talk_names(meetup)
-      talks_for(meetup).map { "#{short_title(_1)} (#{_1["speaker"]})" }
+      talks_for(meetup).map { _1["title"] ? "#{short_title(_1)} (#{_1["speaker"]})" : _1["speaker"] }
     end
 
     def meetup_path(meetup) = "/meetups/#{meetup["number"]}/"
@@ -154,7 +154,7 @@ module Berlinrb
     end
 
     def description(meetup)
-      list = talks_for(meetup).map { "#{_1["title"]} by #{_1["speaker"]}" }
+      list = talks_for(meetup).map { _1["title"] ? "#{_1["title"]} by #{_1["speaker"]}" : _1["speaker"] }
       at = meetup["venue"] ? " at #{meetup["venue"]}" : ""
       if upcoming?(meetup)
         "Berlin.rb ##{meetup["number"]}, the Ruby meetup for the Berlin Ruby community, on #{long_date(meetup["date"])}#{at}." +
@@ -183,7 +183,7 @@ module Berlinrb
     def head(name, meetup: nil, talk: nil)
       case name
       when "meetup"
-        { title: "Berlin.rb ##{meetup["number"]}: #{talks_for(meetup).map { short_title(_1) }.join(", ").then { _1.empty? ? short_date(meetup["date"]) : _1 }}", description: description(meetup),
+        { title: "Berlin.rb ##{meetup["number"]}: #{talks_for(meetup).map { short_title(_1) || _1["speaker"] }.join(", ").then { _1.empty? ? short_date(meetup["date"]) : _1 }}", description: description(meetup),
           path: meetup_path(meetup), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
           ld: [event_ld(meetup), breadcrumbs([["Meetups", "/#past-meetups"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
       when "talk"
@@ -251,7 +251,7 @@ module Berlinrb
       pages = %w[index.html press/index.html imprint/index.html privacy/index.html].map { [_1.delete_suffix("index.html"), lastmod(_1)] }
       data = lastmod("data/meetups.yml")
       pages += @meetups.map { [meetup_path(_1).delete_prefix("/"), data] }
-      pages += talks.map { [talk_path(_1).delete_prefix("/"), data] }
+      pages += talks.select { _1["title"] }.map { [talk_path(_1).delete_prefix("/"), data] }
       pages << ["talks/", data]
       pages << ["photos/", data]
       urls = pages.map { |path, date| "  <url><loc>#{ORIGIN}/#{path}</loc>#{date && "<lastmod>#{date}</lastmod>"}</url>" }

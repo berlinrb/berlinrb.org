@@ -10,8 +10,13 @@
 <%- if show_meetup -%>
     <p class="talk-card-meta"><a href="<%= site.meetup_path(talk["meetup"]) %>">Berlin.rb #<%= talk["meetup"]["number"] %></a> &middot; <time datetime="<%= talk["meetup"]["date"] %>"><%= site.short_date(talk["meetup"]["date"]) %></time></p>
 <%- end -%>
+<%- if talk["title"] -%>
     <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
     <p class="talk-card-speaker"><%= h talk["speaker"] %></p>
+<%- else -%>
+    <h3><%= h talk["speaker"] %></h3>
+    <p class="talk-card-speaker">Talk to be announced</p>
+<%- end -%>
 <%- unless talk["abstract"].to_s.empty? -%>
     <p class="talk-card-abstract"><%= h site.excerpt(talk["abstract"], 32) %></p>
 <%- end -%>
