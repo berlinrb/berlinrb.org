@@ -8,7 +8,7 @@ module Berlinrb
   # talks. The site shows it, and bin/sync asks in Basecamp for Luma to be
   # updated when Luma's text differs.
   module LumaDescription
-    SUBMIT   = %(<a href="https://tally.so/r/WOWMZL">Submit it here</a>)
+    SUBMIT   = %(<a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>)
     WELCOME  = "Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided."
     CONTACT  = "Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org."
     FILMING  = %(<strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.)

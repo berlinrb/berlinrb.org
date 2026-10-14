@@ -1,7 +1,12 @@
 #!/usr/bin/env sh
 # Copy a fresh Basecamp access token from this computer's signed-in basecamp
-# CLI into the repository's BASECAMP_TOKEN secret, so the daily sync can read
-# the Talks card table. Tokens last two weeks; a daily timer keeps it fresh.
+# CLI to the two places that use it: the repository's BASECAMP_TOKEN secret
+# (the daily sync reads the Talks card table) and the form Worker at
+# api.berlinrb.org (it files proposals into Triage). Tokens last two weeks;
+# a daily timer keeps both fresh.
 set -eu
+cd "$(dirname "$0")/.."
 basecamp auth token | gh secret set BASECAMP_TOKEN --repo berlinrb/berlinrb.org
-echo "BASECAMP_TOKEN updated."
+echo "GitHub: BASECAMP_TOKEN updated."
+basecamp auth token | (cd worker && npx -y wrangler@4 secret put BASECAMP_TOKEN >/dev/null)
+echo "Worker: BASECAMP_TOKEN updated."

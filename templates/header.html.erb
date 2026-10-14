@@ -1,0 +1,9 @@
+<header class="site-header">
+  <a class="site-logo" href="/" aria-label="Berlin.rb home"><picture><source srcset="/assets/logo-dark.svg" media="(prefers-color-scheme: dark)"><img src="/assets/logo.svg" alt="Berlin.rb" width="666" height="805"></picture></a>
+  <nav class="site-nav" aria-label="Main">
+<%- [["Meetups", "/meetups/"], ["Talks", "/talks/"], ["Photos", "/photos/"], ["Get involved", "/get-involved/"]].each do |label, href| -%>
+    <a href="<%= href %>"<%= ' aria-current="page"' if current == href %>><%= label %></a>
+<%- end -%>
+    <a class="button site-nav-cta" href="/get-involved/#speak">Submit a talk</a>
+  </nav>
+</header>

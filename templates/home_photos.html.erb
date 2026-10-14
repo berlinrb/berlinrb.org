@@ -1,0 +1,14 @@
+<%- photos = site.recent_photos(6) -%>
+<%- if photos.any? -%>
+<section class="home-section" aria-labelledby="room-title">
+  <div class="section-head">
+    <h2 id="room-title">From the room</h2>
+    <a href="/photos/">All photos &rarr;</a>
+  </div>
+  <ul class="photo-strip">
+<%- photos.each do |photo| -%>
+    <li><a href="<%= site.meetup_path(photo["meetup"]) %>#photos-title"><img src="<%= photo["thumb"] %>" alt="Photo from Berlin.rb #<%= photo["meetup"]["number"] %>" width="<%= photo["width"] %>" height="<%= photo["height"] %>" loading="lazy"></a></li>
+<%- end -%>
+  </ul>
+</section>
+<%- end -%>

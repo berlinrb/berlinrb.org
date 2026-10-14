@@ -31,5 +31,5 @@
 <%- end -%>
 
 <section class="page-section">
-  <p class="note"><%= site.upcoming?(meetup) ? "Coming up at" : "Given at" %> <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a><%= " at #{h meetup["venue"]}" if meetup["venue"] %>. Want to speak too? <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>.</p>
+  <p class="note"><%= site.upcoming?(meetup) ? "Coming up at" : "Given at" %> <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a><%= " at #{h meetup["venue"]}" if meetup["venue"] %>. Want to speak too? <a href="/get-involved/#speak">Submit a talk</a>.</p>
 </section>

@@ -15,9 +15,14 @@ module Berlinrb
     TEMPLATES = File.join(ROOT, "templates")
     STATIC    = %w[index.html styles.css assets photos press imprint privacy cfp CNAME robots.txt .nojekyll].freeze
     ORIGIN    = "https://berlinrb.org"
+    API       = ENV.fetch("BERLINRB_API", "https://api.berlinrb.org")
     MARKERS   = {
       "upcoming-meetups" => "home_upcoming",
-      "past-meetups" => "home_past"
+      "past-meetups" => "home_past",
+      "next-meetup" => "home_next",
+      "latest-talk" => "home_latest_talk",
+      "recent-photos" => "home_photos",
+      "site-header" => "header"
     }.freeze
 
     include ERB::Util
@@ -39,11 +44,17 @@ module Berlinrb
       FileUtils.rm_rf(@out)
       FileUtils.mkdir_p(@out)
       STATIC.each { |path| FileUtils.cp_r(File.join(@root, path), @out) if File.exist?(File.join(@root, path)) }
-      write("index.html", home(File.read(File.join(@root, "index.html"))))
+      write("index.html", fill(File.read(File.join(@root, "index.html")), "/"))
+      %w[press imprint privacy].each do |dir|
+        source = File.join(@root, dir, "index.html")
+        write("#{dir}/index.html", fill(File.read(source), "/#{dir}/")) if File.exist?(source)
+      end
       @meetups.each { |meetup| write("meetups/#{meetup["number"]}/index.html", page("meetup", meetup: meetup)) }
       talks.select { _1["title"] }.each { |talk| write("#{talk_path(talk)}index.html", page("talk", talk: talk)) }
       write("talks/index.html", page("talks"))
       write("photos/index.html", page("photos"))
+      write("meetups/index.html", page("meetups"))
+      write("get-involved/index.html", page("get_involved"))
       write("sitemap.xml", sitemap)
       @written
     end
@@ -83,6 +94,22 @@ module Berlinrb
     def about(meetup)
       upcoming?(meetup) ? LumaDescription.html(meetup) : meetup["about"]
     end
+
+    STAGE_MINUTES = 80
+    FORMATS = { "Lightning (5 min)" => 5, "Short (20 min)" => 20, "Talk (40 min)" => 40, "Long (55 min)" => 55 }.freeze
+
+    # Minutes of stage time a meetup still has, from its Scheduled cards. A
+    # card without a known format counts as a full talk.
+    def free_minutes(meetup)
+      used = meetup["talks"].sum { _1["format"].to_s[/\((\d+) min\)/, 1]&.to_i || 40 }
+      [STAGE_MINUTES - used, 0].max
+    end
+
+    def next_meetup = upcoming.first
+    def api(path) = "#{API}#{path}"
+    def formats = FORMATS
+    def latest_talk = past.lazy.flat_map { talks_for(_1).select { |talk| talk["video"] } }.first
+    def recent_photos(count) = past.flat_map { |meetup| photos(meetup).map { _1.merge("meetup" => meetup) } }.first(count)
 
     def signups(meetup)
       parts = meetup.values_at("signups_in_person", "signups_online", "signups").compact
@@ -199,6 +226,12 @@ module Berlinrb
       when "photos"
         { title: "Photos \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
           path: "/photos/", image: past.lazy.map { photos(_1).first }.find(&:itself)&.fetch("src"), ld: [breadcrumbs([["Photos", "/photos/"]])] }
+      when "meetups"
+        { title: "Meetups \u00b7 Berlin.rb", description: "Every Berlin.rb meetup, past and upcoming, with talks, recordings and photos.",
+          path: "/meetups/", image: nil, ld: [breadcrumbs([["Meetups", "/meetups/"]])] }
+      when "get_involved"
+        { title: "Get involved \u00b7 Berlin.rb", description: "Give a talk at Berlin.rb, host a meetup at your office, or sponsor one. Tell us and an organizer gets back to you.",
+          path: "/get-involved/", image: nil, ld: [breadcrumbs([["Get involved", "/get-involved/"]])] }
       when "talks"
         { title: "Talks · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
           path: "/talks/", image: nil, ld: [breadcrumbs([["Talks", "/talks/"]])] }
@@ -224,12 +257,13 @@ module Berlinrb
         "itemListElement" => ([["Berlin.rb", "/"]] + items).each_with_index.map { |(name, path), i| { "@type" => "ListItem", "position" => i + 1, "name" => name, "item" => "#{ORIGIN}#{path}" } } }
     end
 
-    def home(html)
+    # Hand-written pages carry markers; each is filled from a template.
+    def fill(html, current)
       MARKERS.reduce(html) do |result, (marker, partial)|
         pattern = /(<!-- #{marker}:start -->).*?(\n *<!-- #{marker}:end -->)/m
-        raise "Marker #{marker} not found in index.html" unless result.match?(pattern)
+        next result unless result.match?(pattern)
         indent = result[/\n( *)<!-- #{marker}:start -->/, 1]
-        content = render(partial).strip.lines.map { "#{indent}#{_1}".rstrip }.join("\n")
+        content = render(partial, current: current).strip.lines.map { "#{indent}#{_1}".rstrip }.join("\n")
         result.sub(pattern) { "#{$1}\n#{content}#{$2}" }
       end
     end
@@ -260,6 +294,8 @@ module Berlinrb
       pages += talks.select { _1["title"] }.map { [talk_path(_1).delete_prefix("/"), data] }
       pages << ["talks/", data]
       pages << ["photos/", data]
+      pages << ["meetups/", data]
+      pages << ["get-involved/", data]
       urls = pages.map { |path, date| "  <url><loc>#{ORIGIN}/#{path}</loc>#{date && "<lastmod>#{date}</lastmod>"}</url>" }
       %(<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n#{urls.join("\n")}\n</urlset>\n)
     end

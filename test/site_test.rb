@@ -54,10 +54,11 @@ class SiteTest < Minitest::Test
 
   def test_home_lists_upcoming_and_past_meetups
     home = read("index.html")
-    upcoming = home[/upcoming-meetups:start.*upcoming-meetups:end/m]
+    upcoming = home[/next-meetup:start.*next-meetup:end/m]
     past = home[/past-meetups:start.*past-meetups:end/m]
     assert_includes upcoming, "/meetups/3/"
-    assert_includes upcoming, "Herb (Marco Roth) · Alex Adam"
+    assert_includes upcoming, "<strong>Marco Roth</strong>: Herb"
+    assert_includes upcoming, "<strong>Alex Adam</strong>, talk to be announced"
     assert_includes past, "/meetups/1/"
     assert_includes past, "111 signups"
     assert_includes past, "RubyLLM 2.0 (Carmine Paolino)"
@@ -73,6 +74,15 @@ class SiteTest < Minitest::Test
 
   def test_talks_follow_the_order_of_the_luma_description
     assert_equal ["Rafal Cymerys", "Stephen Margheim"], @site.talks_for(@site.meetups.find { _1["number"] == 2 }).map { _1["speaker"] }
+  end
+
+  def test_get_involved_offers_dates_with_their_free_stage_time
+    page = read("get-involved/index.html")
+    assert_includes page, %(name="dates[]" value="2026-11-10" disabled)
+    assert_includes page, "Full"
+    assert_includes page, %(action="https://api.berlinrb.org/talks")
+    assert_includes read("meetups/index.html"), "/meetups/1/"
+    assert_includes read("index.html"), %(<header class="site-header">)
   end
 
   def test_sitemap_lists_generated_pages

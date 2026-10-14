@@ -1,0 +1,28 @@
+<%- meetup = site.next_meetup -%>
+<%- if meetup -%>
+<%- talks = site.talks_for(meetup) -%>
+<article class="next-meetup" aria-labelledby="next-title">
+  <p class="next-badge"><%= meetup["date"] == site.today ? "Tonight" : "Next meetup" %></p>
+  <h2 id="next-title"><a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a></h2>
+  <p class="next-when"><time datetime="<%= meetup["date"] %>"><%= meetup["date"].strftime("%a %-d %b") %></time> &middot; <%= meetup["starts_at"] || "18:30" %></p>
+  <p class="next-where"><%= h([meetup["venue"], meetup["address"]].compact.uniq.join(", ").then { _1.empty? ? "Venue to be announced" : _1 }) %></p>
+  <p class="next-label">On stage</p>
+<%- if talks.any? -%>
+  <ul class="next-talks">
+<%- talks.each do |talk| -%>
+    <li><strong><%= h talk["speaker"] %></strong><%= talk["title"] ? ": #{h talk["title"]}" : ", talk to be announced" %></li>
+<%- end -%>
+  </ul>
+<%- else -%>
+  <p class="next-talks">Talks to be announced. <a href="/get-involved/#speak">Want to give one?</a></p>
+<%- end -%>
+  <div class="action-links">
+<%- if meetup["luma"] -%>
+    <a class="button" href="<%= site.luma_url(meetup["luma"]) %>">Sign up on Luma</a>
+<%- end -%>
+<%- if meetup["livestream_luma"] -%>
+    <a class="button button-secondary" href="<%= site.luma_url(meetup["livestream_luma"]) %>">Join the livestream</a>
+<%- end -%>
+  </div>
+</article>
+<%- end -%>

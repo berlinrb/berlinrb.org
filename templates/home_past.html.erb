@@ -1,7 +1,7 @@
 <%- if site.past.empty? -%>
 <li>No past meetups yet.</li>
 <%- end -%>
-<%- site.past.each do |meetup| -%>
+<%- site.past.first(3).each do |meetup| -%>
 <%- talks = site.talks_for(meetup) -%>
 <li>
   <a class="meetup-card" href="<%= site.meetup_path(meetup) %>">

@@ -1,0 +1,14 @@
+# The form endpoint for berlinrb.org: talk proposals and host or sponsor
+# enquiries become cards in Basecamp. Deploy with `npx wrangler deploy` from
+# this directory; BASECAMP_TOKEN is set by bin/refresh-basecamp-token.
+name = "berlinrb-api"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+routes = [{ pattern = "api.berlinrb.org", custom_domain = true }]
+
+[vars]
+SITE = "https://berlinrb.org"
+BASECAMP_ACCOUNT = "6219432"
+BASECAMP_PROJECT = "47498411"
+TALKS_TRIAGE = "10403432466"
+COMPANIES_TRIAGE = "10403435064"

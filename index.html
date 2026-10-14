@@ -35,7 +35,6 @@
       window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
       plausible.init()
     </script>
-    <script async src="https://tally.so/widgets/embed.js"></script>
     <link rel="preload" href="assets/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
     <script type="application/ld+json">
@@ -160,7 +159,7 @@
               "name": "How can I speak at Berlin.rb?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "We are always looking for speakers, whether it is a deep technical talk, a lightning talk about something you built, or a lessons learned story. Submit your proposal through our call for proposals form at tally.so/r/WOWMZL and we will get back to you. If you have questions, email hello@berlinrb.org."
+                "text": "We are always looking for speakers, whether it is a deep technical talk, a lightning talk about something you built, or a lessons learned story. Submit your proposal at berlinrb.org/get-involved and we will get back to you. If you have questions, email hello@berlinrb.org."
               }
             },
             {
@@ -168,7 +167,7 @@
               "name": "Can I or my company host or sponsor a meetup?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes. We are always looking for companies to host, by providing a space for an evening meetup of talks and mingling, and to sponsor, by supporting food, drinks, swag, or other costs, which helps us keep Berlin.rb free and welcoming for everyone. Get in touch at hello@berlinrb.org if you are interested in either."
+                "text": "Yes. We are always looking for companies to host, by providing a space for an evening meetup of talks and mingling, and to sponsor, by supporting food, drinks, swag, or other costs, which helps us keep Berlin.rb free and welcoming for everyone. Tell us at berlinrb.org/get-involved or write to hello@berlinrb.org."
               }
             },
             {
@@ -187,29 +186,69 @@
   </head>
   <body>
     <main>
-      <section class="hero">
-        <div class="intro">
-          <h1 class="mark"><picture><source srcset="assets/logo-dark.svg" media="(prefers-color-scheme: dark)"><img class="logo" src="assets/logo.svg" alt="Berlin.rb" width="666" height="805"></picture><span class="visually-hidden">Ruby meetup for the Berlin Ruby community</span></h1>
-          <p class="lead">A new, regular meetup for Berlin&rsquo;s Ruby community. Talks, project show-and-tells, and casual get-togethers. Free and open to everyone.</p>
-          <div class="actions">
-            <div class="action-links">
-              <a class="button" href="https://luma.com/berlinrb">Follow us on Luma</a>
-              <a class="button button-secondary" href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>
-            </div>
-            <p class="hint">Follow us on Luma to hear when the next meetup is scheduled.</p>
+      <!-- site-header:start -->
+      <!-- site-header:end -->
+
+      <section class="home-hero">
+        <div class="home-intro">
+          <p class="eyebrow">Second Tuesday of every month</p>
+          <h1>Berlin&rsquo;s Ruby meetup.</h1>
+          <p class="lead">Talks, project show-and-tells, and casual get-togethers for Berlin&rsquo;s Ruby community. Free and open to everyone, whether you&rsquo;ve written Ruby for fifteen years or you&rsquo;re just curious.</p>
+          <div class="action-links">
+            <a class="button" href="https://luma.com/berlinrb">Follow us on Luma</a>
+            <a class="button button-secondary" href="talks/">Watch past talks</a>
           </div>
         </div>
+        <!-- next-meetup:start -->
+        <!-- next-meetup:end -->
+      </section>
 
-        <div class="events" id="events" aria-labelledby="events-title">
-          <h2 class="eyebrow" id="events-title">Upcoming meetups</h2>
-          <!-- upcoming-meetups:start -->
-          <!-- upcoming-meetups:end -->
-          <p class="hint"><a href="https://luma.com/berlinrb">All dates on Luma</a></p>
+      <!-- upcoming-meetups:start -->
+      <!-- upcoming-meetups:end -->
+
+      <!-- latest-talk:start -->
+      <!-- latest-talk:end -->
+
+      <!-- recent-photos:start -->
+      <!-- recent-photos:end -->
+
+      <section class="home-section" aria-labelledby="involved-title">
+        <div class="section-head">
+          <h2 id="involved-title">Make the next one happen</h2>
         </div>
+        <ul class="involve-cards">
+          <li>
+            <a class="involve-card" href="get-involved/#speak">
+              <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              <span class="involve-title">Give a talk</span>
+              <span class="involve-text">Deep dives, lightning talks, things you built, lessons learned. First-time speakers very welcome.</span>
+              <span class="involve-cta">Submit a proposal &rarr;</span>
+            </a>
+          </li>
+          <li>
+            <a class="involve-card" href="get-involved/#host">
+              <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+              <span class="involve-title">Host us</span>
+              <span class="involve-text">A room for about 60 to 80 people, a screen, and a Tuesday evening. Meet Berlin&rsquo;s Ruby developers in your office.</span>
+              <span class="involve-cta">Offer a venue &rarr;</span>
+            </a>
+          </li>
+          <li>
+            <a class="involve-card" href="get-involved/#sponsor">
+              <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              <span class="involve-title">Sponsor</span>
+              <span class="involve-text">Food, drinks, recordings. Keep Berlin.rb free for everyone who walks in.</span>
+              <span class="involve-cta">Become a sponsor &rarr;</span>
+            </a>
+          </li>
+        </ul>
       </section>
 
       <section id="past-meetups" aria-labelledby="past-meetups-title">
-        <h2 id="past-meetups-title">Past meetups</h2>
+        <div class="section-head">
+          <h2 id="past-meetups-title">Past meetups</h2>
+          <a href="meetups/">All meetups &rarr;</a>
+        </div>
         <ol class="meetup-list past-meetups">
           <!-- past-meetups:start -->
           <!-- past-meetups:end -->
@@ -288,7 +327,7 @@
           <details>
             <summary>How can I speak?</summary>
             <div class="answer">
-              <p>We&rsquo;re always looking for speakers, whether it&rsquo;s a deep technical talk, a lightning talk about something you built, or a &ldquo;lessons learned&rdquo; story. <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit your proposal</a> through our call for proposals form and we&rsquo;ll get back to you. If you have questions, email <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.</p>
+              <p>We&rsquo;re always looking for speakers, whether it&rsquo;s a deep technical talk, a lightning talk about something you built, or a &ldquo;lessons learned&rdquo; story. <a href="get-involved/#speak">Submit your proposal</a> and we&rsquo;ll get back to you. If you have questions, email <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.</p>
             </div>
           </details>
 
@@ -300,7 +339,7 @@
                 <li><strong>Host:</strong> provide a space for an evening meetup (talks + mingling).</li>
                 <li><strong>Sponsor:</strong> support food, drinks, swag, or other costs, which helps us keep Berlin.rb free and welcoming for everyone.</li>
               </ul>
-              <p>Get in touch at <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a> if you&rsquo;re interested in either.</p>
+              <p><a href="get-involved/#host">Tell us on our Get involved page</a> or write to <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.</p>
             </div>
           </details>
 
@@ -320,7 +359,7 @@
             <a href="https://luma.com/berlinrb">Luma calendar</a>
             <a href="talks/">Talks</a>
             <a href="photos/">Photos</a>
-            <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>
+            <a href="get-involved/">Get involved</a>
             <a href="press/">Press kit</a>
           </nav>
           <nav class="footer-social" aria-label="Social media">

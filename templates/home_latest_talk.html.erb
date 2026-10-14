@@ -1,0 +1,25 @@
+<%- talk = site.latest_talk -%>
+<%- if talk -%>
+<section class="latest-talk" aria-labelledby="latest-title">
+  <div class="section-head">
+    <h2 id="latest-title">Latest talk</h2>
+    <a href="/talks/">All talks &rarr;</a>
+  </div>
+  <div class="latest-talk-body">
+    <a class="video-link" href="<%= site.talk_path(talk) %>" aria-label="Watch <%= h talk["title"] %>">
+<%- if site.thumbnail?(talk["video"]) -%>
+      <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720" loading="lazy">
+<%- end -%>
+    </a>
+    <div>
+      <p class="eyebrow">Berlin.rb #<%= talk["meetup"]["number"] %> &middot; <%= site.short_date(talk["meetup"]["date"]) %></p>
+      <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
+      <p class="latest-speaker"><%= h talk["speaker"] %></p>
+<%- unless talk["abstract"].to_s.empty? -%>
+      <p class="latest-abstract"><%= h site.excerpt(talk["abstract"], 36) %></p>
+<%- end -%>
+      <a class="button button-light" href="<%= site.talk_path(talk) %>">Watch the talk</a>
+    </div>
+  </div>
+</section>
+<%- end -%>

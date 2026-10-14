@@ -1,0 +1,129 @@
+<section class="page-hero">
+  <p class="eyebrow">Get involved</p>
+  <h1>Berlin.rb runs on its community.</h1>
+  <p class="lead">Speakers bring the talks, companies bring the room and the food. Tell us what you&rsquo;d like to do and an organizer gets back to you.</p>
+  <nav class="involve-tabs" aria-label="How to get involved">
+    <a href="#speak">Give a talk</a>
+    <a href="#host">Host a meetup</a>
+    <a href="#sponsor">Sponsor</a>
+  </nav>
+  <p class="form-status" role="status" hidden></p>
+</section>
+
+<section class="page-section involve-panel" id="speak" aria-labelledby="speak-title">
+  <div class="involve-split">
+    <div>
+      <h2 id="speak-title">Give a talk</h2>
+      <p class="involve-lead">Deep technical talks, lightning talks about something you built, lessons-learned stories. First-time speakers are very welcome, and we&rsquo;re happy to help you shape the idea.</p>
+      <ol class="steps">
+        <li><strong>You send a proposal.</strong> A title and a few sentences is enough.</li>
+        <li><strong>An organizer replies.</strong> Every proposal lands on our board and gets a human answer.</li>
+        <li><strong>We pick a date together,</strong> from the ones you ticked. Meetups are on the second Tuesday of every month.</li>
+        <li><strong>You speak, we record.</strong> Your talk goes on YouTube and this site, unless you&rsquo;d rather it didn&rsquo;t.</li>
+      </ol>
+      <p class="note">Each evening has <%= Berlinrb::Site::STAGE_MINUTES %> minutes of stage time, usually two talks. Times include questions.</p>
+    </div>
+    <form class="involve-form" method="post" action="<%= site.api("/talks") %>" data-form="talk">
+      <div class="field-row">
+        <label class="field">Your name<input name="name" required autocomplete="name" maxlength="120"></label>
+        <label class="field">Email<input name="email" type="email" required autocomplete="email" maxlength="200"></label>
+      </div>
+      <label class="field">Talk title<input name="title" required maxlength="200"></label>
+      <label class="field">What&rsquo;s it about?<span class="field-hint">A few sentences. We read every one.</span><textarea name="abstract" rows="5" required maxlength="4000"></textarea></label>
+      <label class="field">Format
+        <select name="format">
+<%- site.formats.each do |label, minutes| -%>
+          <option value="<%= label %>" data-minutes="<%= minutes %>"<%= " selected" if minutes == 40 %>><%= label %></option>
+<%- end -%>
+        </select>
+      </label>
+      <fieldset class="field dates">
+        <legend>Dates that work for you</legend>
+        <span class="field-hint">Tick every one you could do. Dates without enough stage time left are greyed out.</span>
+<%- site.upcoming.first(6).each do |meetup| -%>
+<%- free = site.free_minutes(meetup) -%>
+        <label class="date-option" data-free="<%= free %>">
+          <input type="checkbox" name="dates[]" value="<%= meetup["date"] %>"<%= " disabled" if free < 40 %>>
+          <span><%= meetup["date"].strftime("%a %-d %b %Y") %></span>
+          <span class="date-free"><%= free.zero? ? "Full" : "#{free} min free" %></span>
+        </label>
+<%- end -%>
+      </fieldset>
+      <label class="field">Links<span class="field-hint">Optional: GitHub, website, a previous talk.</span><input name="links" maxlength="500"></label>
+      <label class="check"><input type="checkbox" name="first_talk" value="1">This would be my first talk</label>
+      <label class="trap" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <button class="button" type="submit">Send proposal</button>
+      <p class="form-note">We only use your details to reply. See our <a href="/privacy/">privacy notice</a>.</p>
+    </form>
+  </div>
+</section>
+
+<section class="page-section involve-panel" id="host" aria-labelledby="host-title">
+  <div class="involve-split">
+    <div>
+      <h2 id="host-title">Host a meetup</h2>
+      <p class="involve-lead">Meet Berlin&rsquo;s Ruby developers in your own office. We bring the speakers and the audience; you bring the space for one Tuesday evening, 18:30 to 22:00.</p>
+      <div class="involve-box">
+        <p class="eyebrow">What a venue needs</p>
+        <ul>
+          <li>Room for about 60 to 80 people, seated</li>
+          <li>A screen or projector with HDMI</li>
+          <li>Wheelchair access, or a clear note about it</li>
+          <li>Food and drinks, or a sponsor who covers them</li>
+        </ul>
+      </div>
+    </div>
+    <form class="involve-form" method="post" action="<%= site.api("/companies") %>" data-form="host">
+      <input type="hidden" name="kind" value="host">
+      <div class="field-row">
+        <label class="field">Your name<input name="name" required autocomplete="name" maxlength="120"></label>
+        <label class="field">Email<input name="email" type="email" required autocomplete="email" maxlength="200"></label>
+      </div>
+      <div class="field-row">
+        <label class="field">Company<input name="company" required autocomplete="organization" maxlength="160"></label>
+        <label class="field">People you can seat<input name="capacity" type="number" min="10" max="1000"></label>
+      </div>
+      <label class="field">Address<input name="address" autocomplete="street-address" maxlength="300"></label>
+      <label class="field">Anything else?<span class="field-hint">Accessibility, AV setup, dates that work for you.</span><textarea name="notes" rows="4" maxlength="3000"></textarea></label>
+      <label class="trap" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <button class="button" type="submit">Offer our venue</button>
+      <p class="form-note">We only use your details to reply. See our <a href="/privacy/">privacy notice</a>.</p>
+    </form>
+  </div>
+</section>
+
+<section class="page-section involve-panel" id="sponsor" aria-labelledby="sponsor-title">
+  <div class="involve-split">
+    <div>
+      <h2 id="sponsor-title">Sponsor Berlin.rb</h2>
+      <p class="involve-lead">Berlin.rb is free for everyone who walks in. Sponsors keep it that way, and get thanked on stage and on the meetup&rsquo;s page.</p>
+      <div class="involve-box">
+        <p class="eyebrow">What you can cover</p>
+        <ul>
+          <li>Food and drinks for one evening</li>
+          <li>Recording and livestream equipment</li>
+          <li>Something else that helps: tell us</li>
+        </ul>
+      </div>
+    </div>
+    <form class="involve-form" method="post" action="<%= site.api("/companies") %>" data-form="sponsor">
+      <input type="hidden" name="kind" value="sponsor">
+      <div class="field-row">
+        <label class="field">Your name<input name="name" required autocomplete="name" maxlength="120"></label>
+        <label class="field">Email<input name="email" type="email" required autocomplete="email" maxlength="200"></label>
+      </div>
+      <label class="field">Company<input name="company" required autocomplete="organization" maxlength="160"></label>
+      <label class="field">What would you like to cover?
+        <select name="cover">
+          <option>Food and drinks</option>
+          <option>Recording and livestream</option>
+          <option>Something else</option>
+        </select>
+      </label>
+      <label class="field">Tell us more<textarea name="notes" rows="4" maxlength="3000"></textarea></label>
+      <label class="trap" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label>
+      <button class="button" type="submit">Get in touch</button>
+      <p class="form-note">We only use your details to reply. See our <a href="/privacy/">privacy notice</a>.</p>
+    </form>
+  </div>
+</section>

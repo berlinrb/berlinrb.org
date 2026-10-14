@@ -1,0 +1,38 @@
+<section class="page-hero">
+  <p class="eyebrow">Second Tuesday of every month</p>
+  <h1>Meetups</h1>
+  <p class="lead">Every Berlin.rb so far, and the ones coming up. Sign up for the next one <a href="https://luma.com/berlinrb">on Luma</a>.</p>
+</section>
+<%- [["Coming up", site.upcoming], ["Past meetups", site.past]].each do |heading, list| -%>
+<%- next if list.empty? -%>
+
+<section class="page-section" aria-label="<%= heading %>">
+  <h2><%= heading %></h2>
+  <ol class="meetup-list archive-list">
+<%- list.each do |meetup| -%>
+    <li>
+      <a class="meetup-card" href="<%= site.meetup_path(meetup) %>">
+        <time class="meetup-date" datetime="<%= meetup["date"] %>"><span class="meetup-day"><%= meetup["date"].day %></span> <span class="meetup-month"><%= meetup["date"].strftime("%b") %></span> <span class="meetup-year"><%= meetup["date"].year %></span></time>
+        <span class="meetup-body">
+          <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
+<%- if site.talks_for(meetup).any? -%>
+          <span class="meetup-talks"><%= h site.talk_names(meetup).join(" · ") %></span>
+<%- end -%>
+          <span class="meetup-meta">
+<%- if meetup["venue"] -%>
+            <span><%= h meetup["venue"] %></span>
+<%- end -%>
+<%- if site.photos(meetup).any? -%>
+            <span><%= site.photos(meetup).size %> photos</span>
+<%- end -%>
+<%- if !site.upcoming?(meetup) && site.signups(meetup) -%>
+            <span><%= site.signups(meetup) %> signups</span>
+<%- end -%>
+          </span>
+        </span>
+      </a>
+    </li>
+<%- end -%>
+  </ol>
+</section>
+<%- end -%>

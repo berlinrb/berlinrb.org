@@ -1,6 +1,6 @@
 <%- talks = site.talks_for(meetup); upcoming = site.upcoming?(meetup); previous, following = site.neighbours(meetup) -%>
 <section class="page-hero">
-  <a class="back" href="/">Berlin.rb</a>
+  <a class="back" href="/meetups/">All meetups</a>
   <p class="eyebrow"><time datetime="<%= meetup["date"] %>"><%= site.long_date(meetup["date"]) %></time><%= " · doors #{meetup["starts_at"]}" if meetup["starts_at"] %></p>
   <h1>Berlin.rb #<%= meetup["number"] %></h1>
   <dl class="meetup-facts">
@@ -47,7 +47,7 @@
 <section class="page-section" aria-labelledby="talks-title">
   <h2 id="talks-title">Talks</h2>
 <%- if talks.empty? -%>
-  <p class="note"><%= upcoming ? "Speakers will be announced on Luma and here." : "No talks recorded for this meetup." %> Want to speak at a Berlin.rb? <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>.</p>
+  <p class="note"><%= upcoming ? "Speakers to be announced." : "No talks recorded for this meetup." %> Want to speak at a Berlin.rb? <a href="/get-involved/#speak">Submit a talk</a>.</p>
 <%- else -%>
   <ol class="talk-list">
 <%- talks.each do |talk| -%>

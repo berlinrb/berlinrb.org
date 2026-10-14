@@ -31,7 +31,9 @@ jobs:
         with:
           ruby-version: ruby
       - name: Test
-        run: for test in test/*_test.rb; do ruby "$test" || exit 1; done
+        run: |
+          for test in test/*_test.rb; do ruby "$test" || exit 1; done
+          (cd worker && node --test)
       - name: Build the site
         run: bin/build
       - name: Build the press kit zip

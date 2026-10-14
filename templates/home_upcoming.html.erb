@@ -1,29 +1,21 @@
-<%- if site.upcoming.empty? -%>
-<p class="note">No meetups are scheduled right now. Follow us on Luma to hear when the next one is.</p>
-<%- else -%>
-<ol class="meetup-list upcoming-meetups">
-<%- site.upcoming.first(4).each_with_index do |meetup, index| -%>
+<%- later = site.upcoming.drop(1).first(4) -%>
+<%- if later.any? -%>
+<section class="home-section" aria-labelledby="coming-up-title">
+  <div class="section-head">
+    <h2 id="coming-up-title">Coming up</h2>
+    <a href="/meetups/">All meetups &rarr;</a>
+  </div>
+  <ol class="coming-up">
+<%- later.each do |meetup| -%>
 <%- talks = site.talks_for(meetup) -%>
-  <li>
-    <a class="meetup-card<%= " meetup-card-next" if index.zero? %>" href="<%= site.meetup_path(meetup) %>">
-      <time class="meetup-date" datetime="<%= meetup["date"] %>"><span class="meetup-day"><%= meetup["date"].day %></span> <span class="meetup-month"><%= meetup["date"].strftime("%b") %></span> <span class="meetup-year"><%= meetup["date"].year %></span></time>
-      <span class="meetup-body">
-        <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
-<%- if talks.any? -%>
-        <span class="meetup-talks"><%= h site.talk_names(meetup).join(" \u00b7 ") %></span>
+    <li>
+      <a class="coming-card" href="<%= site.meetup_path(meetup) %>">
+        <span class="coming-date"><%= meetup["date"].strftime("%a %-d %b") %></span>
+        <span class="coming-name">Berlin.rb #<%= meetup["number"] %></span>
+        <span class="coming-talks"><%= talks.any? ? h(site.talk_names(meetup).join(" · ")) : "Talks to be announced" %></span>
+      </a>
+    </li>
 <%- end -%>
-        <span class="meetup-meta">
-          <span><%= meetup["date"].strftime("%a") %> <%= meetup["starts_at"] || "18:30" %></span>
-<%- if meetup["venue"] || meetup["address"] -%>
-          <span><%= h(meetup["venue"] || meetup["address"]) %></span>
-<%- end -%>
-<%- if talks.empty? && index.zero? -%>
-          <span>Speakers to be announced</span>
-<%- end -%>
-        </span>
-      </span>
-    </a>
-  </li>
-<%- end -%>
-</ol>
+  </ol>
+</section>
 <%- end -%>
