@@ -1,7 +1,7 @@
 # Updated by bin/sync, rendered by bin/build. Hand edits are kept.
 - number: 1
   date: '2026-09-08'
-  starts_at: '18:30'
+  starts_at: '18:45'
   ends_at: '22:00'
   luma: lnmj7085
   venue: ablefy
@@ -33,6 +33,7 @@
   - speaker: Viktor Schmidt
     title: Ablefy Digital Businesses
     video: b92mTWqrd0E
+  livestream_luma: psvh08jx
 - number: 2
   date: '2026-10-13'
   starts_at: '18:30'
@@ -40,7 +41,7 @@
   luma: x9rj1t0v
   livestream_luma: bgy2tqjk
   venue: Techtelmechtel
-  address: Gürtelstraße 25, Berlin
+  address: Gürtelstraße 25/Etage 4, Berlin
   host: Techtelmechtel
   talks:
   - speaker: Stephen Margheim
@@ -56,6 +57,7 @@
     format: Talk (40 min)
     video: F2uDIEjhdbc
   livestream: 5F78DLf4Fy0
+  signups: 56
 - number: 3
   date: '2026-11-10'
   starts_at: '18:30'
@@ -64,6 +66,7 @@
   talks:
   - speaker: Andrzej Krzywda
     format: Talk (40 min)
+  livestream_luma: r4oli4jh
 - number: 4
   date: '2026-12-08'
   starts_at: '18:30'
@@ -74,6 +77,8 @@
     format: Talk (40 min)
   - speaker: Marco Roth
     format: Talk (40 min)
+    announced: true
+  livestream_luma: 80cv1zsp
 - number: 5
   date: '2027-01-12'
   starts_at: '18:30'
@@ -82,9 +87,18 @@
   talks:
   - speaker: Rosa Gutiérrez
     format: Talk (40 min)
+  livestream_luma: n3p9dbtx
 - number: 6
   date: '2027-02-09'
   starts_at: '18:30'
   ends_at: '22:00'
   luma: rcbvjhep
   talks: []
+  livestream_luma: 744qzi1i
+- number: 7
+  talks: []
+  date: '2027-03-09'
+  starts_at: '18:30'
+  ends_at: '22:00'
+  luma: wons9gym
+  livestream_luma: 00dtm5kx
