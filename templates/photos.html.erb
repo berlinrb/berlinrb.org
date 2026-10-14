@@ -1,0 +1,20 @@
+<section class="page-hero">
+  <a class="back" href="/">Berlin.rb</a>
+  <p class="eyebrow">From the room</p>
+  <h1>Photos</h1>
+  <p class="lead">Talks, hallway chats and pizza from every Berlin.rb.</p>
+</section>
+<%- with_photos = site.past.select { site.photos(_1).any? } -%>
+<%- if with_photos.empty? -%>
+
+<section class="page-section">
+  <p class="note">Photos from our meetups will appear here.</p>
+</section>
+<%- end -%>
+<%- with_photos.each do |meetup| -%>
+
+<section class="page-section" aria-labelledby="photos-<%= meetup["number"] %>">
+  <h2 id="photos-<%= meetup["number"] %>"><a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a> <span class="heading-date"><%= site.short_date(meetup["date"]) %></span></h2>
+<%= site.render_gallery(meetup) %>
+</section>
+<%- end -%>

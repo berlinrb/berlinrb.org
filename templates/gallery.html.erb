@@ -1,0 +1,6 @@
+<ul class="gallery" aria-label="Photos from Berlin.rb #<%= meetup["number"] %>">
+<%- site.photos(meetup).each_with_index do |photo, index| -%>
+  <li><a href="<%= photo["src"] %>"><img src="<%= photo["thumb"] %>" alt="Photo <%= index + 1 %> from Berlin.rb #<%= meetup["number"] %>" width="<%= photo["width"] %>" height="<%= photo["height"] %>" loading="lazy"></a></li>
+<%- end -%>
+</ul>
+<p class="note"><%= "Photos by #{h meetup["photographer"]}. " if meetup["photographer"] %>Spotted yourself and want a photo taken down? Write to <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.</p>

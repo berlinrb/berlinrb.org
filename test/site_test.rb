@@ -7,6 +7,10 @@ require_relative "../lib/berlinrb/site"
 class SiteTest < Minitest::Test
   def setup
     @out = Dir.mktmpdir
+    @root = Dir.mktmpdir
+    FileUtils.cp_r(Dir[File.join(Berlinrb::Site::ROOT, "{index.html,templates}")], @root)
+    FileUtils.mkdir_p(File.join(@root, "photos/1/thumbs"))
+    %w[photos/1/a.jpg photos/1/thumbs/a.jpg].each { FileUtils.cp(File.expand_path("fixtures/photo.jpg", __dir__), File.join(@root, _1)) }
     meetups = Berlinrb::Meetups.new([
       { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups" => 111,
         "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "Ruby is where you ship AI.", "video" => "abc" }] },
@@ -14,11 +18,11 @@ class SiteTest < Minitest::Test
         "talks" => [{ "speaker" => "Andrzej Krzywda", "title" => "Secret", "announced" => false },
                     { "speaker" => "Marco Roth", "title" => "Herb", "announced" => true }] }
     ])
-    @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), out: @out)
+    @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), root: @root, out: @out)
     @site.build
   end
 
-  def teardown = FileUtils.rm_rf(@out)
+  def teardown = FileUtils.rm_rf([@out, @root])
 
   def read(path) = File.read(File.join(@out, path))
 
@@ -51,6 +55,13 @@ class SiteTest < Minitest::Test
     assert_includes past, "/meetups/1/"
     assert_includes past, "111 signups"
     refute_includes past, "/meetups/3/"
+  end
+
+  def test_meetup_photos_appear_on_the_meetup_and_photos_pages
+    assert_includes read("meetups/1/index.html"), %(<a href="/photos/1/a.jpg"><img src="/photos/1/thumbs/a.jpg")
+    assert_includes read("photos/index.html"), "/photos/1/thumbs/a.jpg"
+    assert File.exist?(File.join(@out, "photos/1/a.jpg"))
+    refute_includes read("meetups/3/index.html"), %(class="gallery")
   end
 
   def test_sitemap_lists_generated_pages

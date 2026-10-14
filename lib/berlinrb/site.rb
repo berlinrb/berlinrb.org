@@ -4,6 +4,7 @@ require "erb"
 require "fileutils"
 require "json"
 require_relative "meetups"
+require_relative "photos"
 
 module Berlinrb
   # Builds the site into _site: the hand-written pages as they are, the home
@@ -11,7 +12,7 @@ module Berlinrb
   class Site
     ROOT      = File.expand_path("../..", __dir__)
     TEMPLATES = File.join(ROOT, "templates")
-    STATIC    = %w[index.html styles.css assets press imprint privacy cfp CNAME robots.txt .nojekyll].freeze
+    STATIC    = %w[index.html styles.css assets photos press imprint privacy cfp CNAME robots.txt .nojekyll].freeze
     ORIGIN    = "https://berlinrb.org"
     MARKERS   = {
       "upcoming-meetups" => "home_upcoming",
@@ -30,6 +31,7 @@ module Berlinrb
       @today = today
       @root = root
       @out = out
+      @photos = Photos.new(File.join(root, "photos"))
     end
 
     def build
@@ -40,6 +42,7 @@ module Berlinrb
       @meetups.each { |meetup| write("meetups/#{meetup["number"]}/index.html", page("meetup", meetup: meetup)) }
       talks.each { |talk| write("#{talk_path(talk)}index.html", page("talk", talk: talk)) }
       write("talks/index.html", page("talks"))
+      write("photos/index.html", page("photos"))
       write("sitemap.xml", sitemap)
       @written
     end
@@ -61,6 +64,8 @@ module Berlinrb
     end
 
     def recorded_talks = talks.select { _1["video"] }
+
+    def photos(meetup) = (@photo_cache ||= {})[meetup["number"]] ||= @photos.for(meetup["number"])
 
     def talks_for(meetup)
       talks.select { _1["meetup"].equal?(meetup) }
@@ -88,6 +93,10 @@ module Berlinrb
     def excerpt(text, words = 40)
       list = text.to_s.split
       list.size > words ? "#{list.first(words).join(" ")}…" : list.join(" ")
+    end
+
+    def render_gallery(meetup)
+      render("gallery", meetup: meetup).strip
     end
 
     def render_talk_card(talk, meetup: false)
@@ -153,12 +162,15 @@ module Berlinrb
       case name
       when "meetup"
         { title: "Berlin.rb ##{meetup["number"]} · #{short_date(meetup["date"])}", description: description(meetup),
-          path: meetup_path(meetup), image: talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
+          path: meetup_path(meetup), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
           ld: [event_ld(meetup), breadcrumbs([["Meetups", "/#past-meetups"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
       when "talk"
         { title: "#{talk["title"]} · #{talk["speaker"]} · Berlin.rb", description: excerpt(talk["abstract"], 30).then { _1.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : _1 },
           path: talk_path(talk), image: talk["video"] && thumbnail?(talk["video"]) ? thumbnail(talk["video"]) : nil,
           ld: [talk_ld(talk), breadcrumbs([["Berlin.rb ##{talk["meetup"]["number"]}", meetup_path(talk["meetup"])], [talk["title"], talk_path(talk)]])] }
+      when "photos"
+        { title: "Photos \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
+          path: "/photos/", image: past.lazy.map { photos(_1).first }.find(&:itself)&.fetch("src"), ld: [breadcrumbs([["Photos", "/photos/"]])] }
       when "talks"
         { title: "Talks · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
           path: "/talks/", image: nil, ld: [breadcrumbs([["Talks", "/talks/"]])] }
@@ -219,6 +231,7 @@ module Berlinrb
       pages += @meetups.map { [meetup_path(_1).delete_prefix("/"), data] }
       pages += talks.map { [talk_path(_1).delete_prefix("/"), data] }
       pages << ["talks/", data]
+      pages << ["photos/", data]
       urls = pages.map { |path, date| "  <url><loc>#{ORIGIN}/#{path}</loc>#{date && "<lastmod>#{date}</lastmod>"}</url>" }
       %(<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n#{urls.join("\n")}\n</urlset>\n)
     end

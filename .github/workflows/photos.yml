@@ -1,0 +1,40 @@
+name: Prepare photos
+
+# Photos are added in a pull request: upload them into photos/<meetup number>/
+# on a new branch. This resizes them, strips their metadata (including
+# location), writes thumbnails, and commits the result to the same branch.
+# Squash merging keeps the full-size originals out of main's history.
+
+on:
+  pull_request:
+    paths:
+      - "photos/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: photos-${{ github.head_ref }}
+
+jobs:
+  prepare:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - name: Install ImageMagick
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick libheif1
+      - name: Resize and strip the photos
+        run: bin/photos
+      - name: Commit the prepared photos
+        run: |
+          git add -A photos
+          git diff --cached --quiet && exit 0
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "Prepare photos for the web"
+          git push

@@ -15,6 +15,9 @@
 <%- if talks.any? -%>
         <span><%= talks.size %> <%= talks.size == 1 ? "talk" : "talks" %></span>
 <%- end -%>
+<%- if site.photos(meetup).any? -%>
+        <span><%= site.photos(meetup).size %> photos</span>
+<%- end -%>
 <%- if meetup["signups"] -%>
         <span><%= meetup["signups"] %> signups</span>
 <%- end -%>

@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Resize the photos in photos/<meetup number>/ for the web, strip their
+# metadata, and write thumbnails.
+require_relative "../lib/berlinrb/photos"
+
+written = Berlinrb::Photos.new.process
+puts written.empty? ? "Photos are up to date." : "Wrote #{written.size} files:\n#{written.join("\n")}"

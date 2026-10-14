@@ -41,6 +41,7 @@
     <script async src="https://tally.so/widgets/embed.js"></script>
     <link rel="preload" href="/assets/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="/styles.css">
+    <script defer src="/assets/gallery.js"></script>
     <script type="application/ld+json">
 <%= site.json_ld({ "@context" => "https://schema.org", "@graph" => ld }).gsub(/^/, "    ") %>
     </script>
@@ -55,6 +56,7 @@
             <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>
             <a href="https://luma.com/berlinrb">Luma calendar</a>
             <a href="/talks/"<%= ' aria-current="page"' if path == "/talks/" %>>Talks</a>
+            <a href="/photos/"<%= ' aria-current="page"' if path == "/photos/" %>>Photos</a>
             <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>
             <a href="/press/">Press kit</a>
           </nav>

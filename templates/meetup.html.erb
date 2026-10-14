@@ -58,6 +58,13 @@
   </ol>
 <%- end -%>
 </section>
+<%- if site.photos(meetup).any? -%>
+
+<section class="page-section" aria-labelledby="photos-title">
+  <h2 id="photos-title">Photos</h2>
+<%= site.render_gallery(meetup) %>
+</section>
+<%- end -%>
 <%- if meetup["livestream"] -%>
 
 <section class="page-section" aria-labelledby="livestream-title">
