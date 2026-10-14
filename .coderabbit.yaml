@@ -17,9 +17,10 @@ reviews:
       - name: Dependencies from sources the maintainer controls
         mode: error
         instructions: >-
-          Fail when the pull request makes a dependency come from anywhere but
-          its package registry or a repository under github.com/crmne/ or
-          this repository's own organization: a git URL, a contributor's
-          fork, a patch, override, or replace entry, or another registry, in
-          a manifest, lockfile, or package manager configuration. Pass
+          Fail when the pull request makes a dependency come from an
+          uncontrolled source: a contributor's fork, another registry, or a
+          git URL, patch, override, or replace entry that points anywhere but
+          its package registry or a repository under github.com/crmne/ or this
+          repository's own organization, in a manifest, lockfile, or package
+          manager configuration. Pass otherwise.
           otherwise.
