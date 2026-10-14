@@ -17,9 +17,7 @@ class SiteTest < Minitest::Test
       { "number" => 2, "date" => "2026-10-13", "about" => "<p><strong>Rafał Cymerys</strong>, then Stephen Margheim</p>",
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How" }, { "speaker" => "Rafal Cymerys", "title" => "Let Your Software" }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
-        "talks" => [{ "speaker" => "Andrzej Krzywda", "title" => "Secret", "announced" => false },
-                    { "speaker" => "Marco Roth", "title" => "Herb", "announced" => true },
-                    { "speaker" => "Alex Adam", "announced" => true }] }
+        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb" }, { "speaker" => "Alex Adam" }] }
     ])
     @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), root: @root, out: @out)
     @site.build
@@ -44,14 +42,14 @@ class SiteTest < Minitest::Test
     assert_includes talk, %("@type": "VideoObject")
   end
 
-  def test_upcoming_talks_stay_hidden_until_announced
+  def test_upcoming_talks_show_with_or_without_a_title
     upcoming = read("meetups/3/index.html")
     assert_includes upcoming, "Herb"
     assert_includes upcoming, "<h3>Alex Adam</h3>"
     assert_includes upcoming, "Talk to be announced"
-    refute_includes upcoming, "Secret"
     assert_includes upcoming, "https://luma.com/05tfdlpk"
-    refute File.exist?(File.join(@out, "talks/andrzej-krzywda-secret/index.html"))
+    assert File.exist?(File.join(@out, "talks/marco-roth-herb/index.html"))
+    refute Dir.exist?(File.join(@out, "talks/alex-adam"))
   end
 
   def test_home_lists_upcoming_and_past_meetups

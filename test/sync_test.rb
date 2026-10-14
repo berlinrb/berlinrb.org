@@ -68,7 +68,6 @@ class SyncTest < Minitest::Test
     assert_nil three["signups_in_person"], "upcoming signups change daily and stay off the site"
     assert_nil three["venue"], "a city alone is not a venue"
     assert_equal "3online", three["livestream_luma"]
-    assert_equal [true, nil], three["talks"].map { _1["announced"] }
     assert_equal "<p>With <strong>Andrzej Krzywda</strong> &lt;script&gt;</p>", three["about"]
   end
 
@@ -80,10 +79,20 @@ class SyncTest < Minitest::Test
     ]
     sync(cards: cards).run(%i[basecamp])
 
-    talk = @meetups.find(3)["talks"].first
-    assert_equal ["Rails at scale", "One\n\nTwo", "Talk (40 min)"], talk.values_at("title", "abstract", "format")
-    refute_includes talk.to_s, "secret@example.com"
-    assert_equal 2, @meetups.find(3)["talks"].size
+    talks = @meetups.find(3)["talks"]
+    assert_equal ["Andrzej Krzywda"], talks.map { _1["speaker"] }, "Marco has no card, so he is off #3"
+    assert_equal ["Rails at scale", "One\n\nTwo", "Talk (40 min)"], talks.first.values_at("title", "abstract", "format")
+    refute_includes talks.first.to_s, "secret@example.com"
+    assert_empty @meetups.find(1)["talks"], "no Done card for #1 either"
+  end
+
+  def test_basecamp_keeps_recordings_and_drops_removed_fields
+    @meetups.find(1)["talks"].first.merge!("video" => "talk1", "abstract" => "Old")
+    card = { "title" => "Paweł Strzałkowski: HiFuMi", "due_on" => "2026-09-08", "parent" => { "title" => "Done" },
+             "content" => "<p><strong>Title:</strong> HiFuMi</p>" }
+    sync(cards: [card]).run(%i[basecamp])
+
+    assert_equal [{ "speaker" => "Paweł Strzałkowski", "title" => "HiFuMi", "video" => "talk1" }], @meetups.find(1)["talks"]
   end
 
   def test_basecamp_api_reads_scheduled_and_done_columns_with_a_token

@@ -53,13 +53,12 @@ module Berlinrb
     def past = @meetups.select { _1["date"] < today }.reverse
     def upcoming?(meetup) = meetup["date"] >= today
 
-    # A talk is public once its meetup is over or Luma has announced it.
-    # In the order the Luma description lists the speakers, which is the
-    # running order.
+    # Every Scheduled card is public. Talks follow the order the Luma
+    # description lists their speakers (the running order), then Basecamp's.
     def public_talks(meetup)
       text = Meetups.slug(meetup["about"].to_s.gsub(/<[^>]+>/, " "))
       meetup["talks"]
-        .select { upcoming?(meetup) ? _1["announced"] : _1["title"] }
+        .select { upcoming?(meetup) || _1["title"] }
         .each_with_index
         .sort_by { |talk, index| [text.index(Meetups.slug(talk["speaker"])) || text.size, index] }
         .map(&:first)

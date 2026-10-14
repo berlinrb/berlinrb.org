@@ -39,20 +39,28 @@ module Berlinrb
 
     # Basecamp: Scheduled and Done cards are talks, dated by their due date.
 
+    # Basecamp is the source of truth for talks: every meetup gets exactly
+    # the Scheduled and Done cards due on its date. Fields only Basecamp knows
+    # are replaced; a recording or slides found elsewhere are kept.
+    CARD_FIELDS = { "Title" => "title", "Short title" => "short_title", "Abstract" => "abstract", "Format" => "format" }.freeze
+
     def sync_basecamp
       cards = @basecamp.call
       return @log << "Basecamp: skipped, no BASECAMP_TOKEN and the basecamp CLI is not signed in" unless cards
-      cards.each do |card|
-        next unless %w[Scheduled Done].include?(card.dig("parent", "title")) && card["due_on"]
-        meetup = @meetups.on(card["due_on"])
-        next @log << "Basecamp: no meetup on #{card["due_on"]} for #{card["title"]}" unless meetup
-        fields = self.class.card_fields(card["content"])
-        speaker = card["title"].split(": ", 2).first.strip
-        talk = meetup["talks"].find { Meetups.same_person?(_1["speaker"], speaker) } || (meetup["talks"] << { "speaker" => speaker }).last
-        talk["title"] = fields["Title"] if fields["Title"]
-        talk["abstract"] = fields["Abstract"] if fields["Abstract"]
-        talk["format"] = fields["Format"] if fields["Format"]
-        talk["short_title"] = fields["Short title"] if fields["Short title"]
+      talks = cards.select { %w[Scheduled Done].include?(_1.dig("parent", "title")) && _1["due_on"] }.group_by { _1["due_on"] }
+      (talks.keys - @meetups.list.map { _1["date"].to_s }).each { @log << "Basecamp: no meetup on #{_1} for #{talks[_1].map { |card| card["title"] }.join(", ")}" }
+      @meetups.list.each do |meetup|
+        before = meetup["talks"]
+        meetup["talks"] = (talks[meetup["date"].to_s] || []).map do |card|
+          speaker = card["title"].split(": ", 2).first.strip
+          talk = before.find { Meetups.same_person?(_1["speaker"], speaker) } || {}
+          talk = talk.merge("speaker" => speaker).except("announced")
+          fields = self.class.card_fields(card["content"].to_s)
+          CARD_FIELDS.each { |label, key| fields[label] ? talk[key] = fields[label] : talk.delete(key) }
+          talk
+        end
+        before.reject { |old| meetup["talks"].any? { Meetups.same_person?(_1["speaker"], old["speaker"]) } }
+              .each { @log << "Basecamp: #{_1["speaker"]} is no longer on ##{meetup["number"]}" }
       end
       @log << "Basecamp: read #{cards.size} cards"
     end
@@ -166,15 +174,11 @@ module Berlinrb
       meetup[key] = entry["guest_count"]
     end
 
-    # The Luma page's description becomes the meetup's About section, and a
-    # talk on an upcoming meetup is announced once the description names its
-    # speaker.
+    # The Luma page's description becomes the meetup's About section.
     def describe(meetup)
       data = JSON.parse(@http.call("https://api.lu.ma/url?url=#{URI.encode_www_form_component(meetup["luma"])}")).fetch("data")
       doc = data["description_mirror"] or return
       meetup["about"] = self.class.prose_html(doc)
-      text = Meetups.slug(self.class.prose_text(doc))
-      meetup["talks"].each { _1["announced"] = true if !_1["announced"] && text.include?(Meetups.slug(_1["speaker"])) }
     rescue StandardError => error
       @log << "Luma: could not read the description of ##{meetup["number"]} (#{error.message})"
     end
