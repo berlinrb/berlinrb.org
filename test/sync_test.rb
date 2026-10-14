@@ -102,13 +102,32 @@ class SyncTest < Minitest::Test
         { "lists" => [{ "title" => "Ideas", "cards_url" => "ideas" }, { "title" => "Done", "cards_url" => "done" }] },
       "done" => [{ "title" => "Pawel Strzalkowski: HiFuMi", "due_on" => "2026-09-08", "content" => "" }]
     }
-    sync.define_singleton_method(:basecamp_request) do |url|
+    sync.define_singleton_method(:basecamp_request) do |_method, url, _body = nil|
       Struct.new(:body, :link) { def [](_) = link }.new(JSON.dump(responses.fetch(url)), nil)
     end
 
     cards = with_env("BASECAMP_TOKEN" => "token") { sync.basecamp_cards }
 
     assert_equal [["Pawel Strzalkowski: HiFuMi", "Done"]], cards.map { [_1["title"], _1.dig("parent", "title")] }
+  end
+
+  def test_luma_todos_ask_for_changed_descriptions_and_complete_matching_ones
+    @meetups.find(3).merge!("luma" => "05tfdlpk", "about" => "<p>Talks to be announced</p>")
+    four = @meetups.find_or_create(4).merge!("date" => "2026-12-08", "luma" => "wbdh6v2d")
+    four["about"] = Berlinrb::LumaDescription.html(four)
+    sync = sync()
+    sync.instance_variable_set(:@basecamp_token, "token")
+    calls = []
+    sync.define_singleton_method(:basecamp_pages) do |url|
+      url.end_with?("todolists.json") ? [{ "id" => 7, "name" => "Luma descriptions" }] :
+        [{ "id" => 9, "content" => "Update the Luma description for Berlin.rb #4" }]
+    end
+    sync.define_singleton_method(:basecamp_api) { |path, method: :get, body: nil| calls << [method, path, body&.fetch(:content)] }
+
+    sync.run(%i[luma_todos])
+
+    assert_equal [[:post, "buckets/47498411/todolists/7/todos.json", "Update the Luma description for Berlin.rb #3"],
+                  [:post, "buckets/47498411/todos/9/completion.json", nil]], calls
   end
 
   def test_basecamp_is_skipped_when_the_cli_is_not_signed_in

@@ -7,6 +7,7 @@ require "open3"
 require "rexml/document"
 require "time"
 require_relative "meetups"
+require_relative "luma_description"
 
 module Berlinrb
   # Pulls meetups from Luma, talks from the Basecamp Talks card table, and
@@ -16,7 +17,6 @@ module Berlinrb
     YOUTUBE_CHANNEL = "UCXkuEpnMwzTqGiXRYavRnjw"
     BASECAMP_ACCOUNT = "6219432"
     BASECAMP_PROJECT = "47498411"
-    BASECAMP        = %W[basecamp -a #{BASECAMP_ACCOUNT} -p #{BASECAMP_PROJECT}]
     TALKS_TABLE     = "10403432462"
     THUMBNAILS      = File.expand_path("../../assets/videos", __dir__)
     TIME_ZONE       = "Europe/Berlin"
@@ -31,7 +31,7 @@ module Berlinrb
       @log = []
     end
 
-    def run(sources = %i[basecamp luma youtube])
+    def run(sources = %i[basecamp luma youtube luma_todos])
       ENV["TZ"] = TIME_ZONE
       sources.each { send(:"sync_#{_1}") }
       @meetups
@@ -46,7 +46,7 @@ module Berlinrb
 
     def sync_basecamp
       cards = @basecamp.call
-      return @log << "Basecamp: skipped, no BASECAMP_TOKEN and the basecamp CLI is not signed in" unless cards
+      return @log << "Basecamp: skipped, no token (set BASECAMP_TOKEN or sign in the basecamp CLI)" unless cards
       talks = cards.select { %w[Scheduled Done].include?(_1.dig("parent", "title")) && _1["due_on"] }.group_by { _1["due_on"] }
       (talks.keys - @meetups.list.map { _1["date"].to_s }).each { @log << "Basecamp: no meetup on #{_1} for #{talks[_1].map { |card| card["title"] }.join(", ")}" }
       @meetups.list.each do |meetup|
@@ -81,44 +81,97 @@ module Berlinrb
       fields.transform_values(&:strip).reject { _2.empty? }
     end
 
-    # With BASECAMP_TOKEN set (in CI) the cards come from the API, otherwise
-    # from a signed-in basecamp CLI.
-    def basecamp_cards
-      ENV["BASECAMP_TOKEN"].to_s.empty? ? basecamp_cli_cards : basecamp_api_cards
+    # In CI the token comes from BASECAMP_TOKEN, locally from the signed-in
+    # basecamp CLI.
+    def basecamp_token
+      @basecamp_token ||= ENV["BASECAMP_TOKEN"].to_s.empty? ? cli_token : ENV["BASECAMP_TOKEN"]
     end
 
-    def basecamp_cli_cards
-      out, status = Open3.capture2(*BASECAMP, "cards", "list", "--card-table", TALKS_TABLE, "-q", err: File::NULL)
-      JSON.parse(out) if status.success?
-    rescue Errno::ENOENT, JSON::ParserError
+    def cli_token
+      out, status = Open3.capture2("basecamp", "auth", "token", err: File::NULL)
+      out.strip if status.success? && !out.strip.empty?
+    rescue Errno::ENOENT
       nil
     end
 
-    def basecamp_api_cards
+    def basecamp_cards
+      return unless basecamp_token
       table = basecamp_api("buckets/#{BASECAMP_PROJECT}/card_tables/#{TALKS_TABLE}.json")
       table.fetch("lists").select { %w[Scheduled Done].include?(_1["title"]) }.flat_map do |column|
-        cards = []
-        url = column.fetch("cards_url")
-        while url
-          response = basecamp_request(url)
-          cards.concat(JSON.parse(response.body))
-          url = response["Link"].to_s[/<([^>]+)>;\s*rel="next"/, 1]
-        end
-        cards.map { _1.merge("parent" => { "title" => column["title"] }) }
+        basecamp_pages(column.fetch("cards_url")).map { _1.merge("parent" => { "title" => column["title"] }) }
       end
     rescue StandardError => error
       @log << "Basecamp: API failed (#{error.message})"
       nil
     end
 
-    def basecamp_api(path) = JSON.parse(basecamp_request("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/#{path}").body)
+    def basecamp_pages(url)
+      items = []
+      while url
+        response = basecamp_request(:get, url)
+        items.concat(JSON.parse(response.body))
+        url = response["Link"].to_s[/<([^>]+)>;\s*rel="next"/, 1]
+      end
+      items
+    end
 
-    def basecamp_request(url)
+    def basecamp_api(path, method: :get, body: nil)
+      response = basecamp_request(method, "https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/#{path}", body)
+      response.body.to_s.empty? ? nil : JSON.parse(response.body)
+    end
+
+    def basecamp_request(method, url, body = nil)
       uri = URI(url)
-      request = Net::HTTP::Get.new(uri, "Authorization" => "Bearer #{ENV.fetch("BASECAMP_TOKEN")}", "User-Agent" => "berlinrb.org sync (hello@berlinrb.org)")
+      request = Net::HTTP.const_get(method.capitalize).new(uri, "Authorization" => "Bearer #{basecamp_token}",
+                                                               "User-Agent" => "berlinrb.org sync (hello@berlinrb.org)",
+                                                               "Content-Type" => "application/json")
+      request.body = JSON.dump(body) if body
       response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { _1.request(request) }
-      raise "Basecamp responded with #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+      raise "Basecamp responded with #{response.code} to #{method.upcase} #{uri.path}" unless response.is_a?(Net::HTTPSuccess)
       response
+    end
+
+    # Luma descriptions: when an upcoming meetup's Luma text differs from the
+    # one written from Basecamp, a to-do asks for it to be pasted into Luma.
+    # The to-do is completed once Luma matches.
+    LUMA_TODOLIST = "Luma descriptions"
+    LUMA_ASSIGNEE = 52479905 # Carmine
+    TODOSET       = "9950099724"
+
+    def sync_luma_todos
+      return @log << "Luma to-dos: skipped, no Basecamp token" unless basecamp_token
+      list = luma_todolist
+      open = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json")
+      @meetups.list.each do |meetup|
+        next unless meetup["date"] && Date.parse(meetup["date"].to_s) >= @today && meetup["about"]
+        title = "Update the Luma description for Berlin.rb ##{meetup["number"]}"
+        todo = open.find { _1["content"] == title }
+        wanted = LumaDescription.html(meetup)
+        if LumaDescription.same?(wanted, meetup["about"])
+          next unless todo
+          basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}/completion.json", method: :post)
+          @log << "Luma to-dos: ##{meetup["number"]} matches Basecamp, completed the to-do"
+        else
+          description = %(<p>Luma's description no longer matches the talks in Basecamp. Copy everything below the line into the description of <a href="https://luma.com/#{meetup["luma"]}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. This to-do completes itself once Luma matches.</p><hr>#{wanted.delete("\n")})
+          next if todo && LumaDescription.same?(todo["description"], description)
+          body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
+          if todo
+            basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}.json", method: :put, body: body)
+          else
+            basecamp_api("buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json", method: :post, body: body.merge(notify: true))
+          end
+          @log << "Luma to-dos: asked for ##{meetup["number"]}'s description to be updated"
+        end
+      end
+    rescue StandardError => error
+      @log << "Luma to-dos: failed (#{error.message})"
+    end
+
+    def luma_todolist
+      lists = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todosets/#{TODOSET}/todolists.json")
+      lists.find { _1["name"] == LUMA_TODOLIST } ||
+        basecamp_api("buckets/#{BASECAMP_PROJECT}/todosets/#{TODOSET}/todolists.json", method: :post,
+                     body: { name: LUMA_TODOLIST, description: "<p>Written by the berlinrb.org sync when a meetup's talks change in Basecamp. Paste the text into Luma and the to-do completes itself.</p>" })
     end
 
     # Luma: every Berlin.rb #N event. In person events give the date, venue and

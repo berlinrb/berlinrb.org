@@ -58,11 +58,11 @@
   </ol>
 <%- end -%>
 </section>
-<%- if meetup["about"] -%>
+<%- if site.about(meetup) -%>
 
 <section class="page-section prose" aria-labelledby="about-title">
   <h2 id="about-title">About this meetup</h2>
-<%= meetup["about"].gsub(/^/, "  ") %>
+<%= site.about(meetup).gsub(/^/, "  ") %>
 </section>
 <%- end -%>
 <%- if site.photos(meetup).any? -%>

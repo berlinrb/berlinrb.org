@@ -5,6 +5,7 @@ require "fileutils"
 require "json"
 require_relative "meetups"
 require_relative "photos"
+require_relative "luma_description"
 
 module Berlinrb
   # Builds the site into _site: the hand-written pages as they are, the home
@@ -56,7 +57,7 @@ module Berlinrb
     # Every Scheduled card is public. Talks follow the order the Luma
     # description lists their speakers (the running order), then Basecamp's.
     def public_talks(meetup)
-      text = Meetups.slug(meetup["about"].to_s.gsub(/<[^>]+>/, " "))
+      text = Meetups.slug(about(meetup).to_s.gsub(/<[^>]+>/, " "))
       meetup["talks"]
         .select { upcoming?(meetup) || _1["title"] }
         .each_with_index
@@ -75,6 +76,12 @@ module Berlinrb
 
     def talks_for(meetup)
       talks.select { _1["meetup"].equal?(meetup) }
+    end
+
+    # Upcoming meetups show the description written from Basecamp, which Luma
+    # catches up with; past ones show what Luma said.
+    def about(meetup)
+      upcoming?(meetup) ? LumaDescription.html(meetup) : meetup["about"]
     end
 
     def signups(meetup)
