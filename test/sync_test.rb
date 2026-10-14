@@ -31,9 +31,12 @@ class SyncTest < Minitest::Test
       case url
       when /videos\.xml/ then FEED
       when /i\.ytimg\.com/ then "jpeg"
-      when /period=past/ then JSON.dump(entries: [luma("Berlin.rb #2 (in person)", "2026-10-13T16:30:00Z", "offline", 64)])
+      when /period=past/ then JSON.dump(entries: [luma("Berlin.rb #2 (in person)", "2026-10-13T16:30:00Z", "offline", 64), luma("Berlin.rb #2 (livestream)", "2026-10-13T16:30:00Z", "online", 12)])
       when /period=future/ then JSON.dump(entries: [luma("Berlin.rb #3 (in person)", "2026-11-10T17:30:00Z", "offline", 20, city_only: true), luma("Berlin.rb #3 (livestream)", "2026-11-10T17:30:00Z", "online", 5)])
-      when /event\/get/ then JSON.dump(event: { description: "With Andrzej Krzywda from Arkency" })
+      when /lu\.ma\/url/ then JSON.dump(data: { description_mirror: { type: "doc", content: [
+        { type: "paragraph", content: [{ type: "text", text: "With " }, { type: "text", text: "Andrzej Krzywda", marks: [{ type: "bold" }] },
+                                       { type: "text", text: " <script>", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] }] }
+      ] } })
       end
     end
     Berlinrb::Sync.new(@meetups, today: Date.new(2026, 10, 14), http: http, basecamp: -> { cards })
@@ -61,12 +64,13 @@ class SyncTest < Minitest::Test
     sync.run(%i[luma])
 
     two = @meetups.find(2)
-    assert_equal ["2026-10-13", "18:30", "Venue", "Street 1, Berlin", 64], two.values_at("date", "starts_at", "venue", "address", "signups")
+    assert_equal ["2026-10-13", "18:30", "Venue", "Street 1, Berlin", 64, 12], two.values_at("date", "starts_at", "venue", "address", "signups_in_person", "signups_online")
     three = @meetups.find(3)
-    assert_nil three["signups"], "upcoming signups change daily and stay off the site"
+    assert_nil three["signups_in_person"], "upcoming signups change daily and stay off the site"
     assert_nil three["venue"], "a city alone is not a venue"
     assert_equal "3online", three["livestream_luma"]
     assert_equal [true, nil], three["talks"].map { _1["announced"] }
+    assert_equal "<p>With <strong>Andrzej Krzywda</strong> &lt;script&gt;</p>", three["about"]
   end
 
   def test_basecamp_scheduled_and_done_cards_become_talks

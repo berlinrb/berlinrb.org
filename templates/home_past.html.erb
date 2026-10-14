@@ -8,18 +8,18 @@
     <time class="meetup-date" datetime="<%= meetup["date"] %>"><span class="meetup-day"><%= meetup["date"].day %></span> <span class="meetup-month"><%= meetup["date"].strftime("%b") %></span> <span class="meetup-year"><%= meetup["date"].year %></span></time>
     <span class="meetup-body">
       <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
+<%- if talks.any? -%>
+      <span class="meetup-talks"><%= h site.talk_names(meetup).join(" \u00b7 ") %></span>
+<%- end -%>
       <span class="meetup-meta">
 <%- if meetup["venue"] || meetup["address"] -%>
         <span><%= h(meetup["venue"] || meetup["address"]) %></span>
 <%- end -%>
-<%- if talks.any? -%>
-        <span><%= talks.size %> <%= talks.size == 1 ? "talk" : "talks" %></span>
-<%- end -%>
 <%- if site.photos(meetup).any? -%>
         <span><%= site.photos(meetup).size %> photos</span>
 <%- end -%>
-<%- if meetup["signups"] -%>
-        <span><%= meetup["signups"] %> signups</span>
+<%- if site.signups(meetup) -%>
+        <span><%= site.signups(meetup) %> signups</span>
 <%- end -%>
       </span>
     </span>

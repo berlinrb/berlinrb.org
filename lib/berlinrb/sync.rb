@@ -50,6 +50,7 @@ module Berlinrb
         talk["title"] = fields["Title"] if fields["Title"]
         talk["abstract"] = fields["Abstract"] if fields["Abstract"]
         talk["format"] = fields["Format"] if fields["Format"]
+        talk["short_title"] = fields["Short title"] if fields["Short title"]
       end
       @log << "Basecamp: read #{cards.size} cards"
     end
@@ -88,8 +89,9 @@ module Berlinrb
         number = event["name"][/#(\d+)/, 1]&.to_i
         next unless number && event["visibility"] == "public"
         meetup = @meetups.find_or_create(number)
+        starts_at = Time.iso8601(event["start_at"]).localtime
+        over = starts_at.to_date < @today
         if event["location_type"] == "offline"
-          starts_at = Time.iso8601(event["start_at"]).localtime
           meetup["date"] = starts_at.to_date.to_s
           meetup["starts_at"] = starts_at.strftime("%H:%M")
           meetup["ends_at"] = Time.iso8601(event["end_at"]).localtime.strftime("%H:%M") if event["end_at"]
@@ -100,10 +102,11 @@ module Berlinrb
             meetup["venue"] ||= address["address"]
             meetup["address"] = address["short_address"]
           end
-          meetup["signups"] = entry["guest_count"] if starts_at.to_date < @today && entry["guest_count"].to_i.positive?
-          announce(meetup, event["api_id"]) if starts_at.to_date >= @today
+          signups(meetup, "signups_in_person", entry) if over
+          describe(meetup) if !over || !meetup["about"]
         else
           meetup["livestream_luma"] = event["url"]
+          signups(meetup, "signups_online", entry) if over
         end
       end
       @log << "Luma: read #{events.size} events"
@@ -121,13 +124,63 @@ module Berlinrb
       entries
     end
 
-    def announce(meetup, event_id)
-      pending = meetup["talks"].reject { _1["announced"] }
-      return if pending.empty?
-      text = Meetups.slug(JSON.parse(@http.call("https://api.lu.ma/event/get?event_api_id=#{event_id}")).to_json)
-      pending.each { _1["announced"] = true if text.include?(Meetups.slug(_1["speaker"])) }
+    # Signups only count once a meetup is over: until then they change daily.
+    def signups(meetup, key, entry)
+      return unless entry["guest_count"].to_i.positive?
+      meetup.delete("signups")
+      meetup[key] = entry["guest_count"]
+    end
+
+    # The Luma page's description becomes the meetup's About section, and a
+    # talk on an upcoming meetup is announced once the description names its
+    # speaker.
+    def describe(meetup)
+      data = JSON.parse(@http.call("https://api.lu.ma/url?url=#{URI.encode_www_form_component(meetup["luma"])}")).fetch("data")
+      doc = data["description_mirror"] or return
+      meetup["about"] = self.class.prose_html(doc)
+      text = Meetups.slug(self.class.prose_text(doc))
+      meetup["talks"].each { _1["announced"] = true if !_1["announced"] && text.include?(Meetups.slug(_1["speaker"])) }
     rescue StandardError => error
-      @log << "Luma: could not read ##{meetup["number"]} to check its speakers (#{error.message})"
+      @log << "Luma: could not read the description of ##{meetup["number"]} (#{error.message})"
+    end
+
+    BLOCKS = { "paragraph" => "p", "bullet_list" => "ul", "ordered_list" => "ol", "list_item" => "li", "blockquote" => "blockquote" }.freeze
+
+    # Luma descriptions are ProseMirror documents. Only a known set of nodes
+    # and marks becomes HTML, and every text is escaped.
+    def self.prose_html(node)
+      case node["type"]
+      when "doc" then (node["content"] || []).map { prose_html(_1) }.reject(&:empty?).join("\n")
+      when "text" then marked(CGI.escapeHTML(node["text"].to_s), node["marks"] || [])
+      when "hard_break" then "<br>"
+      when "heading" then "<h3>#{inline(node)}</h3>"
+      when *BLOCKS.keys
+        tag = BLOCKS[node["type"]]
+        inner = %w[paragraph].include?(node["type"]) ? inline(node) : (node["content"] || []).map { prose_html(_1) }.join
+        inner = inner.delete_prefix("<p>").delete_suffix("</p>") if node["type"] == "list_item" && node["content"]&.size == 1
+        inner.strip.empty? ? "" : "<#{tag}>#{inner}</#{tag}>"
+      else (node["content"] || []).map { prose_html(_1) }.join
+      end
+    end
+
+    def self.inline(node) = (node["content"] || []).map { prose_html(_1) }.join
+
+    def self.marked(html, marks)
+      marks.reduce(html) do |result, mark|
+        case mark["type"]
+        when "bold" then "<strong>#{result}</strong>"
+        when "italic" then "<em>#{result}</em>"
+        when "code" then "<code>#{result}</code>"
+        when "link"
+          href = mark.dig("attrs", "href").to_s
+          href.match?(%r{\Ahttps?://}) ? %(<a href="#{CGI.escapeHTML(href)}">#{result}</a>) : result
+        else result
+        end
+      end
+    end
+
+    def self.prose_text(node)
+      node["type"] == "text" ? node["text"].to_s : (node["content"] || []).map { prose_text(_1) }.join(" ")
     end
 
     # YouTube: "Title – Speaker | Berlin.rb" is a talk, "Berlin.rb #N

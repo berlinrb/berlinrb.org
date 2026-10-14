@@ -71,6 +71,21 @@ module Berlinrb
       talks.select { _1["meetup"].equal?(meetup) }
     end
 
+    def signups(meetup)
+      parts = meetup.values_at("signups_in_person", "signups_online", "signups").compact
+      parts.sum if parts.any?
+    end
+
+    # "RubyLLM 2.0: Beyond Agents" is "RubyLLM 2.0" in lists, unless the card
+    # sets a short title.
+    def short_title(talk)
+      talk["short_title"] || talk["title"].split(/:\s|\s[-–—]\s/).first.strip
+    end
+
+    def talk_names(meetup)
+      talks_for(meetup).map { "#{short_title(_1)} (#{_1["speaker"]})" }
+    end
+
     def meetup_path(meetup) = "/meetups/#{meetup["number"]}/"
     def talk_path(talk) = "/talks/#{talk["slug"] || Meetups.slug(talk["speaker"], talk["title"])}/"
     def video_url(id) = "https://www.youtube.com/watch?v=#{id}"
@@ -161,7 +176,7 @@ module Berlinrb
     def head(name, meetup: nil, talk: nil)
       case name
       when "meetup"
-        { title: "Berlin.rb ##{meetup["number"]} · #{short_date(meetup["date"])}", description: description(meetup),
+        { title: "Berlin.rb ##{meetup["number"]}: #{talks_for(meetup).map { short_title(_1) }.join(", ").then { _1.empty? ? short_date(meetup["date"]) : _1 }}", description: description(meetup),
           path: meetup_path(meetup), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
           ld: [event_ld(meetup), breadcrumbs([["Meetups", "/#past-meetups"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
       when "talk"

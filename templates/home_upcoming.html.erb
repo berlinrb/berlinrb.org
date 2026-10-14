@@ -9,14 +9,15 @@
       <time class="meetup-date" datetime="<%= meetup["date"] %>"><span class="meetup-day"><%= meetup["date"].day %></span> <span class="meetup-month"><%= meetup["date"].strftime("%b") %></span> <span class="meetup-year"><%= meetup["date"].year %></span></time>
       <span class="meetup-body">
         <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
+<%- if talks.any? -%>
+        <span class="meetup-talks"><%= h site.talk_names(meetup).join(" \u00b7 ") %></span>
+<%- end -%>
         <span class="meetup-meta">
           <span><%= meetup["date"].strftime("%a") %> <%= meetup["starts_at"] || "18:30" %></span>
 <%- if meetup["venue"] || meetup["address"] -%>
           <span><%= h(meetup["venue"] || meetup["address"]) %></span>
 <%- end -%>
-<%- if talks.any? -%>
-          <span><%= h talks.map { _1["speaker"] }.join(", ") %></span>
-<%- elsif index.zero? -%>
+<%- if talks.empty? && index.zero? -%>
           <span>Speakers to be announced</span>
 <%- end -%>
         </span>

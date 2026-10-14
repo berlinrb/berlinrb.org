@@ -12,7 +12,7 @@ class SiteTest < Minitest::Test
     FileUtils.mkdir_p(File.join(@root, "photos/1/thumbs"))
     %w[photos/1/a.jpg photos/1/thumbs/a.jpg].each { FileUtils.cp(File.expand_path("fixtures/photo.jpg", __dir__), File.join(@root, _1)) }
     meetups = Berlinrb::Meetups.new([
-      { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups" => 111,
+      { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups_in_person" => 100, "signups_online" => 11, "about" => "<p>From Luma</p>",
         "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "Ruby is where you ship AI.", "video" => "abc" }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
         "talks" => [{ "speaker" => "Andrzej Krzywda", "title" => "Secret", "announced" => false },
@@ -30,6 +30,9 @@ class SiteTest < Minitest::Test
     meetup = read("meetups/1/index.html")
     assert_includes meetup, "<h1>Berlin.rb #1</h1>"
     assert_includes meetup, %("@type": "Event")
+    assert_includes meetup, "<title>Berlin.rb #1: RubyLLM 2.0</title>"
+    assert_includes meetup, "<p>From Luma</p>"
+    assert_includes meetup, "(100 in person, 11 online)"
     assert_includes meetup, "/talks/carmine-paolino-rubyllm-2-0-beyond-agents/"
 
     talk = read("talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html")
@@ -54,6 +57,7 @@ class SiteTest < Minitest::Test
     assert_includes upcoming, "Marco Roth"
     assert_includes past, "/meetups/1/"
     assert_includes past, "111 signups"
+    assert_includes past, "RubyLLM 2.0 (Carmine Paolino)"
     refute_includes past, "/meetups/3/"
   end
 

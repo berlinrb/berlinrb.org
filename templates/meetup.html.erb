@@ -22,10 +22,10 @@
       <dd><%= h meetup["sponsors"].join(", ") %></dd>
     </div>
 <%- end -%>
-<%- if !upcoming && meetup["signups"] -%>
+<%- if !upcoming && site.signups(meetup) -%>
     <div>
       <dt>Signups</dt>
-      <dd><%= meetup["signups"] %></dd>
+      <dd><%= site.signups(meetup) %><%- if meetup["signups_in_person"] && meetup["signups_online"] -%> <span class="fact-detail">(<%= meetup["signups_in_person"] %> in person, <%= meetup["signups_online"] %> online)</span><%- end -%></dd>
     </div>
 <%- end -%>
   </dl>
@@ -58,6 +58,13 @@
   </ol>
 <%- end -%>
 </section>
+<%- if meetup["about"] -%>
+
+<section class="page-section prose" aria-labelledby="about-title">
+  <h2 id="about-title">About this meetup</h2>
+<%= meetup["about"].gsub(/^/, "  ") %>
+</section>
+<%- end -%>
 <%- if site.photos(meetup).any? -%>
 
 <section class="page-section" aria-labelledby="photos-title">
