@@ -1,0 +1,35 @@
+<%- meetup = talk["meetup"] -%>
+<section class="page-hero">
+  <a class="back" href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a>
+  <p class="eyebrow"><time datetime="<%= meetup["date"] %>"><%= site.long_date(meetup["date"]) %></time><%= " · #{h talk["format"]}" if talk["format"] && site.upcoming?(meetup) %></p>
+  <h1><%= h talk["title"] %></h1>
+  <p class="lead">By <%= h talk["speaker"] %></p>
+</section>
+<%- if talk["video"] -%>
+
+<section class="page-section" aria-label="Recording">
+  <a class="video-link video-wide" href="<%= site.video_url(talk["video"]) %>">
+<%- if site.thumbnail?(talk["video"]) -%>
+    <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720">
+<%- end -%>
+    <span class="video-label">Watch on YouTube</span>
+  </a>
+</section>
+<%- end -%>
+<%- unless talk["abstract"].to_s.empty? -%>
+
+<section class="page-section prose" aria-labelledby="abstract-title">
+  <h2 id="abstract-title">About the talk</h2>
+<%= site.paragraphs(talk["abstract"]).gsub(/^/, "  ") %>
+</section>
+<%- end -%>
+<%- if talk["slides"] -%>
+
+<section class="page-section">
+  <p class="downloads"><a href="<%= h talk["slides"] %>">Slides</a></p>
+</section>
+<%- end -%>
+
+<section class="page-section">
+  <p class="note"><%= site.upcoming?(meetup) ? "Coming up at" : "Given at" %> <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a><%= " at #{h meetup["venue"]}" if meetup["venue"] %>. Want to speak too? <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>.</p>
+</section>

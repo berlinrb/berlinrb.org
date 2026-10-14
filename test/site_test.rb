@@ -1,0 +1,61 @@
+# frozen_string_literal: true
+
+require "minitest/autorun"
+require "tmpdir"
+require_relative "../lib/berlinrb/site"
+
+class SiteTest < Minitest::Test
+  def setup
+    @out = Dir.mktmpdir
+    meetups = Berlinrb::Meetups.new([
+      { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups" => 111,
+        "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "Ruby is where you ship AI.", "video" => "abc" }] },
+      { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
+        "talks" => [{ "speaker" => "Andrzej Krzywda", "title" => "Secret", "announced" => false },
+                    { "speaker" => "Marco Roth", "title" => "Herb", "announced" => true }] }
+    ])
+    @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), out: @out)
+    @site.build
+  end
+
+  def teardown = FileUtils.rm_rf(@out)
+
+  def read(path) = File.read(File.join(@out, path))
+
+  def test_builds_a_page_per_meetup_and_talk
+    meetup = read("meetups/1/index.html")
+    assert_includes meetup, "<h1>Berlin.rb #1</h1>"
+    assert_includes meetup, %("@type": "Event")
+    assert_includes meetup, "/talks/carmine-paolino-rubyllm-2-0-beyond-agents/"
+
+    talk = read("talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html")
+    assert_includes talk, "RubyLLM 2.0: Beyond Agents"
+    assert_includes talk, "https://www.youtube.com/watch?v=abc"
+    assert_includes talk, %("@type": "VideoObject")
+  end
+
+  def test_upcoming_talks_stay_hidden_until_announced
+    upcoming = read("meetups/3/index.html")
+    assert_includes upcoming, "Herb"
+    refute_includes upcoming, "Secret"
+    assert_includes upcoming, "https://luma.com/05tfdlpk"
+    refute File.exist?(File.join(@out, "talks/andrzej-krzywda-secret/index.html"))
+  end
+
+  def test_home_lists_upcoming_and_past_meetups
+    home = read("index.html")
+    upcoming = home[/upcoming-meetups:start.*upcoming-meetups:end/m]
+    past = home[/past-meetups:start.*past-meetups:end/m]
+    assert_includes upcoming, "/meetups/3/"
+    assert_includes upcoming, "Marco Roth"
+    assert_includes past, "/meetups/1/"
+    assert_includes past, "111 signups"
+    refute_includes past, "/meetups/3/"
+  end
+
+  def test_sitemap_lists_generated_pages
+    sitemap = read("sitemap.xml")
+    assert_includes sitemap, "https://berlinrb.org/meetups/1/"
+    assert_includes sitemap, "https://berlinrb.org/talks/carmine-paolino-rubyllm-2-0-beyond-agents/"
+  end
+end

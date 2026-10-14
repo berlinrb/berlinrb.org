@@ -35,7 +35,6 @@
       window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
       plausible.init()
     </script>
-    <link rel="preconnect" href="https://luma.com">
     <script async src="https://tally.so/widgets/embed.js"></script>
     <link rel="preload" href="assets/fonts/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
@@ -203,48 +202,16 @@
 
         <div class="events" id="events" aria-labelledby="events-title">
           <h2 class="eyebrow" id="events-title">Upcoming meetups</h2>
-          <div class="calendar">
-            <iframe
-              src="https://luma.com/embed/calendar/cal-21caVAhECUCuGR6/events"
-              title="Berlin.rb events calendar on Luma"
-              loading="lazy"
-              allowfullscreen=""
-              aria-hidden="false"
-              tabindex="0"
-            ></iframe>
-            <script>
-              (() => {
-                const calendar = document.currentScript.previousElementSibling
-                const darkMode = matchMedia("(prefers-color-scheme: dark)")
-                const applyTheme = () => {
-                  const url = new URL(calendar.src)
-                  url.searchParams.set("lt", darkMode.matches ? "dark" : "light")
-                  calendar.src = url
-                }
-                if (darkMode.matches) applyTheme()
-                darkMode.addEventListener("change", applyTheme)
-              })()
-            </script>
-          </div>
+          <!-- upcoming-meetups:start -->
+          <!-- upcoming-meetups:end -->
+          <p class="hint"><a href="https://luma.com/berlinrb">All dates on Luma</a></p>
         </div>
       </section>
 
       <section id="past-meetups" aria-labelledby="past-meetups-title">
         <h2 id="past-meetups-title">Past meetups</h2>
-        <ol class="past-meetups">
+        <ol class="meetup-list past-meetups">
           <!-- past-meetups:start -->
-          <li>
-            <a class="past-meetup" href="https://luma.com/lnmj7085">
-              <time class="past-meetup-date" datetime="2026-09-08"><span class="past-meetup-day">8</span> <span class="past-meetup-month">Sep</span> <span class="past-meetup-year">2026</span></time>
-              <span class="past-meetup-body">
-                <span class="past-meetup-name">Berlin.rb #1</span>
-                <span class="past-meetup-meta">
-                  <span>Potsdamer Str. 121, Berlin</span>
-                  <span>111 signups</span>
-                </span>
-              </span>
-            </a>
-          </li>
           <!-- past-meetups:end -->
         </ol>
       </section>
@@ -351,6 +318,7 @@
           <nav class="footer-links" aria-label="Berlin.rb">
             <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>
             <a href="https://luma.com/berlinrb">Luma calendar</a>
+            <a href="talks/">Talks</a>
             <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>
             <a href="press/">Press kit</a>
           </nav>

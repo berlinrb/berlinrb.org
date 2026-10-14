@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Serve the static site locally. Usage: bin/dev [--open] [port]
+# Build the site and serve it locally. Usage: bin/dev [--open] [port]
 set -e
 cd "$(dirname "$0")/.."
 
@@ -21,4 +21,5 @@ if $open_browser; then
   ) &
 fi
 
-exec python3 -m http.server "$port" --bind 127.0.0.1
+bin/build
+exec python3 -m http.server "$port" --bind 127.0.0.1 --directory _site

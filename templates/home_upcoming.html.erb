@@ -1,0 +1,28 @@
+<%- if site.upcoming.empty? -%>
+<p class="note">No meetups are scheduled right now. Follow us on Luma to hear when the next one is.</p>
+<%- else -%>
+<ol class="meetup-list upcoming-meetups">
+<%- site.upcoming.first(4).each_with_index do |meetup, index| -%>
+<%- talks = site.talks_for(meetup) -%>
+  <li>
+    <a class="meetup-card<%= " meetup-card-next" if index.zero? %>" href="<%= site.meetup_path(meetup) %>">
+      <time class="meetup-date" datetime="<%= meetup["date"] %>"><span class="meetup-day"><%= meetup["date"].day %></span> <span class="meetup-month"><%= meetup["date"].strftime("%b") %></span> <span class="meetup-year"><%= meetup["date"].year %></span></time>
+      <span class="meetup-body">
+        <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
+        <span class="meetup-meta">
+          <span><%= meetup["date"].strftime("%a") %> <%= meetup["starts_at"] || "18:30" %></span>
+<%- if meetup["venue"] || meetup["address"] -%>
+          <span><%= h(meetup["venue"] || meetup["address"]) %></span>
+<%- end -%>
+<%- if talks.any? -%>
+          <span><%= h talks.map { _1["speaker"] }.join(", ") %></span>
+<%- elsif index.zero? -%>
+          <span>Speakers to be announced</span>
+<%- end -%>
+        </span>
+      </span>
+    </a>
+  </li>
+<%- end -%>
+</ol>
+<%- end -%>

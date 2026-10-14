@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Update data/meetups.yml from Luma, the Basecamp Talks card table and the
+# YouTube channel. Usage: bin/sync [basecamp] [luma] [youtube]
+require_relative "../lib/berlinrb/sync"
+
+sources = ARGV.empty? ? %i[basecamp luma youtube] : ARGV.map(&:to_sym)
+meetups = Berlinrb::Meetups.load
+sync = Berlinrb::Sync.new(meetups)
+sync.run(sources)
+meetups.save
+puts sync.log

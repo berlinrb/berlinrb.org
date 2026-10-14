@@ -1,0 +1,83 @@
+<%- talks = site.talks_for(meetup); upcoming = site.upcoming?(meetup); previous, following = site.neighbours(meetup) -%>
+<section class="page-hero">
+  <a class="back" href="/">Berlin.rb</a>
+  <p class="eyebrow"><time datetime="<%= meetup["date"] %>"><%= site.long_date(meetup["date"]) %></time><%= " · doors #{meetup["starts_at"]}" if meetup["starts_at"] %></p>
+  <h1>Berlin.rb #<%= meetup["number"] %></h1>
+  <dl class="meetup-facts">
+<%- if meetup["venue"] || meetup["address"] -%>
+    <div>
+      <dt>Where</dt>
+      <dd><%= h meetup["venue"] %><%- if meetup["address"] && meetup["address"] != meetup["venue"] -%><%= meetup["venue"] ? ", " : "" %><a href="https://www.openstreetmap.org/search?query=<%= u meetup["address"] %>"><%= h meetup["address"] %></a><%- end -%></dd>
+    </div>
+<%- end -%>
+<%- if meetup["host"] && meetup["host"] != meetup["venue"] -%>
+    <div>
+      <dt>Hosted by</dt>
+      <dd><%= h meetup["host"] %></dd>
+    </div>
+<%- end -%>
+<%- if meetup["sponsors"]&.any? -%>
+    <div>
+      <dt>Sponsored by</dt>
+      <dd><%= h meetup["sponsors"].join(", ") %></dd>
+    </div>
+<%- end -%>
+<%- if !upcoming && meetup["signups"] -%>
+    <div>
+      <dt>Signups</dt>
+      <dd><%= meetup["signups"] %></dd>
+    </div>
+<%- end -%>
+  </dl>
+<%- if upcoming -%>
+  <div class="action-links">
+<%- if meetup["luma"] -%>
+    <a class="button" href="<%= site.luma_url(meetup["luma"]) %>">Sign up on Luma</a>
+<%- end -%>
+<%- if meetup["livestream_luma"] -%>
+    <a class="button button-secondary" href="<%= site.luma_url(meetup["livestream_luma"]) %>">Join the livestream</a>
+<%- end -%>
+  </div>
+  <p class="hint">Free and open to everyone. Talks start at 19:00, then we mingle until 22:00.</p>
+<%- elsif meetup["luma"] -%>
+  <p class="hint">The event page is <a href="<%= site.luma_url(meetup["luma"]) %>">on Luma</a>.</p>
+<%- end -%>
+</section>
+
+<section class="page-section" aria-labelledby="talks-title">
+  <h2 id="talks-title">Talks</h2>
+<%- if talks.empty? -%>
+  <p class="note"><%= upcoming ? "Speakers will be announced on Luma and here." : "No talks recorded for this meetup." %> Want to speak at a Berlin.rb? <a href="https://tally.so/r/WOWMZL" data-tally-open="WOWMZL" data-tally-layout="modal" data-tally-width="700" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" aria-haspopup="dialog">Submit a talk</a>.</p>
+<%- else -%>
+  <ol class="talk-list">
+<%- talks.each do |talk| -%>
+    <li>
+<%= site.render_talk_card(talk).gsub(/^(?=.)/, "      ") %>
+    </li>
+<%- end -%>
+  </ol>
+<%- end -%>
+</section>
+<%- if meetup["livestream"] -%>
+
+<section class="page-section" aria-labelledby="livestream-title">
+  <h2 id="livestream-title">The whole evening</h2>
+  <a class="video-link video-wide" href="<%= site.video_url(meetup["livestream"]) %>">
+<%- if site.thumbnail?(meetup["livestream"]) -%>
+    <img src="<%= site.thumbnail(meetup["livestream"]) %>" alt="" width="1280" height="720" loading="lazy">
+<%- end -%>
+    <span class="video-label">Watch the livestream on YouTube</span>
+  </a>
+</section>
+<%- end -%>
+
+<nav class="page-section pager" aria-label="Other meetups">
+<%- if previous -%>
+  <a href="<%= site.meetup_path(previous) %>" rel="prev">&larr; Berlin.rb #<%= previous["number"] %></a>
+<%- else -%>
+  <span></span>
+<%- end -%>
+<%- if following -%>
+  <a href="<%= site.meetup_path(following) %>" rel="next">Berlin.rb #<%= following["number"] %> &rarr;</a>
+<%- end -%>
+</nav>

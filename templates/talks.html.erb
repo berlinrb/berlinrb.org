@@ -1,0 +1,16 @@
+<section class="page-hero">
+  <a class="back" href="/">Berlin.rb</a>
+  <p class="eyebrow">Recordings</p>
+  <h1>Talks</h1>
+  <p class="lead">Every talk given at Berlin.rb, newest first. Recordings are also on <a href="https://www.youtube.com/@berlinrb_org">our YouTube channel</a>.</p>
+</section>
+
+<section class="page-section" aria-label="All talks">
+  <ol class="talk-list">
+<%- site.talks.reject { site.upcoming?(_1["meetup"]) }.each do |talk| -%>
+    <li>
+<%= site.render_talk_card(talk, meetup: true).gsub(/^(?=.)/, "      ") %>
+    </li>
+<%- end -%>
+  </ol>
+</section>

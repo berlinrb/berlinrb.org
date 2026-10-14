@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Build the site into _site from the static pages and data/meetups.yml.
+require_relative "../lib/berlinrb/site"
+
+ENV["TZ"] = "Europe/Berlin"
+written = Berlinrb::Site.new(Berlinrb::Meetups.load).build
+puts "Built #{written.size} pages into _site."

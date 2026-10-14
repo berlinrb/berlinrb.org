@@ -1,0 +1,25 @@
+<%- if site.past.empty? -%>
+<li>No past meetups yet.</li>
+<%- end -%>
+<%- site.past.each do |meetup| -%>
+<%- talks = site.talks_for(meetup) -%>
+<li>
+  <a class="meetup-card" href="<%= site.meetup_path(meetup) %>">
+    <time class="meetup-date" datetime="<%= meetup["date"] %>"><span class="meetup-day"><%= meetup["date"].day %></span> <span class="meetup-month"><%= meetup["date"].strftime("%b") %></span> <span class="meetup-year"><%= meetup["date"].year %></span></time>
+    <span class="meetup-body">
+      <span class="meetup-name">Berlin.rb #<%= meetup["number"] %></span>
+      <span class="meetup-meta">
+<%- if meetup["venue"] || meetup["address"] -%>
+        <span><%= h(meetup["venue"] || meetup["address"]) %></span>
+<%- end -%>
+<%- if talks.any? -%>
+        <span><%= talks.size %> <%= talks.size == 1 ? "talk" : "talks" %></span>
+<%- end -%>
+<%- if meetup["signups"] -%>
+        <span><%= meetup["signups"] %> signups</span>
+<%- end -%>
+      </span>
+    </span>
+  </a>
+</li>
+<%- end -%>

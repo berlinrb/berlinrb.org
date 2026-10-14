@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "7 23 * * *" # just after midnight in Berlin, so a finished meetup moves to past
   workflow_dispatch:
 
 permissions:
@@ -25,6 +27,13 @@ jobs:
         with:
           fetch-depth: 0 # sitemap lastmod comes from each page's last commit
       - uses: actions/configure-pages@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+      - name: Test
+        run: for test in test/*_test.rb; do ruby "$test" || exit 1; done
+      - name: Build the site
+        run: bin/build
       - name: Build the press kit zip
         run: |
           mkdir -p build/berlinrb-press-kit
@@ -32,22 +41,10 @@ jobs:
              assets/logo-dark.svg assets/logo-dark.png \
              assets/logo-square.png press/about-berlinrb.txt \
              build/berlinrb-press-kit/
-          (cd build && zip -qr ../press/berlinrb-press-kit.zip berlinrb-press-kit)
+          (cd build && zip -qr ../_site/press/berlinrb-press-kit.zip berlinrb-press-kit)
           rm -rf build
-      - name: Build the sitemap
-        run: |
-          {
-            echo '<?xml version="1.0" encoding="UTF-8"?>'
-            echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
-            for page in index.html press/index.html imprint/index.html privacy/index.html; do
-              printf '  <url><loc>https://berlinrb.org/%s</loc><lastmod>%s</lastmod></url>\n' \
-                "${page%index.html}" "$(git log -1 --format=%cs -- "$page")"
-            done
-            echo '</urlset>'
-          } > sitemap.xml
-          cat sitemap.xml
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

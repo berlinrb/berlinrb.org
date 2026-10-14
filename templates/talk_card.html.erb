@@ -1,0 +1,19 @@
+<article class="talk-card">
+<%- if talk["video"] -%>
+  <a class="video-link" href="<%= site.talk_path(talk) %>" tabindex="-1" aria-hidden="true">
+<%- if site.thumbnail?(talk["video"]) -%>
+    <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720" loading="lazy">
+<%- end -%>
+  </a>
+<%- end -%>
+  <div class="talk-card-body">
+<%- if show_meetup -%>
+    <p class="talk-card-meta"><a href="<%= site.meetup_path(talk["meetup"]) %>">Berlin.rb #<%= talk["meetup"]["number"] %></a> &middot; <time datetime="<%= talk["meetup"]["date"] %>"><%= site.short_date(talk["meetup"]["date"]) %></time></p>
+<%- end -%>
+    <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
+    <p class="talk-card-speaker"><%= h talk["speaker"] %></p>
+<%- unless talk["abstract"].to_s.empty? -%>
+    <p class="talk-card-abstract"><%= h site.excerpt(talk["abstract"], 32) %></p>
+<%- end -%>
+  </div>
+</article>
