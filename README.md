@@ -12,3 +12,5 @@ The site for berlinrb.org: a static site with a page per meetup and per talk.
 - Photos go in `photos/<meetup number>/` through a pull request; the `Prepare photos` workflow runs `bin/photos` to resize them, strip their metadata and write thumbnails. See `photos/README.md`.
 - `bin/build` writes the site into `_site`, and `bin/dev` builds and serves it. The deploy workflow builds on every push and daily after midnight, so a meetup moves to Past meetups the day after.
 - Tests: `for test in test/*_test.rb; do ruby "$test"; done`.
+
+The header uses the horizontal vector logos `assets/logotype.svg` and `assets/logotype-dark.svg`. These reuse the symbol and outlined Montserrat lettering from the stacked logos, with the red gem setting the proportions: its height is about 1.18 times the lettering height, following RubyLLM. The lettering is centered vertically on the red gem, while the tower scales with the whole symbol and extends above it.

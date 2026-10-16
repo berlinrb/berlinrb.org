@@ -27,6 +27,14 @@ class SiteTest < Minitest::Test
 
   def read(path) = File.read(File.join(@out, path))
 
+  def test_header_uses_horizontal_logos_for_both_color_schemes
+    home = read("index.html")
+    assert_includes home, 'srcset="/assets/logotype-dark.svg" media="(prefers-color-scheme: dark)"'
+    assert_includes home, 'src="/assets/logotype.svg" alt="Berlin.rb" width="618" height="195"'
+    assert_includes home, 'aria-label="Berlin.rb home"'
+    assert_includes home, 'rel="icon" href="assets/logo.svg"'
+  end
+
   def test_builds_a_page_per_meetup_and_talk
     meetup = read("meetups/1/index.html")
     assert_includes meetup, "<h1>Berlin.rb #1</h1>"
