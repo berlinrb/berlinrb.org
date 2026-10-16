@@ -36,7 +36,16 @@ module Berlinrb
         written = []
         if source != target || needs_work?(source)
           convert(source, target, FULL, 82)
-          File.delete(source) unless source == target
+          unless source == target
+            if File.identical?(source, target)
+              # A temporary name makes the case change stick on macOS too.
+              temporary = "#{target}.rename"
+              File.rename(source, temporary)
+              File.rename(temporary, target)
+            else
+              File.delete(source)
+            end
+          end
           written << target
         end
         unless File.exist?(thumb) && File.mtime(thumb) >= File.mtime(target)

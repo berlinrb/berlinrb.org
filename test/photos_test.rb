@@ -30,6 +30,14 @@ class PhotosTest < Minitest::Test
     assert_empty Berlinrb::Photos.new(@root).for(3)
   end
 
+  def test_process_preserves_output_when_only_extension_case_changes
+    skip "needs ImageMagick" unless system("command -v magick >/dev/null || command -v convert >/dev/null")
+    FileUtils.cp(FIXTURE, File.join(@root, "2", "camera.JPG"))
+    Berlinrb::Photos.new(@root).process
+    assert_equal [30, 20], Berlinrb::Photos.dimensions(File.join(@root, "2", "camera.jpg"))
+    assert File.exist?(File.join(@root, "2", "thumbs", "camera.jpg"))
+  end
+
   def test_process_renames_strips_and_writes_thumbnails
     skip "needs ImageMagick" unless system("command -v magick >/dev/null || command -v convert >/dev/null")
     FileUtils.cp(FIXTURE, File.join(@root, "2", "IMG 1.JPG"))

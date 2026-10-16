@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative "../lib/berlinrb/image_check"
+
+# Include untracked additions locally, but ignore build output and deleted files.
+paths, status = Open3.capture2("git", "ls-files", "-z", "--cached", "--others", "--exclude-standard")
+abort "Could not list repository files" unless status.success?
+errors = Berlinrb::ImageCheck.errors(paths.split("\0").uniq)
+abort errors.join("\n") unless errors.empty?
+puts "Image sizes and photo thumbnails are valid."

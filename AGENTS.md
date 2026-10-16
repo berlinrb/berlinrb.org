@@ -140,3 +140,10 @@ a fork they control until a release includes it.
 
 Reviewers treat either problem in a pull request as a blocker.
 <!-- /github-automation: pull-requests -->
+
+## Website images
+
+- Prepare meetup photos locally with `bin/photos` before staging. It requires ImageMagick, creates 1600px JPEGs and 640px thumbnails, and strips metadata. Never commit camera originals.
+- Skip existing photos and duplicates when importing. Keep Downloads originals untouched.
+- Run `bin/check-images` before committing. Raster images must be at most 1 MiB, photo thumbnails at most 150 KiB; meetup photos must have thumbnails and meet the pixel limits.
+- See `photos/README.md` for the workflow and Overcommit setup.

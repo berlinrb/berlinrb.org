@@ -1,0 +1,7 @@
+PreCommit:
+  ImageSizes:
+    enabled: true
+    required_executable: './bin/check-images'
+    description: 'Checking image sizes and photo thumbnails'
+    requires_files: false
+    always_run: true
