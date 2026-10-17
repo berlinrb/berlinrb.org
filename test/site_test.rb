@@ -34,7 +34,7 @@ class SiteTest < Minitest::Test
     File.write(File.join(@root, "data/talks/ghi.md"), "## Summary\n\n### Straight into a part\n\n- No opening paragraph\n")
     meetups = Berlinrb::Meetups.new([
       { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups_in_person" => 100, "signups_online" => 11, "about" => "<p>From Luma</p>",
-        "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "Ruby is where you ship AI.", "video" => "abc" }] },
+        "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "video" => "abc" }] },
       { "number" => 2, "date" => "2026-10-13", "about" => "<p><strong>Rafał Cymerys</strong>, then Stephen Margheim</p>",
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How", "abstract" => "Code is cheap now.", "video" => "ghi" },
                     { "speaker" => "Rafal Cymerys", "title" => "Let Your Software", "video" => "def" }] },
@@ -89,6 +89,13 @@ class SiteTest < Minitest::Test
     talk = read("talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html")
     assert_includes talk, %(<meta name="description" content="Carmine shows how to ship AI in Ruby.">)
     assert_includes talk, %("description": "Carmine shows how to ship AI in Ruby.")
+  end
+
+  def test_talk_cards_without_an_abstract_describe_the_talk_from_its_summary
+    card = %(<p class="talk-card-abstract">Carmine shows how to ship AI in Ruby.</p>)
+    assert_includes read("talks/index.html"), card
+    assert_includes read("meetups/1/index.html"), card
+    assert_equal "In his own words.", @site.blurb({ "abstract" => "In his own words.", "video" => "abc" })
   end
 
   def test_a_summary_without_an_opening_paragraph_falls_back_to_the_abstract

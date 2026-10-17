@@ -17,8 +17,8 @@
     <h3><%= h talk["speaker"] %></h3>
     <p class="talk-card-speaker">Talk to be announced</p>
 <%- end -%>
-<%- unless talk["abstract"].to_s.empty? -%>
-    <p class="talk-card-abstract"><%= h site.excerpt(talk["abstract"], 32) %></p>
+<%- unless (blurb = site.blurb(talk)).empty? -%>
+    <p class="talk-card-abstract"><%= h site.excerpt(blurb, 32) %></p>
 <%- end -%>
   </div>
 </article>

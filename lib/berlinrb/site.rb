@@ -103,6 +103,10 @@ module Berlinrb
       end
     end
 
+    # What a talk is about, for cards: the speaker's own abstract, or the
+    # opening of its summary when the card in Basecamp has none.
+    def blurb(talk) = talk["abstract"].to_s.empty? ? tldr(talk).to_s : talk["abstract"]
+
     # The summary opens with the whole talk in one paragraph.
     def tldr(talk)
       summary = summary_sections(talk).find { _1["id"] == "summary" } or return
