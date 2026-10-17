@@ -4,6 +4,7 @@ require "erb"
 require "fileutils"
 require "json"
 require_relative "meetups"
+require_relative "markdown"
 require_relative "photos"
 require_relative "luma_description"
 
@@ -82,6 +83,32 @@ module Berlinrb
     end
 
     def recorded_talks = talks.select { _1["video"] }
+
+    # A recorded talk's written companion, data/talks/<video>.md, split at its
+    # ## headings into the sections its page shows. Links to moments in the
+    # recording become play buttons, except in the chapter list, which is
+    # nothing but those links.
+    def summary_sections(talk)
+      file = talk["video"] && summary_file(talk)
+      return [] unless file && File.exist?(file)
+      (@summaries ||= {})[file] ||= Markdown.sections(File.read(file)).map do |title, markdown|
+        id = Meetups.slug(title)
+        html = Markdown.html(markdown)
+        html = if id == "chapters"
+          html.sub("<ul>", %(<ul style="--rows: #{(html.scan("<li>").size / 2.0).ceil}">))
+        else
+          html.gsub(%(<a href="#{video_url(talk["video"])}&amp;t=), %(<a class="timestamp" href="#{video_url(talk["video"])}&amp;t=))
+        end
+        { "id" => id, "title" => title, "markdown" => markdown, "html" => html }
+      end
+    end
+
+    # The summary opens with the whole talk in one paragraph.
+    def tldr(talk)
+      summary = summary_sections(talk).find { _1["id"] == "summary" } or return
+      paragraph = Markdown.blocks(summary["markdown"]).find { !_1.start_with?("#", "- ") } or return
+      Markdown.plain(paragraph)
+    end
 
     def photos(meetup) = (@photo_cache ||= {})[meetup["number"]] ||= @photos.for(meetup["number"])
 
@@ -206,6 +233,9 @@ module Berlinrb
 
     private
 
+    def summary_path(talk) = "data/talks/#{talk["video"]}.md"
+    def summary_file(talk) = File.join(@root, summary_path(talk))
+
     def offset(date)
       zone = ENV["TZ"]
       ENV["TZ"] = "Europe/Berlin"
@@ -226,7 +256,7 @@ module Berlinrb
           path: meetup_path(meetup), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
           ld: [event_ld(meetup), breadcrumbs([["Meetups", "/#past-meetups"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
       when "talk"
-        { title: "#{talk["title"]} · #{talk["speaker"]} · Berlin.rb", description: excerpt(talk["abstract"], 30).then { _1.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : _1 },
+        { title: "#{talk["title"]} · #{talk["speaker"]} · Berlin.rb", description: excerpt(tldr(talk) || talk["abstract"], 30).then { _1.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : _1 },
           path: talk_path(talk), image: talk["video"] && thumbnail?(talk["video"]) ? thumbnail(talk["video"]) : nil,
           ld: [talk_ld(talk), breadcrumbs([["Berlin.rb ##{talk["meetup"]["number"]}", meetup_path(talk["meetup"])], [talk["title"], talk_path(talk)]])] }
       when "photos"
@@ -249,7 +279,7 @@ module Berlinrb
       {
         "@type" => "VideoObject",
         "name" => "#{talk["title"]} by #{talk["speaker"]}",
-        "description" => talk["abstract"].to_s.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : talk["abstract"],
+        "description" => tldr(talk) || (talk["abstract"].to_s.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : talk["abstract"]),
         "thumbnailUrl" => "#{ORIGIN}#{thumbnail(talk["video"])}",
         "uploadDate" => (talk["video_published"] || talk["meetup"]["date"]).to_s,
         "contentUrl" => video_url(talk["video"]),
@@ -297,7 +327,10 @@ module Berlinrb
       pages = %w[index.html press/index.html imprint/index.html privacy/index.html].map { [_1.delete_suffix("index.html"), lastmod(_1)] }
       data = lastmod("data/meetups.yml")
       pages += @meetups.map { [meetup_path(_1).delete_prefix("/"), data] }
-      pages += talks.select { _1["title"] }.map { [talk_path(_1).delete_prefix("/"), data] }
+      pages += talks.select { _1["title"] }.map do |talk|
+        summary = lastmod(summary_path(talk)) if talk["video"] && File.exist?(summary_file(talk))
+        [talk_path(talk).delete_prefix("/"), [data, summary].compact.max]
+      end
       pages << ["talks/", data]
       pages << ["photos/", data]
       pages << ["meetups/", data]

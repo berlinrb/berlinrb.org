@@ -1,4 +1,5 @@
 <%- meetup = talk["meetup"] -%>
+<%- chapters, sections = site.summary_sections(talk).partition { _1["id"] == "chapters" } -%>
 <section class="page-hero">
   <a class="back" href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a>
   <p class="eyebrow"><time datetime="<%= meetup["date"] %>"><%= site.long_date(meetup["date"]) %></time><%= " · #{h talk["format"]}" if talk["format"] && site.upcoming?(meetup) %></p>
@@ -8,12 +9,23 @@
 <%- if talk["video"] -%>
 
 <section class="page-section" aria-label="Recording">
-  <a class="video-link video-wide" href="<%= site.video_url(talk["video"]) %>">
+  <div class="player-slot">
+    <div class="player" data-player="<%= h talk["video"] %>" data-title="<%= h talk["title"] %>">
+      <a class="video-link player-start" href="<%= site.video_url(talk["video"]) %>">
 <%- if site.thumbnail?(talk["video"]) -%>
-    <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720">
+        <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720">
 <%- end -%>
-    <span class="video-label">Watch on YouTube</span>
-  </a>
+        <span class="video-label">Watch on YouTube</span>
+      </a>
+    </div>
+  </div>
+</section>
+<%- end -%>
+<%- chapters.each do |section| -%>
+
+<section class="page-section chapters" id="chapters" aria-labelledby="chapters-title">
+  <h2 id="chapters-title"><%= h section["title"] %></h2>
+<%= section["html"].gsub(/^/, "  ") %>
 </section>
 <%- end -%>
 <%- unless talk["abstract"].to_s.empty? -%>
@@ -21,6 +33,16 @@
 <section class="page-section prose" aria-labelledby="abstract-title">
   <h2 id="abstract-title">About the talk</h2>
 <%= site.paragraphs(talk["abstract"]).gsub(/^/, "  ") %>
+</section>
+<%- end -%>
+<%- sections.each do |section| -%>
+
+<section class="page-section prose talk-notes" id="<%= section["id"] %>" aria-labelledby="<%= section["id"] %>-title">
+  <h2 id="<%= section["id"] %>-title"><%= h section["title"] %></h2>
+<%- if section["id"] == "summary" -%>
+  <p class="note ai-note">Written with AI from the recording, then checked by Berlin.rb and <%= h talk["speaker"] %>. Spotted a mistake? Write to <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.</p>
+<%- end -%>
+<%= section["html"].gsub(/^/, "  ") %>
 </section>
 <%- end -%>
 <%- if talk["slides"] -%>
