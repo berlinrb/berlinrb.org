@@ -86,7 +86,8 @@
     setTimeout(() => listen(attempts - 1), 250)
   }
 
-  // A seek before the player is ready is held until it answers.
+  // A seek or a pause before the player is ready is held until it answers;
+  // the latest one wins.
   function play(at) {
     highlight(at)
     if (!ready) {
@@ -158,7 +159,8 @@
   })
 
   close.addEventListener("click", () => {
-    command("pauseVideo")
+    if (ready) command("pauseVideo")
+    else queued = "pause"
     dismissed = true
     float()
   })
@@ -178,9 +180,10 @@
     try { data = JSON.parse(event.data) } catch { return }
     if (!ready) {
       ready = true
-      const at = queued
+      const next = queued
       queued = null
-      if (at !== null) play(at)
+      if (next === "pause") command("pauseVideo")
+      else if (next !== null) play(next)
     }
     const seconds = data?.info?.currentTime
     if (typeof seconds === "number") highlight(seconds)
