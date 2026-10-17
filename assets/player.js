@@ -41,11 +41,14 @@
   let inView = true
   let dismissed = false
 
-  label.innerHTML = `Play here<span class="player-note">Loads the video from YouTube, which may set cookies.</span>`
+  // The note says what pressing play does. Phones show it under the video
+  // instead of over the thumbnail (styles.css picks one).
+  const note = `<span class="player-note">Loads the video from YouTube, which may set cookies.</span>`
+  label.innerHTML = `Play here${note}`
   const links = document.createElement("p")
   links.className = "player-links"
-  links.innerHTML = `<a>Watch on YouTube</a><a href="/privacy/#embeds-title">Privacy</a>`
-  links.firstChild.href = start.href
+  links.innerHTML = `${note}<a>Watch on YouTube</a><a href="/privacy/#embeds-title">Privacy</a>`
+  links.querySelector("a").href = start.href
   slot.after(links)
 
   const close = document.createElement("button")

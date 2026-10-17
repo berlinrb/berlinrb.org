@@ -1027,13 +1027,36 @@ a:hover {
   50% { outline-color: transparent; }
 }
 
-.player-note {
+/* Darker than the plain video label, so it reads on light thumbnails */
+.player .video-label {
+  padding-top: 56px;
+  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6) 40%, rgba(0, 0, 0, 0.85));
+}
+
+.video-label .player-note {
   display: block;
   margin-top: 2px;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 0.76rem;
   font-weight: 500;
   line-height: 1.35;
+}
+
+.player-links .player-note {
+  display: none;
+  flex-basis: 100%;
+}
+
+/* On phones the note moves under the video, except while the player waits
+   docked in a corner, where that line is out of sight */
+@media (max-width: 639px) {
+  .player:not(.is-floating) .video-label .player-note {
+    display: none;
+  }
+
+  .player-links .player-note {
+    display: block;
+  }
 }
 
 .player-close {
