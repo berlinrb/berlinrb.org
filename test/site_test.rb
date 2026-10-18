@@ -80,7 +80,7 @@ class SiteTest < Minitest::Test
     assert_includes talk, %(<li><a href="https://www.youtube.com/watch?v=abc&amp;t=0s">0:00</a> Intro</li>)
     assert_includes talk, %(<h3>Agents <a class="timestamp" href="https://www.youtube.com/watch?v=abc&amp;t=90s">1:30</a></h3>)
     assert_includes talk, %(<section class="page-section prose talk-notes" id="mentioned-in-the-talk")
-    assert_includes talk, "then checked by Berlin.rb and Carmine Paolino"
+    assert_includes talk, %(Written with AI</button><span id="ai-note" popover style="position-anchor: --ai-note">This summary was written with AI from the recording, then checked by Berlin.rb and Carmine Paolino.)
     assert_includes talk, "&lt;script&gt;alert(1)&lt;/script&gt;"
     refute_includes talk, "<script>alert"
   end
@@ -108,6 +108,13 @@ class SiteTest < Minitest::Test
     css = File.read(File.join(Berlinrb::Site::ROOT, "styles.css"))
     refute_match(/^\.prose (h3|h4|ul|li|code)\b/, css, "meetup pages use .prose for Luma's description")
     assert_includes read("talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html"), %(<section class="page-section prose talk-notes" id="summary")
+  end
+
+  def test_tips_anchor_each_note_to_its_own_pill
+    tip = @site.render_tip("ai-note", "Q & A", %(<a href="/">Note</a>))
+    assert_match %r{\A<span class="tip"><button type="button" popovertarget="ai-note" style="anchor-name: --ai-note"><svg [^>]+ aria-hidden="true">.+</svg>Q &amp; A</button>}, tip
+    assert tip.end_with?(%(<span id="ai-note" popover style="position-anchor: --ai-note"><a href="/">Note</a></span></span>))
+    assert_raises(ArgumentError) { @site.render_tip("AI note", "Label", "Note") }
   end
 
   def test_recorded_talks_without_a_summary_only_gain_the_player

@@ -839,6 +839,100 @@ a:hover {
   content: "";
 }
 
+/* A pill that opens a short note beside it: site.render_tip */
+.tip {
+  display: inline-flex;
+}
+
+.tip button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px 2px 7px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.tip svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.tip button:hover,
+.tip button:has(+ :popover-open) {
+  border-color: var(--ruby);
+  color: var(--ruby);
+}
+
+.tip button:focus-visible {
+  outline: 3px solid rgba(199, 22, 43, 0.3);
+  outline-offset: 3px;
+}
+
+/* Without anchor positioning the note opens in the middle of the screen */
+.tip [popover] {
+  width: min(340px, calc(100vw - 32px));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  box-shadow: 0 2px 6px rgba(23, 23, 23, 0.08), 0 16px 40px -8px rgba(23, 23, 23, 0.3);
+}
+
+/* A dark page needs a deeper shadow to lift the note off the text behind */
+@media (prefers-color-scheme: dark) {
+  .tip [popover] {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 8px 40px 16px rgba(0, 0, 0, 0.7);
+  }
+}
+
+@supports (anchor-name: --tip) {
+  .tip [popover] {
+    inset: auto;
+    top: anchor(bottom);
+    left: anchor(left);
+    margin: 8px 0 0;
+  }
+
+  @media (max-width: 639px) {
+    .tip [popover] {
+      right: 16px;
+      left: 16px;
+      width: auto;
+    }
+  }
+}
+
+/* A heading with a tip beside it */
+.tip-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 20px;
+}
+
+.tip-heading h2 {
+  margin: 0;
+}
+
+/* Capitals sit high in a line, so center the pill on the whole word */
+.tip-heading .tip {
+  position: relative;
+  top: 2.5px;
+}
+
 .prose p {
   margin: 0 0 14px;
   max-width: 68ch;
@@ -1157,12 +1251,8 @@ a:hover {
   font-weight: 700;
 }
 
-.ai-note {
-  margin: -6px 0 26px;
-}
-
 /* The summary's first paragraph is the talk in short */
-.ai-note + p {
+#summary .tip-heading + p {
   max-width: 56ch;
   font-size: clamp(1.05rem, 1.5vw, 1.2rem);
   line-height: 1.6;

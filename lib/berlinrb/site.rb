@@ -195,6 +195,14 @@ module Berlinrb
       render("talk_card", talk: talk, show_meetup: meetup).strip
     end
 
+    # A pill that opens a short note beside it. The note is HTML, so escape
+    # what goes into it; the id names the pill's anchor, so each on a page
+    # needs its own.
+    def render_tip(id, label, note)
+      raise ArgumentError, "tip id #{id.inspect} must be a lowercase slug" unless id.match?(/\A[a-z][a-z0-9-]*\z/)
+      render("tip", id: id, label: label, note: note).strip
+    end
+
     def json_ld(data) = JSON.pretty_generate(data).gsub("</", "<\\/")
 
     def place(meetup)

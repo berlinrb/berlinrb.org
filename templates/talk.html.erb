@@ -38,9 +38,13 @@
 <%- sections.each do |section| -%>
 
 <section class="page-section prose talk-notes" id="<%= section["id"] %>" aria-labelledby="<%= section["id"] %>-title">
-  <h2 id="<%= section["id"] %>-title"><%= h section["title"] %></h2>
 <%- if section["id"] == "summary" -%>
-  <p class="note ai-note">Written with AI from the recording, then checked by Berlin.rb and <%= h talk["speaker"] %>. Spotted a mistake? Write to <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.</p>
+  <div class="tip-heading">
+    <h2 id="summary-title"><%= h section["title"] %></h2>
+    <%= site.render_tip("ai-note", "Written with AI", %(This summary was written with AI from the recording, then checked by Berlin.rb and #{h talk["speaker"]}. Spotted a mistake? Write to <a href="mailto:hello@berlinrb.org">hello@berlinrb.org</a>.)) %>
+  </div>
+<%- else -%>
+  <h2 id="<%= section["id"] %>-title"><%= h section["title"] %></h2>
 <%- end -%>
 <%= section["html"].gsub(/^/, "  ") %>
 </section>
