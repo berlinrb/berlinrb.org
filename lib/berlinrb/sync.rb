@@ -137,39 +137,49 @@ module Berlinrb
     LUMA_TODOLIST = "Luma descriptions"
     LUMA_ASSIGNEE = 52488656 # Viktor, who looks after Luma
     TODOSET       = "9950099724"
-    BLANK_LINE    = "<p><br></p>"
 
     def sync_luma_todos
       return @log << "Luma to-dos: skipped, no Basecamp token" unless basecamp_token
       list = luma_todolist
       open = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json")
       @meetups.list.each do |meetup|
-        next unless meetup["date"] && Date.parse(meetup["date"].to_s) >= @today && meetup["about"]
-        title = "Update the Luma description for Berlin.rb ##{meetup["number"]}"
-        todo = open.find { _1["content"] == title }
-        wanted = LumaDescription.html(meetup)
-        if LumaDescription.same?(wanted, meetup["about"])
-          next unless todo
-          basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}/completion.json", method: :post)
-          @log << "Luma to-dos: ##{meetup["number"]} matches Basecamp, completed the to-do"
-        else
-          description = %(<p>Luma's description no longer matches the talks in Basecamp. Copy everything below the line into the description of <a href="https://luma.com/#{meetup["luma"]}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. This to-do completes itself once Luma matches.</p><hr>#{wanted.gsub("\n", BLANK_LINE)})
-          next if todo && LumaDescription.same?(todo["description"], description) && blank_lines(todo["description"]) == blank_lines(description) &&
-                  todo["assignees"]&.map { _1["id"] } == [LUMA_ASSIGNEE]
-          body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
-          if todo
-            basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}.json", method: :put, body: body)
-          else
-            basecamp_api("buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json", method: :post, body: body.merge(notify: true))
-          end
-          @log << "Luma to-dos: asked for ##{meetup["number"]}'s description to be updated"
-        end
+        next unless meetup["date"] && Date.parse(meetup["date"].to_s) >= @today
+        LUMA_PAGES.each { |page| luma_todo(list, open, meetup, page) if meetup[page[:about]] }
       end
     rescue StandardError => error
       @log << "Luma to-dos: failed (#{error.message})"
     end
 
-    def blank_lines(html) = html.to_s.scan(%r{<p[^>]*>\s*<br>\s*</p>}).size
+    LUMA_PAGES = [
+      { url: "luma", event: "luma_event", about: "about", write: :html, name: "description" },
+      { url: "livestream_luma", event: "livestream_luma_event", about: "livestream_about", write: :livestream_html, name: "livestream description" }
+    ].freeze
+
+    def luma_manage_url(meetup, page)
+      meetup[page[:event]] ? "https://luma.com/event/manage/#{meetup[page[:event]]}" : "https://luma.com/#{meetup[page[:url]]}"
+    end
+
+    def luma_todo(list, open, meetup, page)
+      title = "Update the Luma #{page[:name]} for Berlin.rb ##{meetup["number"]}"
+      todo = open.find { _1["content"] == title }
+      wanted = LumaDescription.public_send(page[:write], meetup)
+      if LumaDescription.same?(wanted, meetup[page[:about]])
+        return unless todo
+        basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}/completion.json", method: :post)
+        @log << "Luma to-dos: ##{meetup["number"]}'s #{page[:name]} matches Basecamp, completed the to-do"
+      else
+        description = %(<p>Luma's #{page[:name]} no longer matches the talks in Basecamp. Copy the Markdown below into the description of <a href="#{luma_manage_url(meetup, page)}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. Luma turns it into formatting. This to-do completes itself once Luma matches.</p><pre>#{CGI.escapeHTML(LumaDescription.markdown(wanted))}</pre>)
+        return if todo && LumaDescription.same?(todo["description"], description) &&
+                  todo["assignees"]&.map { _1["id"] } == [LUMA_ASSIGNEE]
+        body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
+        if todo
+          basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}.json", method: :put, body: body)
+        else
+          basecamp_api("buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json", method: :post, body: body.merge(notify: true))
+        end
+        @log << "Luma to-dos: asked for ##{meetup["number"]}'s #{page[:name]} to be updated"
+      end
+    end
 
     def luma_todolist
       lists = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todosets/#{TODOSET}/todolists.json")
@@ -196,6 +206,7 @@ module Berlinrb
           meetup["starts_at"] = starts_at.strftime("%H:%M")
           meetup["ends_at"] = Time.iso8601(event["end_at"]).localtime.strftime("%H:%M") if event["end_at"]
           meetup["luma"] = event["url"]
+          meetup["luma_event"] = event["api_id"]
           address = event["geo_address_info"] || {}
           # Until a venue is set, Luma only knows the city.
           if address["short_address"].to_s.include?(",")
@@ -206,6 +217,8 @@ module Berlinrb
           describe(meetup) if !over || !meetup["about"]
         else
           meetup["livestream_luma"] = event["url"]
+          meetup["livestream_luma_event"] = event["api_id"]
+          describe(meetup, "livestream_luma", "livestream_about") if !over || !meetup["livestream_about"]
           signups(meetup, "signups_online", entry) if over
         end
       end
@@ -232,10 +245,10 @@ module Berlinrb
     end
 
     # The Luma page's description becomes the meetup's About section.
-    def describe(meetup)
-      data = JSON.parse(@http.call("https://api.lu.ma/url?url=#{URI.encode_www_form_component(meetup["luma"])}")).fetch("data")
+    def describe(meetup, url = "luma", about = "about")
+      data = JSON.parse(@http.call("https://api.lu.ma/url?url=#{URI.encode_www_form_component(meetup[url])}")).fetch("data")
       doc = data["description_mirror"] or return
-      meetup["about"] = self.class.prose_html(doc)
+      meetup[about] = self.class.prose_html(doc)
     rescue StandardError => error
       @log << "Luma: could not read the description of ##{meetup["number"]} (#{error.message})"
     end
