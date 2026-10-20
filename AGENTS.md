@@ -141,6 +141,11 @@ a fork they control until a release includes it.
 Reviewers treat either problem in a pull request as a blocker.
 <!-- /github-automation: pull-requests -->
 
+## Draft pull requests
+
+- Open every pull request as a draft, and keep it a draft while you are still working on it. Mark it ready for review only once you are done.
+- A pull request that is ready for review is open to the maintainer: they may update, fix or merge it, or ask automation to.
+
 ## Website images
 
 - Prepare meetup photos locally with `bin/photos` before staging. It requires ImageMagick, creates 1600px JPEGs and 640px thumbnails, and strips metadata. Never commit camera originals.
