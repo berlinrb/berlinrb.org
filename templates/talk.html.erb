@@ -49,13 +49,7 @@
 <%= section["html"].gsub(/^/, "  ") %>
 </section>
 <%- end -%>
-<%- if talk["slides"] -%>
 
 <section class="page-section">
-  <p class="downloads"><a href="<%= h talk["slides"] %>">Slides</a></p>
-</section>
-<%- end -%>
-
-<section class="page-section">
-  <p class="note"><%= site.upcoming?(meetup) ? "Coming up at" : "Given at" %> <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a><%= " at #{h meetup["venue"]}" if meetup["venue"] %>. Want to speak too? <a href="/get-involved/#speak">Submit a talk</a>.</p>
+  <p class="note"><%= site.upcoming?(meetup) ? "Coming up at" : "Given at" %> <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a><%= " at #{h meetup["venue"]}" if meetup["venue"] %>.<%= %( <a href="#{h talk["slides"]}">See the slides</a>.) if talk["slides"] %> Want to speak too? <a href="/get-involved/#speak">Submit a talk</a>.</p>
 </section>

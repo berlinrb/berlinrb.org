@@ -163,7 +163,9 @@ class SiteTest < Minitest::Test
 
   def test_talk_slides_are_published_and_linked
     assert File.exist?(File.join(@out, SLIDES))
-    assert_includes read("talks/rafal-cymerys-let-your-software/index.html"), %(<a href="#{SLIDES}">Slides</a>)
+    page = read("talks/rafal-cymerys-let-your-software/index.html")
+    assert_match %r{<p class="note">Given at .*? <a href="#{SLIDES}">See the slides</a>\. Want to speak too\?}, page
+    refute_includes page, %(class="downloads")
   end
 
   def test_get_involved_offers_dates_with_their_free_stage_time
