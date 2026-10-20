@@ -65,6 +65,7 @@
       This talk explores this perspective on AI coding - rather than helping the developer write software, help the user overcome problems that you never built an explicit feature for: common examples include importing an unknown file format, or generating custom report dashboards on the fly.
     format: Talk (40 min)
     video: F2uDIEjhdbc
+    slides: "/slides/2/rafal-cymerys.pdf"
   livestream: 5F78DLf4Fy0
   signups_in_person: 56
   signups_online: 10

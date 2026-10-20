@@ -5,10 +5,12 @@ require "tmpdir"
 require_relative "../lib/berlinrb/site"
 
 class SiteTest < Minitest::Test
+  SLIDES = "/slides/2/rafal-cymerys.pdf"
+
   def setup
     @out = Dir.mktmpdir
     @root = Dir.mktmpdir
-    FileUtils.cp_r(Dir[File.join(Berlinrb::Site::ROOT, "{index.html,templates}")], @root)
+    FileUtils.cp_r(Dir[File.join(Berlinrb::Site::ROOT, "{index.html,templates,slides}")], @root)
     FileUtils.mkdir_p(File.join(@root, "photos/1/thumbs"))
     %w[photos/1/a.jpg photos/1/thumbs/a.jpg].each { FileUtils.cp(File.expand_path("fixtures/photo.jpg", __dir__), File.join(@root, _1)) }
     FileUtils.mkdir_p(File.join(@root, "data/talks"))
@@ -37,7 +39,7 @@ class SiteTest < Minitest::Test
         "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "video" => "abc" }] },
       { "number" => 2, "date" => "2026-10-13", "about" => "<p><strong>Rafał Cymerys</strong>, then Stephen Margheim</p>",
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How", "abstract" => "Code is cheap now.", "video" => "ghi" },
-                    { "speaker" => "Rafal Cymerys", "title" => "Let Your Software", "video" => "def" }] },
+                    { "speaker" => "Rafal Cymerys", "title" => "Let Your Software", "video" => "def", "slides" => SLIDES }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
         "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb" }, { "speaker" => "Alex Adam" }] }
     ])
@@ -157,6 +159,11 @@ class SiteTest < Minitest::Test
 
   def test_talks_follow_the_order_of_the_luma_description
     assert_equal ["Rafal Cymerys", "Stephen Margheim"], @site.talks_for(@site.meetups.find { _1["number"] == 2 }).map { _1["speaker"] }
+  end
+
+  def test_talk_slides_are_published_and_linked
+    assert File.exist?(File.join(@out, SLIDES))
+    assert_includes read("talks/rafal-cymerys-let-your-software/index.html"), %(<a href="#{SLIDES}">Slides</a>)
   end
 
   def test_get_involved_offers_dates_with_their_free_stage_time
