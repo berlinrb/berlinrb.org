@@ -13,6 +13,7 @@ The site for berlinrb.org: a static site with a page per meetup and per talk.
 - Basecamp is the source of truth for talks: each meetup shows exactly the Scheduled and Done cards due on its date, with or without a title yet.
 - The forms on `/get-involved/` post to a Cloudflare Worker at `api.berlinrb.org` (`worker/`), which files talk proposals into the Talks card table's Triage and host or sponsor enquiries into the Companies card table's Triage. Deploy it with `npx wrangler deploy` in `worker/`; `bin/refresh-basecamp-token` keeps its `BASECAMP_TOKEN` secret fresh along with the GitHub one. It also serves `/live` (cached five minutes): who's going to each upcoming meetup from Luma and the stage time still free from Basecamp, which `assets/live.js` shows on the home, meetup and Get involved pages. Test it with `node --test` in `worker/`.
 - Photos go in `photos/<meetup number>/` through a pull request; the `Prepare photos` workflow runs `bin/photos` to resize them, strip their metadata and write thumbnails. See `photos/README.md`.
+- Slides go in `slides/<meetup number>/<speaker>.pdf`, linked from the talk with a `slides:` line in `data/meetups.yml`, which `bin/sync` keeps.
 - `bin/build` writes the site into `_site`, and `bin/dev` builds and serves it. The deploy workflow builds on every push and daily after midnight, so a meetup moves to Past meetups the day after.
 - Tests: `for test in test/*_test.rb; do ruby "$test"; done`.
 
