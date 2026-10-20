@@ -39,6 +39,20 @@ module Berlinrb
       paragraphs.map { _1.start_with?("<ul>") ? _1 : "<p>#{_1}</p>" }.join("\n")
     end
 
+    def markdown(html)
+      html.split("\n").map do |block|
+        if block.start_with?("<ul>")
+          block.scan(%r{<li>(.*?)</li>}).map { "- #{inline_markdown(_1.first)}" }.join("\n")
+        else
+          inline_markdown(block.delete_prefix("<p>").delete_suffix("</p>"))
+        end
+      end.join("\n\n")
+    end
+
+    def inline_markdown(html)
+      CGI.unescapeHTML(html.gsub(%r{<strong>(.*?)</strong>}, '**\1**').gsub(%r{<a href="([^"]*)">(.*?)</a>}, '[\2](\1)'))
+    end
+
     # Two descriptions match when their words do, whatever the markup.
     def same?(a, b) = key(a) == key(b)
 

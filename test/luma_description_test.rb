@@ -26,6 +26,14 @@ class LumaDescriptionTest < Minitest::Test
     assert_includes text, "<strong>Getting there:</strong> Fourth floor."
   end
 
+def test_markdown_keeps_paragraphs_lists_bold_and_links
+  text = Berlinrb::LumaDescription.markdown(html([{ "speaker" => "Rosa", "title" => "Kamal & co" }, { "speaker" => "Alex Adam" }], livestream_luma: "abc"))
+  assert text.start_with?("Berlin.rb is a regular meetup for Berlin's Ruby community.")
+  assert_includes text, "**Talks**\n\n- **Rosa**: Kamal & co.\n- **Alex Adam**: talk to be announced\n\nWhether"
+  assert_includes text, "[Register for the livestream event](https://luma.com/abc)"
+  refute_match(/<|&#39;|&amp;/, text)
+end
+
   def test_compares_words_not_markup
     assert Berlinrb::LumaDescription.same?("<p>Talks: <strong>Rosa</strong></p>", "<ul><li>Talks Rosa</li></ul>")
     refute Berlinrb::LumaDescription.same?("<p>Rosa</p>", "<p>Marco</p>")

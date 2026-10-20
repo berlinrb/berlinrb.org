@@ -130,27 +130,26 @@ class SyncTest < Minitest::Test
                   [:post, "buckets/47498411/todos/9/completion.json", nil]], calls
   end
 
-def test_luma_todos_space_their_paragraphs_and_respace_an_unspaced_one
-  @meetups.find(3).merge!("luma" => "05tfdlpk", "about" => "<p>Talks to be announced</p>")
-  wanted = Berlinrb::LumaDescription.html(@meetups.find(3))
-  unspaced = %(<p>Luma's description no longer matches the talks in Basecamp. Copy everything below the line into the description of <a href="https://luma.com/05tfdlpk">Berlin.rb #3 on Luma</a>, replacing what is there. This to-do completes itself once Luma matches.</p><hr>#{wanted.delete("\n")})
-  sync = sync()
-  sync.instance_variable_set(:@basecamp_token, "token")
-  calls = []
-  sync.define_singleton_method(:basecamp_pages) do |url|
-    url.end_with?("todolists.json") ? [{ "id" => 7, "name" => "Luma descriptions" }] :
-      [{ "id" => 9, "content" => "Update the Luma description for Berlin.rb #3", "description" => unspaced, "assignees" => [{ "id" => 52488656 }] }]
+def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
+    @meetups.find(3).merge!("luma" => "05tfdlpk", "about" => "<p>Talks to be announced</p>")
+    wanted = Berlinrb::LumaDescription.html(@meetups.find(3))
+    html = %(<p>Luma&#39;s description no longer matches the talks in Basecamp.</p><hr>#{wanted.gsub("\n", "<p><br></p>")})
+    sync = sync()
+    sync.instance_variable_set(:@basecamp_token, "token")
+    calls = []
+    sync.define_singleton_method(:basecamp_pages) do |url|
+      url.end_with?("todolists.json") ? [{ "id" => 7, "name" => "Luma descriptions" }] :
+        [{ "id" => 9, "content" => "Update the Luma description for Berlin.rb #3", "description" => html, "assignees" => [{ "id" => 52488656 }] }]
+    end
+    sync.define_singleton_method(:basecamp_api) { |path, method: :get, body: nil| calls << [method, path, body&.fetch(:description)] }
+
+    sync.run(%i[luma_todos])
+
+    assert_equal [[:put, "buckets/47498411/todos/9.json"]], calls.map { _1.first(2) }
+    markdown = CGI.unescapeHTML(calls.first.last[%r{<pre>(.*)</pre>}m, 1])
+    assert_equal Berlinrb::LumaDescription.markdown(wanted), markdown
+    assert_includes markdown, "**Filming:** the talks are recorded and published on our [YouTube channel](https://www.youtube.com/@berlinrb_org)."
   end
-  sync.define_singleton_method(:basecamp_api) { |path, method: :get, body: nil| calls << [method, path, body&.fetch(:description)] }
-
-  sync.run(%i[luma_todos])
-
-  assert_equal [[:put, "buckets/47498411/todos/9.json"]], calls.map { _1.first(2) }
-  description = calls.first.last
-  assert_includes description, "<hr><p>Berlin.rb is a regular meetup"
-  assert_includes description, "</p><p><br></p><p><strong>Talks</strong></p><p><br></p><ul>"
-  assert_equal wanted.count("\n"), description.scan("<p><br></p>").size
-end
 
   def test_basecamp_is_skipped_when_the_cli_is_not_signed_in
     sync = sync(cards: nil)

@@ -137,7 +137,6 @@ module Berlinrb
     LUMA_TODOLIST = "Luma descriptions"
     LUMA_ASSIGNEE = 52488656 # Viktor, who looks after Luma
     TODOSET       = "9950099724"
-    BLANK_LINE    = "<p><br></p>"
 
     def sync_luma_todos
       return @log << "Luma to-dos: skipped, no Basecamp token" unless basecamp_token
@@ -153,8 +152,8 @@ module Berlinrb
           basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}/completion.json", method: :post)
           @log << "Luma to-dos: ##{meetup["number"]} matches Basecamp, completed the to-do"
         else
-          description = %(<p>Luma's description no longer matches the talks in Basecamp. Copy everything below the line into the description of <a href="https://luma.com/#{meetup["luma"]}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. This to-do completes itself once Luma matches.</p><hr>#{wanted.gsub("\n", BLANK_LINE)})
-          next if todo && LumaDescription.same?(todo["description"], description) && blank_lines(todo["description"]) == blank_lines(description) &&
+          description = %(<p>Luma's description no longer matches the talks in Basecamp. Copy the Markdown below into the description of <a href="https://luma.com/#{meetup["luma"]}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. Luma turns it into formatting. This to-do completes itself once Luma matches.</p><pre>#{CGI.escapeHTML(LumaDescription.markdown(wanted))}</pre>)
+          next if todo && LumaDescription.same?(todo["description"], description) &&
                   todo["assignees"]&.map { _1["id"] } == [LUMA_ASSIGNEE]
           body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
           if todo
@@ -168,8 +167,6 @@ module Berlinrb
     rescue StandardError => error
       @log << "Luma to-dos: failed (#{error.message})"
     end
-
-    def blank_lines(html) = html.to_s.scan(%r{<p[^>]*>\s*<br>\s*</p>}).size
 
     def luma_todolist
       lists = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todosets/#{TODOSET}/todolists.json")
