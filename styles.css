@@ -903,6 +903,8 @@ a:hover {
     top: anchor(bottom);
     left: anchor(left);
     margin: 8px 0 0;
+    /* Above the pill when there is no room below */
+    position-try-fallbacks: flip-block;
   }
 
   @media (max-width: 639px) {
