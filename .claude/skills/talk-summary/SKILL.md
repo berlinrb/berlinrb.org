@@ -1,6 +1,6 @@
 ---
 name: talk-summary
-description: Write the summary page for a recorded Berlin.rb talk, data/talks/<video id>.md, from a transcript of its recording. Use when someone shares a talk transcript (for example a MacWhisper export) and asks to summarise the talk, write its chapters, or add or update a talk summary for berlinrb.org.
+description: Write the summary page for a recorded Berlin.rb talk, data/talks/<video id>.md, from a transcript of its recording. Use when someone shares a talk transcript and asks to summarise the talk, write its chapters, or add or update a talk summary for berlinrb.org.
 ---
 
 # Talk summary
@@ -19,8 +19,8 @@ polish. Nothing goes live until the speaker has approved it.
 
 - **The talk's video id.** Find the talk in `data/meetups.yml`; its `video:`
   value is the YouTube id. The file is `data/talks/<video id>.md`.
-- **A transcript with timestamps**, ideally with speaker labels: a MacWhisper
-  export, or YouTube's captions. Ask for one if you don't have it.
+- **A transcript of the recording with timestamps**, made with any tool. Ask
+  for one if you don't have it.
 
 Check that the transcript covers the whole recording: its last timestamp
 should be within a few seconds of the video's length. If it doesn't match (an
