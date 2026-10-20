@@ -19,8 +19,8 @@
 <%- end -%>
       <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
       <p class="latest-speaker"><%= h talk["speaker"] %></p>
-<%- unless talk["abstract"].to_s.empty? -%>
-      <p class="latest-abstract"><%= h site.excerpt(talk["abstract"], 26) %></p>
+<%- unless (blurb = site.blurb(talk)).empty? -%>
+      <p class="latest-abstract"><%= h site.excerpt(blurb, 26) %></p>
 <%- end -%>
     </li>
 <%- end -%>
