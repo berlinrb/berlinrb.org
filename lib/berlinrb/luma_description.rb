@@ -64,7 +64,15 @@ module Berlinrb
     end
 
     def inline_markdown(html)
-      CGI.unescapeHTML(html.gsub(%r{<strong>(.*?)</strong>}, '**\1**').gsub(%r{<a href="([^"]*)">(.*?)</a>}, '[\2](\1)'))
+      href = nil
+      html.split(/(<[^>]+>)/).map do |part|
+        case part
+        when "<strong>", "</strong>" then "**"
+        when /\A<a href="([^"]*)">\z/ then (href = CGI.unescapeHTML(Regexp.last_match(1))) && "["
+        when "</a>" then "](#{href})"
+        else CGI.unescapeHTML(part).gsub(/([\\`*_\[\]<>])/) { "\\#{Regexp.last_match(1)}" }
+        end
+      end.join
     end
 
     # Two descriptions match when their words do, whatever the markup.

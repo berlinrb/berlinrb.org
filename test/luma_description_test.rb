@@ -26,13 +26,18 @@ class LumaDescriptionTest < Minitest::Test
     assert_includes text, "<strong>Getting there:</strong> Fourth floor."
   end
 
-def test_markdown_keeps_paragraphs_lists_bold_and_links
-  text = Berlinrb::LumaDescription.markdown(html([{ "speaker" => "Rosa", "title" => "Kamal & co" }, { "speaker" => "Alex Adam" }], livestream_luma: "abc"))
-  assert text.start_with?("Berlin.rb is a regular meetup for Berlin's Ruby community.")
-  assert_includes text, "**Talks**\n\n- **Rosa**: Kamal & co.\n- **Alex Adam**: talk to be announced\n\nWhether"
-  assert_includes text, "[Register for the livestream event](https://luma.com/abc)"
-  refute_match(/<|&#39;|&amp;/, text)
-end
+  def test_markdown_keeps_paragraphs_lists_bold_and_links
+    text = Berlinrb::LumaDescription.markdown(html([{ "speaker" => "Rosa", "title" => "Kamal & co" }, { "speaker" => "Alex Adam" }], livestream_luma: "abc"))
+    assert text.start_with?("Berlin.rb is a regular meetup for Berlin's Ruby community.")
+    assert_includes text, "**Talks**\n\n- **Rosa**: Kamal & co.\n- **Alex Adam**: talk to be announced\n\nWhether"
+    assert_includes text, "[Register for the livestream event](https://luma.com/abc)"
+    refute_match(/<|&#39;|&amp;/, text)
+  end
+
+  def test_markdown_escapes_markdown_characters_in_text_but_not_in_links
+    text = Berlinrb::LumaDescription.markdown(%(<p><strong>Talks</strong> on snake_case, *splat* and [arrays] <a href="https://example.com/a_b?x=1&amp;y=2">read_me</a></p>))
+    assert_equal '**Talks** on snake\_case, \*splat\* and \[arrays\] [read\_me](https://example.com/a_b?x=1&y=2)', text
+  end
 
   def test_livestream_description_lists_the_same_talks_for_people_at_home
     text = Berlinrb::LumaDescription.livestream_html({ "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb" }] })
