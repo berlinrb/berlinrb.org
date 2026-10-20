@@ -163,7 +163,7 @@
 
   close.addEventListener("click", () => {
     if (ready) command("pauseVideo")
-    else queued = "pause"
+    else if (frame) queued = "pause"
     dismissed = true
     float()
   })
