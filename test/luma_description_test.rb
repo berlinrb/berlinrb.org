@@ -52,5 +52,7 @@ class LumaDescriptionTest < Minitest::Test
     refute Berlinrb::LumaDescription.same?("<p>Rosa</p>", "<p>Marco</p>")
     refute Berlinrb::LumaDescription.same?(%(<p><a href="https://tally.so/r/x">Submit it here</a></p>), %(<p><a href="https://berlinrb.org/get-involved/#speak">Submit it here</a></p>))
     assert Berlinrb::LumaDescription.same?(%(<p><a href="https://a.example/">Here</a></p>), %(<p><a target="_blank" href="https://a.example/" rel="noreferrer">Here</a></p>))
+    assert Berlinrb::LumaDescription.same?(%(<p><a href="https://a.example/">Here</a></p>), %(<p><a href="https://a.example/" data-href="https://b.example/">Here</a></p>))
+    refute Berlinrb::LumaDescription.same?(%(<p><a href="https://a.example/a_b">Here</a></p>), %(<p><a href="https://a.example/a-b">Here</a></p>))
   end
 end
