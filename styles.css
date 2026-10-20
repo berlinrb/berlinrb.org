@@ -1251,6 +1251,15 @@ a:hover {
   font-weight: 700;
 }
 
+/* Smaller on phones, so more titles fit on one line */
+@media (max-width: 639px) {
+  .chapters li {
+    gap: 10px;
+    padding: 7px 6px;
+    font-size: 0.9rem;
+  }
+}
+
 /* The summary's first paragraph is the talk in short */
 #summary .tip-heading + p {
   max-width: 56ch;
