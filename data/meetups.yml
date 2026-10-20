@@ -85,10 +85,19 @@
   talks:
   - speaker: Andrzej Krzywda
     format: Talk (40 min)
+    title: Rails architecture in the age of AI
+    abstract: After over 15 years of doing DDD in Rails at Arkency, Andrzej will reflect
+      which parts still make sense with AI. The economy has changed and so do architectural
+      decisions. One example is the choice between refactoring and a rewrite. Andrzej
+      will also present the current state of the art when it comes to human legacy
+      code vs AI slop.
   livestream_luma: r4oli4jh
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
-    <p>Talks to be announced. Want to give one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
+    <h3>Talks:</h3>
+    <p><strong>Andrzej Krzywda, Arkency: Rails architecture in the age of AI</strong></p>
+    <p>After over 15 years of doing DDD in Rails at Arkency, Andrzej will reflect which parts still make sense with AI. The economy has changed and so do architectural decisions. One example is the choice between refactoring and a rewrite. Andrzej will also present the current state of the art when it comes to human legacy code vs AI slop.</p>
+    <p><strong>Second talk</strong> to be announced. Want to give one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
     <p>Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided.</p>
     <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
     <p><strong>Watching from home:</strong> the talks are streamed live, with a separate livestream event on <a href="https://luma.com/berlinrb">our calendar</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
