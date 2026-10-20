@@ -70,6 +70,8 @@ class SyncTest < Minitest::Test
     assert_equal "3online", three["livestream_luma"]
     assert_equal "<p>With <strong>Andrzej Krzywda</strong> &lt;script&gt;</p>", three["about"]
     assert_equal three["about"], three["livestream_about"], "the livestream page is read too"
+    assert_match(/\Aevt-/, three["luma_event"])
+    assert_match(/\Aevt-/, three["livestream_luma_event"])
   end
 
   def test_basecamp_scheduled_and_done_cards_become_talks
@@ -131,7 +133,7 @@ class SyncTest < Minitest::Test
                   [:post, "buckets/47498411/todos/9/completion.json", nil]], calls
   end
 
-def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
+  def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
     @meetups.find(3).merge!("luma" => "05tfdlpk", "about" => "<p>Talks to be announced</p>")
     wanted = Berlinrb::LumaDescription.html(@meetups.find(3))
     html = %(<p>Luma&#39;s description no longer matches the talks in Basecamp.</p><hr>#{wanted.gsub("\n", "<p><br></p>")})
@@ -153,7 +155,7 @@ def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
   end
 
   def test_luma_todos_ask_for_a_changed_livestream_description
-    three = @meetups.find(3).merge!("luma" => "05tfdlpk", "livestream_luma" => "r4oli4jh", "livestream_about" => "<p>Talks to be announced</p>")
+    three = @meetups.find(3).merge!("luma" => "05tfdlpk", "livestream_luma" => "r4oli4jh", "livestream_luma_event" => "evt-Live3", "livestream_about" => "<p>Talks to be announced</p>")
     three["about"] = Berlinrb::LumaDescription.html(three)
     sync = sync()
     sync.instance_variable_set(:@basecamp_token, "token")
@@ -164,7 +166,7 @@ def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
     sync.run(%i[luma_todos])
 
     assert_equal [[:post, "buckets/47498411/todolists/7/todos.json", "Update the Luma livestream description for Berlin.rb #3"]], calls.map { _1.first(3) }
-    assert_includes calls.first.last, %(<a href="https://luma.com/r4oli4jh">Berlin.rb #3 on Luma</a>)
+    assert_includes calls.first.last, %(<a href="https://luma.com/event/manage/evt-Live3">Berlin.rb #3 on Luma</a>)
     assert_includes CGI.unescapeHTML(calls.first.last), "and we stream the talks live."
   end
 

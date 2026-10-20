@@ -151,9 +151,13 @@ module Berlinrb
     end
 
     LUMA_PAGES = [
-      { url: "luma", about: "about", write: :html, name: "description" },
-      { url: "livestream_luma", about: "livestream_about", write: :livestream_html, name: "livestream description" }
+      { url: "luma", event: "luma_event", about: "about", write: :html, name: "description" },
+      { url: "livestream_luma", event: "livestream_luma_event", about: "livestream_about", write: :livestream_html, name: "livestream description" }
     ].freeze
+
+    def luma_manage_url(meetup, page)
+      meetup[page[:event]] ? "https://luma.com/event/manage/#{meetup[page[:event]]}" : "https://luma.com/#{meetup[page[:url]]}"
+    end
 
     def luma_todo(list, open, meetup, page)
       title = "Update the Luma #{page[:name]} for Berlin.rb ##{meetup["number"]}"
@@ -164,7 +168,7 @@ module Berlinrb
         basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}/completion.json", method: :post)
         @log << "Luma to-dos: ##{meetup["number"]}'s #{page[:name]} matches Basecamp, completed the to-do"
       else
-        description = %(<p>Luma's #{page[:name]} no longer matches the talks in Basecamp. Copy the Markdown below into the description of <a href="https://luma.com/#{meetup[page[:url]]}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. Luma turns it into formatting. This to-do completes itself once Luma matches.</p><pre>#{CGI.escapeHTML(LumaDescription.markdown(wanted))}</pre>)
+        description = %(<p>Luma's #{page[:name]} no longer matches the talks in Basecamp. Copy the Markdown below into the description of <a href="#{luma_manage_url(meetup, page)}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. Luma turns it into formatting. This to-do completes itself once Luma matches.</p><pre>#{CGI.escapeHTML(LumaDescription.markdown(wanted))}</pre>)
         return if todo && LumaDescription.same?(todo["description"], description) &&
                   todo["assignees"]&.map { _1["id"] } == [LUMA_ASSIGNEE]
         body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
@@ -202,6 +206,7 @@ module Berlinrb
           meetup["starts_at"] = starts_at.strftime("%H:%M")
           meetup["ends_at"] = Time.iso8601(event["end_at"]).localtime.strftime("%H:%M") if event["end_at"]
           meetup["luma"] = event["url"]
+          meetup["luma_event"] = event["api_id"]
           address = event["geo_address_info"] || {}
           # Until a venue is set, Luma only knows the city.
           if address["short_address"].to_s.include?(",")
@@ -212,6 +217,7 @@ module Berlinrb
           describe(meetup) if !over || !meetup["about"]
         else
           meetup["livestream_luma"] = event["url"]
+          meetup["livestream_luma_event"] = event["api_id"]
           describe(meetup, "livestream_luma", "livestream_about") if !over || !meetup["livestream_about"]
           signups(meetup, "signups_online", entry) if over
         end
