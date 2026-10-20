@@ -34,6 +34,14 @@ def test_markdown_keeps_paragraphs_lists_bold_and_links
   refute_match(/<|&#39;|&amp;/, text)
 end
 
+  def test_livestream_description_lists_the_same_talks_for_people_at_home
+    text = Berlinrb::LumaDescription.livestream_html({ "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb" }] })
+    assert_includes text, "<li><strong>Marco Roth</strong>: Herb.</li>"
+    assert_includes text, %(the in-person event is on <a href="https://luma.com/berlinrb">our calendar</a>.)
+    assert_includes text, "<strong>Recording:</strong> the talks are published on our"
+    refute_includes text, "Filming:"
+  end
+
   def test_compares_words_not_markup
     assert Berlinrb::LumaDescription.same?("<p>Talks: <strong>Rosa</strong></p>", "<ul><li>Talks Rosa</li></ul>")
     refute Berlinrb::LumaDescription.same?("<p>Rosa</p>", "<p>Marco</p>")

@@ -69,6 +69,7 @@ class SyncTest < Minitest::Test
     assert_nil three["venue"], "a city alone is not a venue"
     assert_equal "3online", three["livestream_luma"]
     assert_equal "<p>With <strong>Andrzej Krzywda</strong> &lt;script&gt;</p>", three["about"]
+    assert_equal three["about"], three["livestream_about"], "the livestream page is read too"
   end
 
   def test_basecamp_scheduled_and_done_cards_become_talks
@@ -149,6 +150,22 @@ def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
     markdown = CGI.unescapeHTML(calls.first.last[%r{<pre>(.*)</pre>}m, 1])
     assert_equal Berlinrb::LumaDescription.markdown(wanted), markdown
     assert_includes markdown, "**Filming:** the talks are recorded and published on our [YouTube channel](https://www.youtube.com/@berlinrb_org)."
+  end
+
+  def test_luma_todos_ask_for_a_changed_livestream_description
+    three = @meetups.find(3).merge!("luma" => "05tfdlpk", "livestream_luma" => "r4oli4jh", "livestream_about" => "<p>Talks to be announced</p>")
+    three["about"] = Berlinrb::LumaDescription.html(three)
+    sync = sync()
+    sync.instance_variable_set(:@basecamp_token, "token")
+    calls = []
+    sync.define_singleton_method(:basecamp_pages) { |url| url.end_with?("todolists.json") ? [{ "id" => 7, "name" => "Luma descriptions" }] : [] }
+    sync.define_singleton_method(:basecamp_api) { |path, method: :get, body: nil| calls << [method, path, body&.fetch(:content), body&.fetch(:description)] }
+
+    sync.run(%i[luma_todos])
+
+    assert_equal [[:post, "buckets/47498411/todolists/7/todos.json", "Update the Luma livestream description for Berlin.rb #3"]], calls.map { _1.first(3) }
+    assert_includes calls.first.last, %(<a href="https://luma.com/r4oli4jh">Berlin.rb #3 on Luma</a>)
+    assert_includes CGI.unescapeHTML(calls.first.last), "and we stream the talks live."
   end
 
   def test_basecamp_is_skipped_when_the_cli_is_not_signed_in
