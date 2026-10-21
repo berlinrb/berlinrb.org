@@ -75,10 +75,14 @@ module Berlinrb
       end.join
     end
 
-    # Two descriptions match when their words do, whatever the markup.
+    # Two descriptions match when their words and link targets do, whatever the markup.
     def same?(a, b) = key(a) == key(b)
 
-    def key(html) = Meetups.slug(CGI.unescapeHTML(html.to_s.gsub(/<[^>]+>/, " ")))
+    def key(html)
+      text = Meetups.slug(CGI.unescapeHTML(html.to_s.gsub(/<[^>]+>/, " ")))
+      links = html.to_s.scan(/<a\b[^>]*?\shref="([^"]*)"/).flatten.map { CGI.unescapeHTML(_1) }
+      [text, links]
+    end
 
     def h(text) = CGI.escapeHTML(text.to_s)
   end
