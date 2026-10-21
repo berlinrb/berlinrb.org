@@ -43,6 +43,17 @@
     <p>Watching from home: the talks are streamed live. Register for the live stream event instead: <a href="https://luma.com/psvh08jx">https://luma.com/psvh08jx</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p>Getting there: the venue is wheelchair accessible. If you need anything else to join us, write to hello@berlinrb.org and we will arrange it.</p>
     <p>Filming: the talks are recorded and published on our YouTube channel. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  livestream_luma_event: evt-Yn7sQn5gXCtCEFz
+  livestream_about: |-
+    <p>Berlin.rb is kicking off, and we&#39;re streaming the talks live.</p>
+    <p>Berlin.rb is a new, regular meetup for Berlin&#39;s Ruby community. For our first get-together we have a couple of talks:</p>
+    <ul><li>Carmine Paolino, presents RubyLLM 2.0 - Beyond Agents</li><li>Paweł Strzałkowski, presents HiFuMi - The story of building an online Rails apps generator</li></ul>
+    <p>The stream goes out on our YouTube channel:<br><a href="http://youtube.com/@berlinrb_org">http://youtube.com/@berlinrb_org</a></p>
+    <p>Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The rest of the evening, drinks, snacks, happens in the room. If you&#39;re in Berlin, come in person instead:<a href="https://luma.com/lnmj7085"> https://luma.com/lnmj7085</a></p>
+    <p>Interested in giving a talk at a future meetup, or hosting/sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p>Recording: the talks are published on our YouTube channel afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
+  luma_event: evt-Thas9HvZ17EVL8O
 - number: 2
   date: '2026-10-13'
   starts_at: '18:30'
@@ -78,6 +89,16 @@
     <p><strong>Watching from home:</strong> the talks are streamed live. <a href="https://luma.com/bgy2tqjk">Register for the livestream event</a> instead. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p><strong>Getting there:</strong> take the elevator in the middle of the courtyard to the fourth floor. There are signs outside. The venue is wheelchair accessible. If you need anything else to join us, write to hello@berlinrb.org and we will arrange it.</p>
     <p><strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  livestream_luma_event: evt-9iSjbmAo3ZkUrtV
+  livestream_about: |-
+    <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community, and we stream the talks live.</p>
+    <p><strong>Talks</strong></p>
+    <ul><li><strong>Rafał Cymerys</strong>, CTO at Upside: Let Your Software Write Its Own Code: Runtime Code Generation in Production. <a href="https://github.com/rafalcymerys">GitHub</a> · <a href="https://cymerys.com">cymerys.com</a> · <a href="https://www.upsidelab.io">Upside</a></li><li><strong>Stephen Margheim</strong>: The ZARchitecture: How and Why we evolved a fintech for AI-driven development. <a href="https://fractaledmind.com">fractaledmind.com</a></li></ul>
+    <p>The stream goes out on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The food and the rest of the evening happen in the room. If you&#39;re in Berlin, <a href="https://luma.com/x9rj1t0v">come in person</a> instead.</p>
+    <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
+  luma_event: evt-wWGuXDYTxv4hZKf
 - number: 3
   date: '2026-11-10'
   starts_at: '18:30'
@@ -95,14 +116,24 @@
   livestream_luma: r4oli4jh
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
-    <h3>Talks:</h3>
-    <p><strong>Andrzej Krzywda, Arkency: Rails architecture in the age of AI</strong></p>
-    <p>After over 15 years of doing DDD in Rails at Arkency, Andrzej will reflect which parts still make sense with AI. The economy has changed and so do architectural decisions. One example is the choice between refactoring and a rewrite. Andrzej will also present the current state of the art when it comes to human legacy code vs AI slop.</p>
-    <p><strong>Second talk</strong> to be announced. Want to give one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
+    <p><strong>Talks</strong></p>
+    <ul><li><strong>Andrzej Krzywda</strong>: Rails architecture in the age of AI.</li></ul>
+    <p>Want to give the second one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
     <p>Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided.</p>
     <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
-    <p><strong>Watching from home:</strong> the talks are streamed live, with a separate livestream event on <a href="https://luma.com/berlinrb">our calendar</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
+    <p><strong>Watching from home:</strong> the talks are streamed live. <a href="https://luma.com/r4oli4jh">Register for the livestream event</a> instead. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p><strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  luma_event: evt-bdy9SAv280VA2NV
+  livestream_luma_event: evt-HkJxgBCb0BPXLug
+  livestream_about: |-
+    <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community, and we stream the talks live.</p>
+    <p><strong>Talks</strong></p>
+    <ul><li><strong>Andrzej Krzywda</strong>: Rails architecture in the age of AI.</li></ul>
+    <p>Want to give the second one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
+    <p>The stream goes out on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The food and the rest of the evening happen in the room. If you&#39;re in Berlin, come in person instead: the in-person event is on <a href="https://luma.com/berlinrb">our calendar</a>.</p>
+    <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
 - number: 4
   date: '2026-12-08'
   starts_at: '18:30'
@@ -117,12 +148,21 @@
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
     <p><strong>Talks</strong></p>
-    <ul><li><strong>Marco Roth</strong>: talk to be announced</li></ul>
-    <p>Want to give the second one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
+    <ul><li><strong>Alex Adam</strong>: talk to be announced</li><li><strong>Marco Roth</strong>: talk to be announced</li></ul>
     <p>Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided.</p>
     <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
-    <p><strong>Watching from home:</strong> the talks are streamed live, with a separate livestream event on <a href="https://luma.com/berlinrb">our calendar</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
+    <p><strong>Watching from home:</strong> the talks are streamed live. <a href="https://luma.com/80cv1zsp">Register for the livestream event</a> instead. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p><strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  luma_event: evt-ZsjFqCA5BlZyYTR
+  livestream_luma_event: evt-43J4D8Rw6KZowjz
+  livestream_about: |-
+    <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community, and we stream the talks live.</p>
+    <p><strong>Talks</strong></p>
+    <ul><li><strong>Alex Adam</strong>: talk to be announced</li><li><strong>Marco Roth</strong>: talk to be announced</li></ul>
+    <p>The stream goes out on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The food and the rest of the evening happen in the room. If you&#39;re in Berlin, come in person instead: the in-person event is on <a href="https://luma.com/berlinrb">our calendar</a>.</p>
+    <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
 - number: 5
   date: '2027-01-12'
   starts_at: '18:30'
@@ -134,11 +174,24 @@
   livestream_luma: n3p9dbtx
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
-    <p>Talks to be announced. Want to give one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
+    <p><strong>Talks</strong></p>
+    <ul><li><strong>Rosa Gutiérrez</strong>: talk to be announced</li></ul>
+    <p>Want to give the second one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
     <p>Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided.</p>
     <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
-    <p><strong>Watching from home:</strong> the talks are streamed live, with a separate livestream event on <a href="https://luma.com/berlinrb">our calendar</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
+    <p><strong>Watching from home:</strong> the talks are streamed live. <a href="https://luma.com/n3p9dbtx">Register for the livestream event</a> instead. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p><strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  luma_event: evt-I37De1m8ken3Zxs
+  livestream_luma_event: evt-jMHuPX5oGWzr0CY
+  livestream_about: |-
+    <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community, and we stream the talks live.</p>
+    <p><strong>Talks</strong></p>
+    <ul><li><strong>Rosa Gutiérrez</strong>: talk to be announced</li></ul>
+    <p>Want to give the second one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
+    <p>The stream goes out on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The food and the rest of the evening happen in the room. If you&#39;re in Berlin, come in person instead: the in-person event is on <a href="https://luma.com/berlinrb">our calendar</a>.</p>
+    <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
 - number: 6
   date: '2027-02-09'
   starts_at: '18:30'
@@ -148,11 +201,20 @@
   livestream_luma: 744qzi1i
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
-    <p>Talks to be announced. Want to give one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
+    <p>Talks to be announced. Want to give one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
     <p>Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided.</p>
     <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
-    <p><strong>Watching from home:</strong> the talks are streamed live, with a separate livestream event on <a href="https://luma.com/berlinrb">our calendar</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
+    <p><strong>Watching from home:</strong> the talks are streamed live. <a href="https://luma.com/744qzi1i">Register for the livestream event</a> instead. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p><strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  luma_event: evt-nHDTC8BqKcChanP
+  livestream_luma_event: evt-sTG8FMN33RW24yi
+  livestream_about: |-
+    <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community, and we stream the talks live.</p>
+    <p>Talks to be announced. Want to give one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
+    <p>The stream goes out on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The food and the rest of the evening happen in the room. If you&#39;re in Berlin, come in person instead: the in-person event is on <a href="https://luma.com/berlinrb">our calendar</a>.</p>
+    <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
 - number: 7
   talks: []
   date: '2027-03-09'
@@ -162,8 +224,17 @@
   livestream_luma: 00dtm5kx
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
-    <p>Talks to be announced. Want to give one? <a href="https://tally.so/r/WOWMZL">Submit it here</a>.</p>
+    <p>Talks to be announced. Want to give one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
     <p>Whether you&#39;ve been writing Ruby for 15 years or you&#39;re just curious about the language, everyone&#39;s welcome. Food and drinks provided.</p>
     <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
-    <p><strong>Watching from home:</strong> the talks are streamed live, with a separate livestream event on <a href="https://luma.com/berlinrb">our calendar</a>. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
+    <p><strong>Watching from home:</strong> the talks are streamed live. <a href="https://luma.com/00dtm5kx">Register for the livestream event</a> instead. Please only register here if you&#39;re coming to the venue, so we know how many seats and how much food we need.</p>
     <p><strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. The camera stands behind the audience and points at the stage, so you may end up in the shot. Tell us at the door if you would rather not be, and we will keep you out of frame.</p>
+  luma_event: evt-TghPSotoNaRn1QQ
+  livestream_luma_event: evt-YZVuYIBI7n1bnEJ
+  livestream_about: |-
+    <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community, and we stream the talks live.</p>
+    <p>Talks to be announced. Want to give one? <a href="https://berlinrb.org/get-involved/#speak">Submit it here</a>.</p>
+    <p>The stream goes out on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>. Register here and you&#39;ll get a reminder when we go live.</p>
+    <p>The food and the rest of the evening happen in the room. If you&#39;re in Berlin, come in person instead: the in-person event is on <a href="https://luma.com/berlinrb">our calendar</a>.</p>
+    <p>Interested in giving a talk at a future meetup, or hosting or sponsoring one? Reach out to hello@berlinrb.org.</p>
+    <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
