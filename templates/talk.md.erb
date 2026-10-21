@@ -1,0 +1,24 @@
+<%- meetup = talk["meetup"] -%>
+# <%= talk["title"] %>
+
+By <%= talk["speaker"] %>, <%= site.upcoming?(meetup) ? "coming up at" : "given at" %> [Berlin.rb #<%= meetup["number"] %>](<%= site.markdown_url(site.meetup_path(meetup)) %>) on <%= site.long_date(meetup["date"]) %><%= " at #{meetup["venue"]}" if meetup["venue"] %>.
+
+- Page: <%= Berlinrb::Site::ORIGIN %><%= site.talk_path(talk) %>
+<%- if talk["video"] -%>
+- Recording: <%= site.video_url(talk["video"]) %>
+<%- end -%>
+<%- if talk["slides"] -%>
+- Slides: <%= Berlinrb::Site::ORIGIN %><%= talk["slides"] %>
+<%- end -%>
+<%- unless talk["abstract"].to_s.empty? -%>
+
+## About the talk
+
+<%= talk["abstract"].strip %>
+<%- end -%>
+<%- if (summary = site.summary_markdown(talk)) -%>
+
+<%= summary %>
+
+The chapters and summary were written with AI from the recording, then checked by Berlin.rb and <%= talk["speaker"] %>.
+<%- end -%>

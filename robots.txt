@@ -1,4 +1,7 @@
+# Search engines and AI agents are welcome. Every talk and meetup page has a
+# Markdown version, listed in https://berlinrb.org/llms.txt.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 Sitemap: https://berlinrb.org/sitemap.xml

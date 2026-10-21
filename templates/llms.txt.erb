@@ -1,0 +1,27 @@
+# Berlin.rb
+
+> Berlin.rb is a monthly Ruby meetup for the Berlin Ruby community, on the second Tuesday of every month: talks, project show-and-tells and casual get-togethers. Free and open to everyone.
+
+Every talk and meetup page has a Markdown version: the page's address with `.md` in place of its trailing slash, as linked below. Recorded talks include chapters and a summary of the talk. All of them are in one file at <%= Berlinrb::Site::ORIGIN %>/llms-full.txt.
+
+## Talks
+
+<%- site.talks_newest_first.each do |talk| -%>
+- [<%= talk["title"] %>](<%= site.markdown_url(site.talk_path(talk)) %>): by <%= talk["speaker"] %>, Berlin.rb #<%= talk["meetup"]["number"] %>, <%= site.short_date(talk["meetup"]["date"]) %><%= ", upcoming" if site.upcoming?(talk["meetup"]) %><%= ", recorded" if talk["video"] %>
+<%- end -%>
+
+## Meetups
+
+<%- site.meetups.reverse_each do |meetup| -%>
+- [Berlin.rb #<%= meetup["number"] %>](<%= site.markdown_url(site.meetup_path(meetup)) %>): <%= site.short_date(meetup["date"]) %><%= ", #{meetup["venue"]}" if meetup["venue"] %>
+<%- end -%>
+
+## Get involved
+
+- [Give a talk, host or sponsor](<%= Berlinrb::Site::ORIGIN %>/get-involved/): propose a talk, or offer your office or support for a meetup
+- [Luma calendar](https://luma.com/berlinrb): sign up for upcoming meetups
+
+## Optional
+
+- [Press kit](<%= Berlinrb::Site::ORIGIN %>/press/): logos and a short description of Berlin.rb
+- [YouTube channel](https://www.youtube.com/@berlinrb_org): every recorded talk

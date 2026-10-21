@@ -54,4 +54,6 @@
 
 <section class="page-section">
   <p class="note"><%= site.upcoming?(meetup) ? "Coming up at" : "Given at" %> <a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a><%= " at #{h meetup["venue"]}" if meetup["venue"] %>.<%= %( <a href="#{h talk["slides"]}">See the slides</a>.) if talk["slides"] && !talk["video"] %> Want to speak too? <a href="/get-involved/#speak">Submit a talk</a>.</p>
+<%- markdown = "/#{site.markdown_file(site.talk_path(talk))}" -%>
+  <p class="note markdown-links"><span>For AI assistants: <a href="<%= markdown %>">this page as Markdown</a></span><button type="button" class="link-button" data-copy-markdown="<%= markdown %>" hidden>Copy as Markdown</button></p>
 </section>

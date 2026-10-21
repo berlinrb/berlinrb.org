@@ -10,7 +10,8 @@ require_relative "luma_description"
 
 module Berlinrb
   # Builds the site into _site: the hand-written pages as they are, the home
-  # page's meetup lists, a page per meetup and per talk, and the sitemap.
+  # page's meetup lists, a page per meetup and per talk, each with a Markdown
+  # version for AI agents, llms.txt, and the sitemap.
   class Site
     ROOT      = File.expand_path("../..", __dir__)
     TEMPLATES = File.join(ROOT, "templates")
@@ -50,8 +51,16 @@ module Berlinrb
         source = File.join(@root, dir, "index.html")
         write("#{dir}/index.html", fill(File.read(source), "/#{dir}/")) if File.exist?(source)
       end
-      @meetups.each { |meetup| write("meetups/#{meetup["number"]}/index.html", page("meetup", meetup: meetup)) }
-      talks.select { _1["title"] }.each { |talk| write("#{talk_path(talk)}index.html", page("talk", talk: talk)) }
+      @meetups.each do |meetup|
+        write("meetups/#{meetup["number"]}/index.html", page("meetup", meetup: meetup))
+        write(markdown_file(meetup_path(meetup)), render("meetup.md", meetup: meetup))
+      end
+      talks.select { _1["title"] }.each do |talk|
+        write("#{talk_path(talk)}index.html", page("talk", talk: talk))
+        write(markdown_file(talk_path(talk)), render("talk.md", talk: talk))
+      end
+      write("llms.txt", render("llms.txt"))
+      write("llms-full.txt", llms_full)
       write("talks/index.html", page("talks"))
       write("photos/index.html", page("photos"))
       write("meetups/index.html", page("meetups"))
@@ -84,6 +93,11 @@ module Berlinrb
 
     def recorded_talks = talks.select { _1["video"] }
 
+    # Talks with a title, from the latest meetup back, in running order.
+    def talks_newest_first
+      talks.select { _1["title"] }.each_with_index.sort_by { |talk, index| [-talk["meetup"]["date"].jd, index] }.map(&:first)
+    end
+
     # A recorded talk's written companion, data/talks/<video>.md, split at its
     # ## headings into the sections its page shows. Links to moments in the
     # recording become play buttons, except in the chapter list, which is
@@ -102,6 +116,16 @@ module Berlinrb
         { "id" => id, "title" => title, "markdown" => markdown, "html" => html }
       end
     end
+
+    # The summary file as it is, for the talk's Markdown version.
+    def summary_markdown(talk)
+      file = talk["video"] && summary_file(talk)
+      File.read(file).strip if file && File.exist?(file)
+    end
+
+    # A page's Markdown version sits beside it: /talks/x/ has /talks/x.md.
+    def markdown_url(path) = "#{ORIGIN}/#{markdown_file(path)}"
+    def markdown_file(path) = "#{path.delete_prefix("/").chomp("/")}.md"
 
     # What a talk is about, for cards: the speaker's own abstract, or the
     # opening of its summary when the card in Basecamp has none.
@@ -246,6 +270,14 @@ module Berlinrb
     private
 
     def summary_path(talk) = "data/talks/#{talk["video"]}.md"
+
+    # Every Markdown version in one file, talks first, newest first.
+    def llms_full
+      intro = render("llms.txt")[/\A.*?(?=\n## )/m].strip
+      docs = talks_newest_first.map { render("talk.md", talk: _1) } +
+             @meetups.reverse.map { render("meetup.md", meetup: _1) }
+      ([intro] + docs.map(&:strip)).join("\n\n---\n\n") + "\n"
+    end
     def summary_file(talk) = File.join(@root, summary_path(talk))
 
     def offset(date)
@@ -258,18 +290,18 @@ module Berlinrb
 
     def page(name, **locals)
       body = render(name, **locals)
-      render("layout", body: body, **head(name, **locals))
+      render("layout", body: body, alternate: nil, **head(name, **locals))
     end
 
     def head(name, meetup: nil, talk: nil)
       case name
       when "meetup"
         { title: "Berlin.rb ##{meetup["number"]}: #{talks_for(meetup).map { short_title(_1) || _1["speaker"] }.join(", ").then { _1.empty? ? short_date(meetup["date"]) : _1 }}", description: description(meetup),
-          path: meetup_path(meetup), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
+          path: meetup_path(meetup), alternate: markdown_url(meetup_path(meetup)), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
           ld: [event_ld(meetup), breadcrumbs([["Meetups", "/#past-meetups"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
       when "talk"
         { title: "#{talk["title"]} · #{talk["speaker"]} · Berlin.rb", description: excerpt(tldr(talk) || talk["abstract"], 30).then { _1.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : _1 },
-          path: talk_path(talk), image: talk["video"] && thumbnail?(talk["video"]) ? thumbnail(talk["video"]) : nil,
+          path: talk_path(talk), alternate: markdown_url(talk_path(talk)), image: talk["video"] && thumbnail?(talk["video"]) ? thumbnail(talk["video"]) : nil,
           ld: [talk_ld(talk), breadcrumbs([["Berlin.rb ##{talk["meetup"]["number"]}", meetup_path(talk["meetup"])], [talk["title"], talk_path(talk)]])] }
       when "photos"
         { title: "Photos \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
@@ -325,7 +357,8 @@ module Berlinrb
 
     def template(name)
       @templates ||= {}
-      @templates[name] ||= ERB.new(File.read(File.join(TEMPLATES, "#{name}.html.erb")), trim_mode: "-")
+      file = name.include?(".") ? "#{name}.erb" : "#{name}.html.erb"
+      @templates[name] ||= ERB.new(File.read(File.join(TEMPLATES, file)), trim_mode: "-")
     end
 
     def write(path, content)

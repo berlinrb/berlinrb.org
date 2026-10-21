@@ -1,0 +1,27 @@
+<%- talks = site.talks_for(meetup) -%>
+# Berlin.rb #<%= meetup["number"] %>
+
+<%= site.long_date(meetup["date"]) %><%= ", doors #{meetup["starts_at"]}" if meetup["starts_at"] %><%= ", at #{[meetup["venue"], meetup["address"]].compact.uniq.join(", ")}" if meetup["venue"] || meetup["address"] %>.
+
+- Page: <%= Berlinrb::Site::ORIGIN %><%= site.meetup_path(meetup) %>
+<%- if meetup["luma"] -%>
+- Event on Luma: <%= site.luma_url(meetup["luma"]) %>
+<%- end -%>
+<%- if meetup["host"] && meetup["host"] != meetup["venue"] -%>
+- Hosted by <%= meetup["host"] %>
+<%- end -%>
+<%- if meetup["sponsors"]&.any? -%>
+- Sponsored by <%= meetup["sponsors"].join(", ") %>
+<%- end -%>
+<%- if talks.any? -%>
+
+## Talks
+
+<%- talks.each do |talk| -%>
+<%- if talk["title"] -%>
+- [<%= talk["title"] %>](<%= site.markdown_url(site.talk_path(talk)) %>) by <%= talk["speaker"] %>
+<%- else -%>
+- <%= talk["speaker"] %>, title to come
+<%- end -%>
+<%- end -%>
+<%- end -%>

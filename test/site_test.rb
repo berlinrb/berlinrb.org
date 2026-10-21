@@ -206,6 +206,37 @@ class SiteTest < Minitest::Test
     assert_includes meetup, "<dt>Recorded talks</dt>"
   end
 
+  def test_talks_and_meetups_have_markdown_versions_for_agents
+    talk = read("talks/carmine-paolino-rubyllm-2-0-beyond-agents.md")
+    assert talk.start_with?("# RubyLLM 2.0: Beyond Agents\n")
+    assert_includes talk, "given at [Berlin.rb #1](https://berlinrb.org/meetups/1.md)"
+    assert_includes talk, "- Recording: https://www.youtube.com/watch?v=abc"
+    assert_includes talk, "Carmine shows how to ship **AI** in [Ruby](https://www.ruby-lang.org)."
+    assert_includes talk, "written with AI from the recording"
+    assert_includes read("talks/rafal-cymerys-let-your-software.md"), "- Slides: https://berlinrb.org#{SLIDES}"
+    assert_includes read("meetups/2.md"), "- [Let Your Software](https://berlinrb.org/talks/rafal-cymerys-let-your-software.md) by Rafal Cymerys"
+    page = read("talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html")
+    assert_includes page, %(<link rel="alternate" type="text/markdown" href="https://berlinrb.org/talks/carmine-paolino-rubyllm-2-0-beyond-agents.md">)
+    assert_includes page, %(data-copy-markdown="/talks/carmine-paolino-rubyllm-2-0-beyond-agents.md")
+  end
+
+  def test_llms_txt_maps_the_markdown_versions
+    llms = read("llms.txt")
+    assert llms.start_with?("# Berlin.rb\n\n> ")
+    assert_includes llms, "- [RubyLLM 2.0: Beyond Agents](https://berlinrb.org/talks/carmine-paolino-rubyllm-2-0-beyond-agents.md): by Carmine Paolino, Berlin.rb #1, 8 Sep 2026, recorded"
+    assert_includes llms, "- [Berlin.rb #1](https://berlinrb.org/meetups/1.md): 8 Sep 2026, ablefy"
+    assert_operator llms.index("Let Your Software"), :<, llms.index("RubyLLM 2.0")
+    full = read("llms-full.txt")
+    assert_includes full, "Carmine shows how to ship **AI**"
+    assert_includes full, "# Berlin.rb #3"
+  end
+
+  def test_robots_txt_welcomes_ai_agents
+    robots = File.read(File.join(Berlinrb::Site::ROOT, "robots.txt"))
+    assert_includes robots, "Content-Signal: search=yes, ai-input=yes, ai-train=yes"
+    assert_includes robots, "https://berlinrb.org/llms.txt"
+  end
+
   def test_sitemap_lists_generated_pages
     sitemap = read("sitemap.xml")
     assert_includes sitemap, "https://berlinrb.org/meetups/1/"

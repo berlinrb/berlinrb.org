@@ -654,6 +654,40 @@ a:hover {
   font-size: 0.95rem;
 }
 
+/* "For AI assistants" under a talk page's closing note */
+.markdown-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.markdown-links a,
+.link-button {
+  color: inherit;
+}
+
+.markdown-links a:hover,
+.link-button:hover {
+  color: var(--ruby);
+}
+
+.link-button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link-button[hidden] {
+  display: none;
+}
+
 .logo-grid + .note {
   margin-top: 22px;
 }

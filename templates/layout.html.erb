@@ -6,6 +6,9 @@
     <title><%= h title %></title>
     <meta name="description" content="<%= h description %>">
     <link rel="canonical" href="https://berlinrb.org<%= path %>">
+<%- if alternate -%>
+    <link rel="alternate" type="text/markdown" href="<%= alternate %>">
+<%- end -%>
     <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
@@ -45,6 +48,7 @@
     <script defer src="/assets/live.js"></script>
     <script defer src="/assets/filters.js"></script>
     <script defer src="/assets/player.js"></script>
+    <script defer src="/assets/markdown.js"></script>
     <meta name="berlinrb-api" content="<%= site.api("") %>">
     <script type="application/ld+json">
 <%= site.json_ld({ "@context" => "https://schema.org", "@graph" => ld }).gsub(/^/, "    ") %>
