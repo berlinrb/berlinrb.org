@@ -41,7 +41,7 @@ class SiteTest < Minitest::Test
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How", "abstract" => "Code is cheap now.", "video" => "ghi" },
                     { "speaker" => "Rafal Cymerys", "title" => "Let Your Software", "video" => "def", "slides" => SLIDES }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
-        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb" }, { "speaker" => "Alex Adam" }] }
+        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb", "slides" => "/slides/3/marco-roth.pdf" }, { "speaker" => "Alex Adam" }] }
     ])
     @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), root: @root, out: @out)
     @site.build
@@ -164,8 +164,14 @@ class SiteTest < Minitest::Test
   def test_talk_slides_are_published_and_linked
     assert File.exist?(File.join(@out, SLIDES))
     page = read("talks/rafal-cymerys-let-your-software/index.html")
-    assert_match %r{<p class="note">Given at .*? <a href="#{SLIDES}">See the slides</a>\. Want to speak too\?}, page
-    refute_includes page, %(class="downloads")
+    assert_includes page, %(<p class="player-links"><a href="#{SLIDES}">Slides</a></p>)
+    refute_includes page, "See the slides"
+  end
+
+  def test_talk_slides_without_a_recording_are_linked_from_the_note
+    page = read("talks/marco-roth-herb/index.html")
+    assert_includes page, %(<a href="/slides/3/marco-roth.pdf">See the slides</a>. Want to speak too?)
+    refute_includes page, "player-links"
   end
 
   def test_get_involved_offers_dates_with_their_free_stage_time

@@ -45,11 +45,15 @@
   // instead of over the thumbnail (styles.css picks one).
   const note = `<span class="player-note">Loads the video from YouTube, which may set cookies.</span>`
   label.innerHTML = `Play here${note}`
-  const links = document.createElement("p")
-  links.className = "player-links"
-  links.innerHTML = `${note}<a>Watch on YouTube</a><a href="/privacy/#embeds-title">Privacy</a>`
+  // The page may already list the slides there; the YouTube links go first.
+  let links = slot.nextElementSibling
+  if (!links?.matches(".player-links")) {
+    links = document.createElement("p")
+    links.className = "player-links"
+    slot.after(links)
+  }
+  links.insertAdjacentHTML("afterbegin", `${note}<a>Watch on YouTube</a><a href="/privacy/#embeds-title">Privacy</a>`)
   links.querySelector("a").href = start.href
-  slot.after(links)
 
   const close = document.createElement("button")
   close.type = "button"
