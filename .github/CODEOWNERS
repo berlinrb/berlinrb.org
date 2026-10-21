@@ -1,0 +1,10 @@
+# Changes to the site itself (layout, styles, code, automation) need
+# Carmine's approval before they're merged. Content stays open to every
+# organizer: meetups, talks and their summaries, video thumbnails, photos and
+# slides have no owner, so a pull request that only touches them can be merged
+# by anyone once the checks pass.
+*               @crmne
+/data/
+/assets/videos/
+/photos/
+/slides/
