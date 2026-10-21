@@ -106,6 +106,7 @@ Short explanations of ideas the talk builds on, written by Berlin.rb.
 
 - [Upside](https://upsidelab.io): Rafał's engineering consultancy for healthcare and life science companies.
 - [cymerys.com](https://cymerys.com): Rafał's site.
+- [codegen-examples](https://github.com/rafalcymerys/codegen-examples): the demo's code and sample input files, from Rafał's last slide.
 - [RubyLLM](https://rubyllm.com): the Ruby library the demo's agents are built with.
 - [The Cat API](https://thecatapi.com): the cat breed API the demo imports from.
 - [Anthropic's code execution tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool): a code sandbox run by the model provider, from Rafał's resources slide.
