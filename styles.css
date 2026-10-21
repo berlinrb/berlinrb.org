@@ -171,6 +171,15 @@ a:hover {
   content: "";
 }
 
+.eyebrow a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.eyebrow a:hover {
+  color: var(--ink);
+}
+
 /* Community network */
 
 .network {

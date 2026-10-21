@@ -1,8 +1,7 @@
 <%- meetup = talk["meetup"] -%>
 <%- chapters, sections = site.summary_sections(talk).partition { _1["id"] == "chapters" } -%>
 <section class="page-hero">
-  <a class="back" href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a>
-  <p class="eyebrow"><time datetime="<%= meetup["date"] %>"><%= site.long_date(meetup["date"]) %></time><%= " · #{h talk["format"]}" if talk["format"] && site.upcoming?(meetup) %></p>
+  <p class="eyebrow"><span><a href="<%= site.meetup_path(meetup) %>">Berlin.rb #<%= meetup["number"] %></a>, <time datetime="<%= meetup["date"] %>"><%= site.long_date(meetup["date"]) %></time><%= " · #{h talk["format"]}" if talk["format"] && site.upcoming?(meetup) %></span></p>
   <h1><%= h talk["title"] %></h1>
   <p class="lead">By <%= h talk["speaker"] %></p>
 </section>

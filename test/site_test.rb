@@ -161,6 +161,12 @@ class SiteTest < Minitest::Test
     assert_equal ["Rafal Cymerys", "Stephen Margheim"], @site.talks_for(@site.meetups.find { _1["number"] == 2 }).map { _1["speaker"] }
   end
 
+  def test_talk_pages_open_with_the_meetup_and_date_on_one_line
+    hero = read("talks/rafal-cymerys-let-your-software/index.html")[/<section class="page-hero">.*?<\/section>/m]
+    assert_includes hero, %(<p class="eyebrow"><span><a href="/meetups/2/">Berlin.rb #2</a>, <time datetime="2026-10-13">)
+    refute_includes hero, %(class="back")
+  end
+
   def test_talk_slides_are_published_and_linked
     assert File.exist?(File.join(@out, SLIDES))
     page = read("talks/rafal-cymerys-let-your-software/index.html")
