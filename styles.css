@@ -1570,6 +1570,9 @@ a:hover {
 /* Site header */
 
 .site-header {
+  --logo-height: 84px;
+  /* The tower fills the top 71 of the logotype's 195 units. */
+  --logo-tower: calc(var(--logo-height) * 71 / 195);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1577,13 +1580,19 @@ a:hover {
   gap: 12px 28px;
   margin: -18px 0 clamp(28px, 5vw, 48px);
   border-bottom: 1px solid var(--line);
-  padding-bottom: 16px;
+  padding: var(--logo-tower) 0 16px;
+}
+
+/* Leave the tower out of the logo's line height so the nav centers on the
+   wordmark rather than on the whole image. */
+.site-logo {
+  margin-top: calc(var(--logo-tower) * -1);
 }
 
 .site-logo img {
   display: block;
   width: auto;
-  height: 84px;
+  height: var(--logo-height);
 }
 
 .site-nav {
