@@ -15,7 +15,9 @@ module Berlinrb
   class Site
     ROOT      = File.expand_path("../..", __dir__)
     TEMPLATES = File.join(ROOT, "templates")
-    STATIC    = %w[index.html styles.css assets photos slides press imprint privacy cfp CNAME robots.txt .nojekyll].freeze
+    # 0b4dad3050cd21cfba8b10d8d447abac.txt is the IndexNow key (see .github/workflows/pages.yml).
+    STATIC    = %w[index.html styles.css assets photos slides press imprint privacy cfp CNAME robots.txt .nojekyll
+                   0b4dad3050cd21cfba8b10d8d447abac.txt].freeze
     ORIGIN    = "https://berlinrb.org"
     API       = ENV.fetch("BERLINRB_API", "https://api.berlinrb.org")
     MARKERS   = {

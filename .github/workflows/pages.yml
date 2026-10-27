@@ -47,8 +47,12 @@ jobs:
              build/berlinrb-press-kit/
           (cd build && zip -qr ../_site/press/berlinrb-press-kit.zip berlinrb-press-kit)
           rm -rf build
+      - name: Plan IndexNow submission
+        run: ruby .github/scripts/indexnow.rb plan _site "$RUNNER_TEMP/indexnow.json"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Submit changed URLs to IndexNow
+        run: ruby .github/scripts/indexnow.rb submit "$RUNNER_TEMP/indexnow.json"

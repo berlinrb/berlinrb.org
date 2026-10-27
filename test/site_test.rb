@@ -231,6 +231,12 @@ class SiteTest < Minitest::Test
     assert_includes full, "# Berlin.rb #3"
   end
 
+  def test_publishes_the_indexnow_key
+    Berlinrb::Site.new(Berlinrb::Meetups.new([]), out: @out).build
+    key = "0b4dad3050cd21cfba8b10d8d447abac"
+    assert_equal key, File.read(File.join(@out, "#{key}.txt")).strip
+  end
+
   def test_robots_txt_welcomes_ai_agents
     robots = File.read(File.join(Berlinrb::Site::ROOT, "robots.txt"))
     assert_includes robots, "Content-Signal: search=yes, ai-input=yes, ai-train=yes"
