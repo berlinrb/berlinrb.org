@@ -10,7 +10,7 @@ class SiteTest < Minitest::Test
   def setup
     @out = Dir.mktmpdir
     @root = Dir.mktmpdir
-    FileUtils.cp_r(Dir[File.join(Berlinrb::Site::ROOT, "{index.html,templates,slides}")], @root)
+    FileUtils.cp_r(Dir[File.join(Berlinrb::Site::ROOT, "{index.html,templates,slides,press}")], @root)
     FileUtils.mkdir_p(File.join(@root, "photos/1/thumbs"))
     %w[photos/1/a.jpg photos/1/thumbs/a.jpg].each { FileUtils.cp(File.expand_path("fixtures/photo.jpg", __dir__), File.join(@root, _1)) }
     FileUtils.mkdir_p(File.join(@root, "data/talks"))
@@ -57,6 +57,13 @@ class SiteTest < Minitest::Test
     assert_includes home, 'src="/assets/logotype.svg" alt="Berlin.rb" width="618" height="195"'
     assert_includes home, 'aria-label="Berlin.rb home"'
     assert_includes home, 'rel="icon" href="assets/logo.svg"'
+  end
+
+  def test_footers_link_to_the_discord_channel
+    link = '<a href="https://discord.gg/AxPaDEcfST">Discord</a>'
+    %w[index.html talks/index.html meetups/1/index.html press/index.html].each { assert_includes read(_1), link, _1 }
+    organization = JSON.parse(read("index.html")[%r{<script type="application/ld\+json">(.*?)</script>}m, 1])["@graph"].first
+    assert_includes organization["sameAs"], "https://discord.gg/AxPaDEcfST"
   end
 
   def test_builds_a_page_per_meetup_and_talk
