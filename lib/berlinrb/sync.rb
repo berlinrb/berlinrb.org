@@ -168,7 +168,7 @@ module Berlinrb
         basecamp_api("buckets/#{BASECAMP_PROJECT}/todos/#{todo["id"]}/completion.json", method: :post)
         @log << "Luma to-dos: ##{meetup["number"]}'s #{page[:name]} matches Basecamp, completed the to-do"
       else
-        description = %(<p>Luma's #{page[:name]} no longer matches the talks in Basecamp. Copy the Markdown below into the description of <a href="#{luma_manage_url(meetup, page)}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. Luma turns it into formatting. This to-do completes itself once Luma matches.</p><pre>#{CGI.escapeHTML(LumaDescription.markdown(wanted))}</pre>)
+        description = %(<p>Luma's #{page[:name]} no longer matches the talks in Basecamp. Copy everything below the line into the description of <a href="#{luma_manage_url(meetup, page)}">Berlin.rb ##{meetup["number"]} on Luma</a>, replacing what is there. This to-do completes itself once Luma matches.</p><hr>#{wanted.delete("\n")})
         return if todo && LumaDescription.same?(todo["description"], description) &&
                   todo["assignees"]&.map { _1["id"] } == [LUMA_ASSIGNEE]
         body = { content: title, description: description, assignee_ids: [LUMA_ASSIGNEE] }
