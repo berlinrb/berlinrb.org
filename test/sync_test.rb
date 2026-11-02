@@ -133,10 +133,10 @@ class SyncTest < Minitest::Test
                   [:post, "buckets/47498411/todos/9/completion.json", nil]], calls
   end
 
-  def test_luma_todos_carry_the_description_as_markdown_and_rewrite_an_html_one
+  def test_luma_todos_carry_the_description_formatted_and_rewrite_a_markdown_one
     @meetups.find(3).merge!("luma" => "05tfdlpk", "about" => "<p>Talks to be announced</p>")
     wanted = Berlinrb::LumaDescription.html(@meetups.find(3))
-    html = %(<p>Luma&#39;s description no longer matches the talks in Basecamp.</p><hr>#{wanted.gsub("\n", "<p><br></p>")})
+    html = %(<p>Luma&#39;s description no longer matches the talks in Basecamp.</p><pre>#{CGI.escapeHTML(Berlinrb::LumaDescription.markdown(wanted))}</pre>)
     sync = sync()
     sync.instance_variable_set(:@basecamp_token, "token")
     calls = []
@@ -149,9 +149,11 @@ class SyncTest < Minitest::Test
     sync.run(%i[luma_todos])
 
     assert_equal [[:put, "buckets/47498411/todos/9.json"]], calls.map { _1.first(2) }
-    markdown = CGI.unescapeHTML(calls.first.last[%r{<pre>(.*)</pre>}m, 1])
-    assert_equal Berlinrb::LumaDescription.markdown(wanted), markdown
-    assert_includes markdown, "**Filming:** the talks are recorded and published on our [YouTube channel](https://www.youtube.com/@berlinrb_org)."
+    intro, text = calls.first.last.split("<hr>", 2)
+    assert_equal wanted.delete("\n"), text
+    assert_includes text, %(<strong>Filming:</strong> the talks are recorded and published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a>.)
+    assert_includes intro, "Copy everything below the line"
+    refute_match %r{<pre>|<p><br></p>|\*\*|\n|Luma turns it into formatting}, calls.first.last
   end
 
   def test_luma_todos_ask_for_a_changed_livestream_description
