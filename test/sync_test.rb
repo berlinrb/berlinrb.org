@@ -174,10 +174,41 @@ class SyncTest < Minitest::Test
 
   def test_basecamp_is_skipped_when_the_cli_is_not_signed_in
     sync = sync(cards: nil)
-    sync.instance_variable_set(:@basecamp, -> {})
-    sync.run(%i[basecamp])
+    with_env("CI" => nil) { sync.run(%i[basecamp]) }
 
     assert_match(/skipped/, sync.log.first)
+    refute sync.failed?
+  end
+
+  def test_a_missing_basecamp_token_fails_the_run_in_ci
+    sync = sync(cards: nil)
+    with_env("CI" => "true") { sync.run(%i[basecamp]) }
+
+    assert sync.failed?
+  end
+
+  # Basecamp refused the token for a week while the daily run stayed green
+  # (issue #37); a refused read must fail the run.
+  def test_a_basecamp_error_fails_the_run_and_keeps_the_talks
+    talks = @meetups.find(3)["talks"].dup
+    sync = sync()
+    sync.instance_variable_set(:@basecamp, -> { raise "Basecamp responded with 401 to GET /6219432/card_tables" })
+    stub_const(Berlinrb::Sync, :THUMBNAILS, @dir) { sync.run(%i[basecamp youtube]) }
+
+    assert sync.failed?
+    assert_equal ["Basecamp: API failed (Basecamp responded with 401 to GET /6219432/card_tables)"], sync.failures
+    refute(sync.log.any? { _1.include?("skipped") })
+    assert_includes sync.log, "YouTube: read 3 videos"
+    assert_equal talks, @meetups.find(3)["talks"]
+  end
+
+  def test_a_luma_todo_error_fails_the_run
+    sync = sync()
+    sync.instance_variable_set(:@basecamp_token, "token")
+    sync.define_singleton_method(:basecamp_pages) { |_url| raise "Basecamp responded with 403 to GET /todolists.json" }
+    sync.run(%i[luma_todos])
+
+    assert_equal ["Luma to-dos: failed (Basecamp responded with 403 to GET /todolists.json)"], sync.failures
   end
 
   private

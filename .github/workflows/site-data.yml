@@ -21,10 +21,13 @@ jobs:
         with:
           ruby-version: ruby
       - name: Fetch talks from Basecamp, meetups from Luma and recordings from YouTube
+        id: sync
+        # A source that fails still lets the others open their pull request;
+        # the last step then fails the run.
+        continue-on-error: true
         run: bin/sync
         env:
-          # Refreshed from a maintainer's signed-in basecamp CLI by
-          # bin/refresh-basecamp-token. Without it the Basecamp step is skipped.
+          # A Basecamp personal access token, set by bin/set-basecamp-token.
           BASECAMP_TOKEN: ${{ secrets.BASECAMP_TOKEN }}
       - uses: peter-evans/create-pull-request@v8
         with:
@@ -36,3 +39,8 @@ jobs:
             Talks from the Basecamp Talks card table, meetups from the [Luma calendar](https://luma.com/berlinrb) and recordings from the [YouTube channel](https://www.youtube.com/@berlinrb_org), fetched by `bin/sync`.
 
             Check the dates, venues, and that each video landed on the right talk before merging.
+      - name: Fail if a source could not be read
+        if: steps.sync.outcome == 'failure'
+        run: |
+          echo "::error::bin/sync could not read every source. See the Fetch step's log."
+          exit 1

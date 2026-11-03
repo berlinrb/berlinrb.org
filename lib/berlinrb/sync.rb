@@ -21,7 +21,7 @@ module Berlinrb
     THUMBNAILS      = File.expand_path("../../assets/videos", __dir__)
     TIME_ZONE       = "Europe/Berlin"
 
-    attr_reader :log
+    attr_reader :log, :failures
 
     def initialize(meetups, today: Date.today, http: method(:get), basecamp: method(:basecamp_cards))
       @meetups = meetups
@@ -29,7 +29,13 @@ module Berlinrb
       @http = http
       @basecamp = basecamp
       @log = []
+      @failures = []
     end
+
+    # A source that could not be read fails the run, so the scheduled
+    # workflow turns red instead of quietly keeping stale talks. In CI a
+    # missing Basecamp token is a failure too; locally it is only skipped.
+    def failed? = @failures.any?
 
     def run(sources = %i[basecamp luma youtube luma_todos])
       ENV["TZ"] = TIME_ZONE
@@ -45,8 +51,12 @@ module Berlinrb
     CARD_FIELDS = { "Title" => "title", "Short title" => "short_title", "Abstract" => "abstract", "Format" => "format" }.freeze
 
     def sync_basecamp
-      cards = @basecamp.call
-      return @log << "Basecamp: skipped, no token (set BASECAMP_TOKEN or sign in the basecamp CLI)" unless cards
+      cards = begin
+        @basecamp.call
+      rescue StandardError => error
+        return failure("Basecamp: API failed (#{error.message})")
+      end
+      return missing_token("Basecamp") unless cards
       talks = cards.select { %w[Scheduled Done].include?(_1.dig("parent", "title")) && _1["due_on"] }.group_by { _1["due_on"] }
       (talks.keys - @meetups.list.map { _1["date"].to_s }).each { @log << "Basecamp: no meetup on #{_1} for #{talks[_1].map { |card| card["title"] }.join(", ")}" }
       @meetups.list.each do |meetup|
@@ -100,9 +110,6 @@ module Berlinrb
       table.fetch("lists").select { %w[Scheduled Done].include?(_1["title"]) }.flat_map do |column|
         basecamp_pages(column.fetch("cards_url")).map { _1.merge("parent" => { "title" => column["title"] }) }
       end
-    rescue StandardError => error
-      @log << "Basecamp: API failed (#{error.message})"
-      nil
     end
 
     def basecamp_pages(url)
@@ -139,7 +146,7 @@ module Berlinrb
     TODOSET       = "9950099724"
 
     def sync_luma_todos
-      return @log << "Luma to-dos: skipped, no Basecamp token" unless basecamp_token
+      return missing_token("Luma to-dos") unless basecamp_token
       list = luma_todolist
       open = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json")
       @meetups.list.each do |meetup|
@@ -147,7 +154,17 @@ module Berlinrb
         LUMA_PAGES.each { |page| luma_todo(list, open, meetup, page) if meetup[page[:about]] }
       end
     rescue StandardError => error
-      @log << "Luma to-dos: failed (#{error.message})"
+      failure("Luma to-dos: failed (#{error.message})")
+    end
+
+    def failure(message)
+      @failures << message
+      @log << message
+    end
+
+    def missing_token(source)
+      message = "#{source}: skipped, no Basecamp token (set BASECAMP_TOKEN or sign in the basecamp CLI)"
+      ENV["CI"] ? failure(message) : @log << message
     end
 
     LUMA_PAGES = [

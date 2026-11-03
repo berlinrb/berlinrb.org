@@ -8,6 +8,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
     if (request.method === "GET" && url.pathname === "/live") return live(env, ctx)
+    if (request.method === "GET" && url.pathname === "/health") return health(env, ctx)
     const cors = corsHeaders(request, env)
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors })
     if (request.method !== "POST" || !["/talks", "/companies"].includes(url.pathname)) {
@@ -99,14 +100,47 @@ export async function lumaCounts() {
   return Object.fromEntries(Object.entries(dates).map(([number, { date, going }]) => [date, { going, online: online[number] ?? null }]))
 }
 
-export async function stageMinutes(env) {
-  const base = `https://3.basecampapi.com/${env.BASECAMP_ACCOUNT}`
-  const get = async (url) => {
-    const response = await fetch(url, { headers: { Authorization: `Bearer ${env.BASECAMP_TOKEN}`, "User-Agent": "berlinrb.org forms (hello@berlinrb.org)" } })
-    if (!response.ok) throw new Error(`Basecamp responded with ${response.status}`)
-    return response
+// Whether the forms can file cards: the token reads the Talks card table and
+// finds its Triage column. A scheduled GitHub workflow polls this and fails
+// when it does, so a refused token is noticed before a speaker hits it.
+// Cached for a minute, so polling it can't use up Basecamp's rate limit.
+const HEALTH_SECONDS = 60
+
+async function health(env, ctx) {
+  const cache = caches.default
+  const key = new Request(`${env.SITE}/health-cache`)
+  const cached = await cache.match(key)
+  if (cached) return cached
+
+  let problem = null
+  try {
+    const table = await talksTable(env)
+    if (!table.lists?.some((list) => String(list.id) === String(env.TALKS_TRIAGE))) problem = "The Talks card table has no Triage column with TALKS_TRIAGE's id"
+  } catch (error) {
+    problem = error.message
   }
-  const table = await (await get(`${base}/buckets/${env.BASECAMP_PROJECT}/card_tables/${env.TALKS_TABLE}.json`)).json()
+  if (problem) console.error("Health", problem)
+  const response = new Response(JSON.stringify({ ok: !problem, basecamp: problem || "ok", checked_at: new Date().toISOString() }), {
+    status: problem ? 503 : 200,
+    headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${HEALTH_SECONDS}` }
+  })
+  ctx?.waitUntil?.(cache.put(key, response.clone()))
+  return response
+}
+
+async function basecampGet(env, url) {
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${env.BASECAMP_TOKEN}`, "User-Agent": "berlinrb.org forms (hello@berlinrb.org)" } })
+  if (!response.ok) throw new Error(`Basecamp responded with ${response.status}${response.headers.get("WWW-Authenticate") ? ` (${response.headers.get("WWW-Authenticate")})` : ""}`)
+  return response
+}
+
+async function talksTable(env) {
+  return (await basecampGet(env, `https://3.basecampapi.com/${env.BASECAMP_ACCOUNT}/buckets/${env.BASECAMP_PROJECT}/card_tables/${env.TALKS_TABLE}.json`)).json()
+}
+
+export async function stageMinutes(env) {
+  const get = (url) => basecampGet(env, url)
+  const table = await talksTable(env)
   const scheduled = table.lists.find((list) => list.title === "Scheduled")
   const used = {}
   let url = scheduled?.cards_url

@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+# Set the Basecamp token that the daily sync (the repository's
+# BASECAMP_TOKEN secret) and the form Worker at api.berlinrb.org use. Pass a
+# Basecamp personal access token on stdin, never as an argument:
+#
+#   op-cache read "op://Personal/Berlin.rb Basecamp token/credential" | bin/set-basecamp-token
+#
+# It refuses a token that can't read the Berlin.rb Talks card table, so a bad
+# token never replaces a working one. The basecamp CLI's own login is no use
+# here: its tokens last an hour and only reach the account it signed in to.
+set -eu
+cd "$(dirname "$0")/.."
+token=$(cat)
+[ -n "$token" ] || { echo "Pass the token on stdin." >&2; exit 1; }
+
+status=$(curl -sS -o /dev/null -w '%{http_code}' \
+  -H "Authorization: Bearer $token" -H "User-Agent: berlinrb.org (hello@berlinrb.org)" \
+  https://3.basecampapi.com/6219432/buckets/47498411/card_tables/10403432462.json)
+[ "$status" = 200 ] || { echo "Basecamp answered $status for the Talks card table; nothing was changed." >&2; exit 1; }
+
+printf %s "$token" | gh secret set BASECAMP_TOKEN --repo berlinrb/berlinrb.org
+echo "GitHub: BASECAMP_TOKEN updated."
+printf %s "$token" | (cd worker && npx -y wrangler@4 secret put BASECAMP_TOKEN >/dev/null)
+echo "Worker: BASECAMP_TOKEN updated."
+echo "Check: https://api.berlinrb.org/health (cached for a minute)"

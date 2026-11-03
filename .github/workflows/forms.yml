@@ -1,0 +1,27 @@
+name: Check forms
+
+# The forms on /get-involved/ file cards through the Worker at
+# api.berlinrb.org. Its /health says whether its Basecamp token still reaches
+# the Talks card table; this fails, and GitHub emails, when it doesn't, so a
+# refused token is fixed before a speaker meets it (issue #37).
+
+on:
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that the Worker can reach Basecamp
+        run: |
+          for attempt in 1 2 3; do
+            status=$(curl -sS -o health.json -w '%{http_code}' https://api.berlinrb.org/health || true)
+            [ "$status" = 200 ] && { cat health.json; exit 0; }
+            sleep 45
+          done
+          echo "::error::api.berlinrb.org/health answered $status: $(cat health.json 2>/dev/null). Talk proposals and host enquiries are failing; set a new token with bin/set-basecamp-token."
+          exit 1

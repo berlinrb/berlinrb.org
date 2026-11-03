@@ -12,3 +12,5 @@ sync = Berlinrb::Sync.new(meetups)
 sync.run(sources)
 meetups.save
 puts sync.log
+# Whatever could be read is saved; a source that failed still fails the run.
+abort "\nFailed:\n#{sync.failures.join("\n")}" if sync.failed?

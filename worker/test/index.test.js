@@ -66,3 +66,45 @@ test("stage time used adds up the Scheduled cards' formats", async () => {
     : [{ due_on: "2026-12-08", content: "<p><strong>Format:</strong> Short (20 min)</p>" }, { due_on: "2026-12-08", content: "" }, { due_on: null }]))
   assert.deepEqual(await stageMinutes(env), { "2026-12-08": 60 })
 })
+
+// Issue #37: the token stopped reaching Basecamp and proposals failed for a
+// week before anyone noticed. /health is what the scheduled check polls.
+const noCache = { default: { match: async () => undefined, put: async () => {} } }
+
+test("health is ok when the token reads the Talks table and finds Triage", async () => {
+  globalThis.caches = noCache
+  globalThis.fetch = async (url) => {
+    assert.equal(url, "https://3.basecampapi.com/1/buckets/2/card_tables/9.json")
+    return new Response(JSON.stringify({ lists: [{ id: 3, title: "Triage" }, { id: 5, title: "Scheduled" }] }))
+  }
+  const response = await worker.fetch(new Request("https://api.berlinrb.org/health"), env)
+  assert.equal(response.status, 200)
+  assert.equal((await response.json()).ok, true)
+})
+
+test("health fails, naming Basecamp's answer, when the token is refused", async () => {
+  globalThis.caches = noCache
+  globalThis.fetch = async () => new Response("", { status: 403, headers: { "WWW-Authenticate": 'Bearer error="insufficient_scope"' } })
+  const response = await worker.fetch(new Request("https://api.berlinrb.org/health"), env)
+  assert.equal(response.status, 503)
+  assert.match((await response.json()).basecamp, /403 \(Bearer error="insufficient_scope"\)/)
+})
+
+test("health fails when the Triage column is gone", async () => {
+  globalThis.caches = noCache
+  globalThis.fetch = async () => new Response(JSON.stringify({ lists: [{ id: 5, title: "Scheduled" }] }))
+  const response = await worker.fetch(new Request("https://api.berlinrb.org/health"), env)
+  assert.equal(response.status, 503)
+})
+
+test("a refused proposal tells the speaker to write instead", async () => {
+  globalThis.fetch = async () => new Response("", { status: 401 })
+  const request = new Request("https://api.berlinrb.org/talks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json", Origin: "https://berlinrb.org" },
+    body: JSON.stringify({ name: "Ada", email: "ada@example.com", title: "Ruby", abstract: "About Ruby" })
+  })
+  const response = await worker.fetch(request, env)
+  assert.equal(response.status, 502)
+  assert.match((await response.json()).error, /hello@berlinrb\.org/)
+})
