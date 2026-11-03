@@ -12,34 +12,32 @@
 
 :root {
   color-scheme: light dark;
-  --ink: #171717;
-  --muted: #69665f;
-  --paper: #fbfaf7;
-  --surface: #fff;
-  --ruby: #c7162b;
-  --ruby-deep: #a91224;
-  --button: var(--ruby);
-  --button-hover: var(--ruby-deep);
+  --ink: light-dark(#171717, #ecebe7);
+  --muted: light-dark(#69665f, #a7a39a);
+  --paper: light-dark(#fbfaf7, #141311);
+  --surface: light-dark(#fff, #1c1b19);
+  --ruby: light-dark(#c7162b, #f25466);
+  --ruby-deep: light-dark(#a91224, #ff7a88);
+  --button: #c7162b;
+  --button-hover: light-dark(#a91224, #db2a3f);
   --gold: #f2c94c;
-  --line: rgba(23, 23, 23, 0.12);
-  --glow: rgba(199, 22, 43, 0.065);
-  --glow-soft: rgba(199, 22, 43, 0.035);
+  --line: light-dark(rgba(23, 23, 23, 0.12), rgba(236, 235, 231, 0.14));
+  --glow: light-dark(rgba(199, 22, 43, 0.065), rgba(199, 22, 43, 0.16));
+  --glow-soft: light-dark(rgba(199, 22, 43, 0.035), rgba(199, 22, 43, 0.08));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #ecebe7;
-    --muted: #a7a39a;
-    --paper: #141311;
-    --surface: #1c1b19;
-    --ruby: #f25466;
-    --ruby-deep: #ff7a88;
-    --button: #c7162b;
-    --button-hover: #db2a3f;
-    --line: rgba(236, 235, 231, 0.14);
-    --glow: rgba(199, 22, 43, 0.16);
-    --glow-soft: rgba(199, 22, 43, 0.08);
-  }
+/* The footer's theme toggle (templates/theme_toggle.html.erb, run by
+   templates/theme.html.erb) overrides the system preference. Colors follow
+   color-scheme through light-dark(); anything else that changes in the dark
+   needs a rule under both
+   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) ... }
+   and :root[data-theme="dark"] ... */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 * {
@@ -482,6 +480,33 @@ a:hover {
   font-size: 0.8rem;
 }
 
+.theme-toggle {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+}
+
+.theme-toggle span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The toggle only works with the script in the page's head */
+@media (scripting: none) {
+  .theme-toggle {
+    display: none;
+  }
+}
+
 /* Small screens: stack the hero, center the identity */
 
 @media (max-width: 840px) {
@@ -503,6 +528,10 @@ a:hover {
   .footer-social,
   .footer-legal {
     justify-content: center;
+  }
+
+  .theme-toggle {
+    margin-left: 0;
   }
 }
 
@@ -609,17 +638,11 @@ a:hover {
 
 .preview-dark {
   background: #14161a;
-  border-color: #14161a;
+  border-color: light-dark(#14161a, var(--line));
 }
 
 .preview-square img {
   outline: 1px dashed rgba(23, 23, 23, 0.12);
-}
-
-@media (prefers-color-scheme: dark) {
-  .preview-dark {
-    border-color: var(--line);
-  }
 }
 
 .logo-card .downloads {
@@ -935,9 +958,13 @@ a:hover {
 
 /* A dark page needs a deeper shadow to lift the note off the text behind */
 @media (prefers-color-scheme: dark) {
-  .tip [popover] {
+  :root:not([data-theme="light"]) .tip [popover] {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 8px 40px 16px rgba(0, 0, 0, 0.7);
   }
+}
+
+:root[data-theme="dark"] .tip [popover] {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), 0 8px 40px 16px rgba(0, 0, 0, 0.7);
 }
 
 @supports (anchor-name: --tip) {
@@ -1593,6 +1620,39 @@ a:hover {
   display: block;
   width: auto;
   height: var(--logo-height);
+}
+
+.site-logo .logo-dark,
+.theme-toggle .theme-to-light {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .site-logo .logo-light,
+  :root:not([data-theme="light"]) .theme-toggle .theme-to-dark {
+    display: none;
+  }
+
+  :root:not([data-theme="light"]) .site-logo .logo-dark {
+    display: block;
+  }
+
+  :root:not([data-theme="light"]) .theme-toggle .theme-to-light {
+    display: inline-flex;
+  }
+}
+
+:root[data-theme="dark"] .site-logo .logo-light,
+:root[data-theme="dark"] .theme-toggle .theme-to-dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .site-logo .logo-dark {
+  display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .theme-to-light {
+  display: inline-flex;
 }
 
 .site-nav {

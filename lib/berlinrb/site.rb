@@ -26,7 +26,9 @@ module Berlinrb
       "next-meetup" => "home_next",
       "latest-talk" => "home_latest_talk",
       "recent-photos" => "home_photos",
-      "site-header" => "header"
+      "site-header" => "header",
+      "theme-script" => "theme",
+      "theme-toggle" => "theme_toggle"
     }.freeze
 
     include ERB::Util
