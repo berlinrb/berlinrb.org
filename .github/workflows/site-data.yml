@@ -27,8 +27,11 @@ jobs:
         continue-on-error: true
         run: bin/sync
         env:
-          # A Basecamp personal access token, set by bin/set-basecamp-token.
-          BASECAMP_TOKEN: ${{ secrets.BASECAMP_TOKEN }}
+          # The berlinrb.org Launchpad app, set by bin/set-basecamp-token.
+          # bin/sync mints a Basecamp access token from its refresh token.
+          BASECAMP_CLIENT_ID: ${{ secrets.BASECAMP_CLIENT_ID }}
+          BASECAMP_CLIENT_SECRET: ${{ secrets.BASECAMP_CLIENT_SECRET }}
+          BASECAMP_REFRESH_TOKEN: ${{ secrets.BASECAMP_REFRESH_TOKEN }}
       - uses: peter-evans/create-pull-request@v8
         with:
           branch: automation/site-data

@@ -1,25 +1,39 @@
 #!/usr/bin/env sh
-# Set the Basecamp token that the daily sync (the repository's
-# BASECAMP_TOKEN secret) and the form Worker at api.berlinrb.org use. Pass a
-# Basecamp personal access token on stdin, never as an argument:
+# Give the daily sync (GitHub secrets) and the form Worker at api.berlinrb.org
+# the berlinrb.org Launchpad app's credentials. Both mint their own two-week
+# Basecamp access tokens from its refresh token, so nothing has to copy
+# tokens again. The credentials live in 1Password; pass another item with
+# BASECAMP_APP=op://vault/item.
 #
-#   op-cache read "op://Personal/Berlin.rb Basecamp token/credential" | bin/set-basecamp-token
-#
-# It refuses a token that can't read the Berlin.rb Talks card table, so a bad
-# token never replaces a working one. The basecamp CLI's own login is no use
-# here: its tokens last an hour and only reach the account it signed in to.
+# It refuses credentials that can't read the Berlin.rb Talks card table, so a
+# bad set never replaces a working one. To start over (a revoked app, a lost
+# refresh token), authorize the app at
+# https://launchpad.37signals.com/integrations again and update the item.
 set -eu
 cd "$(dirname "$0")/.."
-token=$(cat)
-[ -n "$token" ] || { echo "Pass the token on stdin." >&2; exit 1; }
+item=${BASECAMP_APP:-"op://Personal/Berlin.rb Basecamp app"}
+client_id=$(op-cache read "$item/client_id")
+client_secret=$(op-cache read "$item/client_secret")
+refresh_token=$(op-cache read "$item/refresh_token")
 
+token=$(curl -sS -X POST https://launchpad.37signals.com/authorization/token \
+  --data-urlencode type=refresh --data-urlencode "client_id=$client_id" \
+  --data-urlencode "client_secret=$client_secret" --data-urlencode "refresh_token=$refresh_token" |
+  ruby -rjson -e 'puts JSON.parse($stdin.read).fetch("access_token", "")' 2>/dev/null || true)
+[ -n "$token" ] || { echo "Launchpad refused the refresh token; nothing was changed." >&2; exit 1; }
 status=$(curl -sS -o /dev/null -w '%{http_code}' \
   -H "Authorization: Bearer $token" -H "User-Agent: berlinrb.org (hello@berlinrb.org)" \
   https://3.basecampapi.com/6219432/buckets/47498411/card_tables/10403432462.json)
 [ "$status" = 200 ] || { echo "Basecamp answered $status for the Talks card table; nothing was changed." >&2; exit 1; }
 
-printf %s "$token" | gh secret set BASECAMP_TOKEN --repo berlinrb/berlinrb.org
-echo "GitHub: BASECAMP_TOKEN updated."
-printf %s "$token" | (cd worker && npx -y wrangler@4 secret put BASECAMP_TOKEN >/dev/null)
-echo "Worker: BASECAMP_TOKEN updated."
+for name in BASECAMP_CLIENT_ID BASECAMP_CLIENT_SECRET BASECAMP_REFRESH_TOKEN; do
+  case $name in
+    BASECAMP_CLIENT_ID) value=$client_id ;;
+    BASECAMP_CLIENT_SECRET) value=$client_secret ;;
+    BASECAMP_REFRESH_TOKEN) value=$refresh_token ;;
+  esac
+  printf %s "$value" | gh secret set "$name" --repo berlinrb/berlinrb.org
+  printf %s "$value" | (cd worker && npx -y wrangler@4 secret put "$name" >/dev/null)
+  echo "$name: set for GitHub and the Worker."
+done
 echo "Check: https://api.berlinrb.org/health (cached for a minute)"

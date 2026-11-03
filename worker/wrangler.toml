@@ -1,6 +1,6 @@
 # The form endpoint for berlinrb.org: talk proposals and host or sponsor
 # enquiries become cards in Basecamp. Deploy with `npx wrangler deploy` from
-# this directory; BASECAMP_TOKEN is set by bin/set-basecamp-token.
+# this directory; the Basecamp app's credentials are set by bin/set-basecamp-token.
 name = "berlinrb-api"
 main = "src/index.js"
 compatibility_date = "2026-09-01"

@@ -1,7 +1,7 @@
 name: Check forms
 
 # The forms on /get-involved/ file cards through the Worker at
-# api.berlinrb.org. Its /health says whether its Basecamp token still reaches
+# api.berlinrb.org. Its /health says whether it can still get a Basecamp token that reaches
 # the Talks card table; this fails, and GitHub emails, when it doesn't, so a
 # refused token is fixed before a speaker meets it (issue #37).
 
@@ -23,5 +23,5 @@ jobs:
             [ "$status" = 200 ] && { cat health.json; exit 0; }
             sleep 45
           done
-          echo "::error::api.berlinrb.org/health answered $status: $(cat health.json 2>/dev/null). Talk proposals and host enquiries are failing; set a new token with bin/set-basecamp-token."
+          echo "::error::api.berlinrb.org/health answered $status: $(cat health.json 2>/dev/null). Talk proposals and host enquiries are failing. If the app's refresh token was refused, authorize it again (see bin/set-basecamp-token)."
           exit 1

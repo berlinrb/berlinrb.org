@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import worker, { talkCard, companyCard, lumaCounts, stageMinutes } from "../src/index.js"
+import worker, { talkCard, companyCard, lumaCounts, stageMinutes, forgetToken } from "../src/index.js"
 
 const env = { TALKS_TABLE: "9", STAGE_MINUTES: "80", SITE: "https://berlinrb.org", BASECAMP_ACCOUNT: "1", BASECAMP_PROJECT: "2", TALKS_TRIAGE: "3", COMPANIES_TRIAGE: "4", BASECAMP_TOKEN: "t" }
 
@@ -107,4 +107,54 @@ test("a refused proposal tells the speaker to write instead", async () => {
   const response = await worker.fetch(request, env)
   assert.equal(response.status, 502)
   assert.match((await response.json()).error, /hello@berlinrb\.org/)
+})
+
+const appEnv = { ...env, BASECAMP_TOKEN: undefined, BASECAMP_CLIENT_ID: "id", BASECAMP_CLIENT_SECRET: "secret", BASECAMP_REFRESH_TOKEN: "refresh" }
+
+test("with the app's refresh token, the Worker mints an access token once and reuses it", async () => {
+  forgetToken()
+  globalThis.caches = noCache
+  const calls = []
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push([String(url), init.body ? String(init.body) : init.headers?.Authorization])
+    if (String(url).startsWith("https://launchpad")) return new Response(JSON.stringify({ access_token: "minted", expires_in: 1209600 }))
+    return new Response(JSON.stringify({ lists: [{ id: 3 }] }))
+  }
+  await worker.fetch(new Request("https://api.berlinrb.org/health"), appEnv)
+  await worker.fetch(new Request("https://api.berlinrb.org/health"), appEnv)
+  assert.deepEqual(calls.map(([url]) => url.split("?")[0]), [
+    "https://launchpad.37signals.com/authorization/token",
+    "https://3.basecampapi.com/1/buckets/2/card_tables/9.json",
+    "https://3.basecampapi.com/1/buckets/2/card_tables/9.json"
+  ])
+  assert.match(calls[0][1], /type=refresh&client_id=id&client_secret=secret&refresh_token=refresh/)
+  assert.equal(calls[1][1], "Bearer minted")
+})
+
+test("a refused access token is minted again and the proposal retried", async () => {
+  forgetToken()
+  let mints = 0
+  const auths = []
+  globalThis.fetch = async (url, init = {}) => {
+    if (String(url).startsWith("https://launchpad")) return new Response(JSON.stringify({ access_token: `token${++mints}`, expires_in: 1209600 }))
+    auths.push(init.headers.Authorization)
+    return new Response("{}", { status: auths.length === 1 ? 401 : 201 })
+  }
+  const request = new Request("https://api.berlinrb.org/talks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json", Origin: "https://berlinrb.org" },
+    body: JSON.stringify({ name: "Ada", email: "ada@example.com", title: "Ruby", abstract: "About Ruby" })
+  })
+  const response = await worker.fetch(request, appEnv)
+  assert.equal(response.status, 200)
+  assert.deepEqual(auths, ["Bearer token1", "Bearer token2"])
+})
+
+test("health names a refused refresh token", async () => {
+  forgetToken()
+  globalThis.caches = noCache
+  globalThis.fetch = async () => new Response("", { status: 401 })
+  const response = await worker.fetch(new Request("https://api.berlinrb.org/health"), appEnv)
+  assert.equal(response.status, 503)
+  assert.match((await response.json()).basecamp, /Launchpad refused the refresh token with 401/)
 })

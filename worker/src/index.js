@@ -28,18 +28,16 @@ export default {
     if (card.error) return reply(request, env, cors, 422, card.error)
 
     const column = url.pathname === "/talks" ? env.TALKS_TRIAGE : env.COMPANIES_TRIAGE
-    const response = await fetch(
-      `https://3.basecampapi.com/${env.BASECAMP_ACCOUNT}/buckets/${env.BASECAMP_PROJECT}/card_tables/lists/${column}/cards.json`,
-      {
+    let response
+    try {
+      response = await basecampFetch(env, `https://3.basecampapi.com/${env.BASECAMP_ACCOUNT}/buckets/${env.BASECAMP_PROJECT}/card_tables/lists/${column}/cards.json`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${env.BASECAMP_TOKEN}`,
-          "Content-Type": "application/json",
-          "User-Agent": "berlinrb.org forms (hello@berlinrb.org)"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: card.title, content: card.content })
-      }
-    )
+      })
+    } catch (error) {
+      response = { ok: false, status: 0, text: async () => error.message }
+    }
     if (!response.ok) {
       console.error("Basecamp", response.status, await response.text())
       return reply(request, env, cors, 502, "Something went wrong on our side. Please write to hello@berlinrb.org instead.")
@@ -128,8 +126,41 @@ async function health(env, ctx) {
   return response
 }
 
+// Basecamp access tokens last two weeks. The Worker mints its own from the
+// berlinrb.org Launchpad app's refresh token (BASECAMP_CLIENT_ID,
+// BASECAMP_CLIENT_SECRET, BASECAMP_REFRESH_TOKEN, set by
+// bin/set-basecamp-token), keeps it for the life of the isolate, and mints
+// another when Basecamp refuses it. A plain BASECAMP_TOKEN is used when
+// there is no refresh token (tests, local runs).
+let minted = null
+
+export function forgetToken() {
+  minted = null
+}
+
+async function basecampToken(env, { fresh = false } = {}) {
+  if (!env.BASECAMP_REFRESH_TOKEN) return env.BASECAMP_TOKEN
+  if (!fresh && minted && minted.expires > Date.now()) return minted.token
+  const response = await fetch("https://launchpad.37signals.com/authorization/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "berlinrb.org forms (hello@berlinrb.org)" },
+    body: new URLSearchParams({ type: "refresh", client_id: env.BASECAMP_CLIENT_ID, client_secret: env.BASECAMP_CLIENT_SECRET, refresh_token: env.BASECAMP_REFRESH_TOKEN })
+  })
+  if (!response.ok) throw new Error(`Launchpad refused the refresh token with ${response.status}`)
+  const { access_token: token, expires_in: seconds } = await response.json()
+  minted = { token, expires: Date.now() + Math.min(Number(seconds) || 3600, 86400) * 1000 }
+  return token
+}
+
+async function basecampFetch(env, url, init = {}) {
+  const send = async (token) => fetch(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}`, "User-Agent": "berlinrb.org forms (hello@berlinrb.org)" } })
+  const response = await send(await basecampToken(env))
+  if (response.status !== 401 || !env.BASECAMP_REFRESH_TOKEN) return response
+  return send(await basecampToken(env, { fresh: true }))
+}
+
 async function basecampGet(env, url) {
-  const response = await fetch(url, { headers: { Authorization: `Bearer ${env.BASECAMP_TOKEN}`, "User-Agent": "berlinrb.org forms (hello@berlinrb.org)" } })
+  const response = await basecampFetch(env, url)
   if (!response.ok) throw new Error(`Basecamp responded with ${response.status}${response.headers.get("WWW-Authenticate") ? ` (${response.headers.get("WWW-Authenticate")})` : ""}`)
   return response
 }

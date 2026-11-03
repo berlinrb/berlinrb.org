@@ -202,6 +202,32 @@ class SyncTest < Minitest::Test
     assert_equal talks, @meetups.find(3)["talks"]
   end
 
+  def test_the_token_is_minted_from_the_app_refresh_token_before_basecamp_token
+    sent = nil
+    response = Net::HTTPOK.new("1.1", "200", "OK")
+    response.define_singleton_method(:body) { JSON.dump(access_token: "minted", expires_in: 1_209_600) }
+    original = Net::HTTP.method(:post_form)
+    Net::HTTP.define_singleton_method(:post_form) { |uri, form| sent = [uri.to_s, form]; response }
+    token = with_env("BASECAMP_TOKEN" => "old", "BASECAMP_CLIENT_ID" => "id", "BASECAMP_CLIENT_SECRET" => "secret", "BASECAMP_REFRESH_TOKEN" => "refresh") do
+      Berlinrb::Sync.new(@meetups).basecamp_token
+    end
+
+    assert_equal "minted", token
+    assert_equal ["https://launchpad.37signals.com/authorization/token",
+                  { "type" => "refresh", "client_id" => "id", "client_secret" => "secret", "refresh_token" => "refresh" }], sent
+  ensure
+    Net::HTTP.define_singleton_method(:post_form, original)
+  end
+
+  def test_a_refused_refresh_token_fails_the_run
+    sync = Berlinrb::Sync.new(@meetups)
+    sync.define_singleton_method(:minted_token) { raise "Launchpad refused the refresh token with 401" }
+    with_env("BASECAMP_REFRESH_TOKEN" => "refresh") { sync.run(%i[basecamp luma_todos]) }
+
+    assert_equal ["Basecamp: API failed (Launchpad refused the refresh token with 401)",
+                  "Luma to-dos: failed (Launchpad refused the refresh token with 401)"], sync.failures
+  end
+
   def test_a_luma_todo_error_fails_the_run
     sync = sync()
     sync.instance_variable_set(:@basecamp_token, "token")

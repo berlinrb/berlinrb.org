@@ -91,10 +91,25 @@ module Berlinrb
       fields.transform_values(&:strip).reject { _2.empty? }
     end
 
-    # In CI the token comes from BASECAMP_TOKEN, locally from the signed-in
-    # basecamp CLI.
+    # In CI the token is minted from the berlinrb.org Launchpad app's refresh
+    # token (BASECAMP_CLIENT_ID, BASECAMP_CLIENT_SECRET and
+    # BASECAMP_REFRESH_TOKEN, set by bin/set-basecamp-token). Otherwise it
+    # comes from BASECAMP_TOKEN, or the signed-in basecamp CLI.
     def basecamp_token
-      @basecamp_token ||= ENV["BASECAMP_TOKEN"].to_s.empty? ? cli_token : ENV["BASECAMP_TOKEN"]
+      @basecamp_token ||= if !ENV["BASECAMP_REFRESH_TOKEN"].to_s.empty? then minted_token
+                          elsif !ENV["BASECAMP_TOKEN"].to_s.empty? then ENV["BASECAMP_TOKEN"]
+                          else cli_token
+                          end
+    end
+
+    def minted_token
+      response = Net::HTTP.post_form(URI("https://launchpad.37signals.com/authorization/token"),
+                                     "type" => "refresh", "client_id" => ENV.fetch("BASECAMP_CLIENT_ID"),
+                                     "client_secret" => ENV.fetch("BASECAMP_CLIENT_SECRET"),
+                                     "refresh_token" => ENV.fetch("BASECAMP_REFRESH_TOKEN"))
+      raise "Launchpad refused the refresh token with #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+
+      JSON.parse(response.body).fetch("access_token")
     end
 
     def cli_token
@@ -147,6 +162,7 @@ module Berlinrb
 
     def sync_luma_todos
       return missing_token("Luma to-dos") unless basecamp_token
+
       list = luma_todolist
       open = basecamp_pages("https://3.basecampapi.com/#{BASECAMP_ACCOUNT}/buckets/#{BASECAMP_PROJECT}/todolists/#{list["id"]}/todos.json")
       @meetups.list.each do |meetup|
