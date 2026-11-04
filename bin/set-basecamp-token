@@ -11,7 +11,7 @@
 # https://launchpad.37signals.com/integrations again and update the item.
 set -eu
 cd "$(dirname "$0")/.."
-item=${BASECAMP_APP:-"op://Personal/Berlin.rb Basecamp app"}
+item=${BASECAMP_APP:-"op://Berlin.rb/Berlin.rb Basecamp app"}
 client_id=$(op-cache read "$item/client_id")
 client_secret=$(op-cache read "$item/client_secret")
 refresh_token=$(op-cache read "$item/refresh_token")
