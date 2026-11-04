@@ -53,10 +53,39 @@ class SiteTest < Minitest::Test
 
   def test_header_uses_horizontal_logos_for_both_color_schemes
     home = read("index.html")
-    assert_includes home, 'srcset="/assets/logotype-dark.svg" media="(prefers-color-scheme: dark)"'
-    assert_includes home, 'src="/assets/logotype.svg" alt="Berlin.rb" width="618" height="195"'
+    assert_includes home, '<img class="logo-light" src="/assets/logotype.svg" alt="Berlin.rb" width="618" height="195">'
+    assert_includes home, '<img class="logo-dark" src="/assets/logotype-dark.svg" alt="Berlin.rb" width="618" height="195">'
     assert_includes home, 'aria-label="Berlin.rb home"'
     assert_includes home, 'rel="icon" href="assets/logo.svg"'
+  end
+
+  def test_every_page_applies_the_chosen_theme_before_the_stylesheet_and_offers_the_toggle_in_its_footer
+    pages = %w[index.html press/index.html talks/index.html meetups/1/index.html].map { [_1, read(_1)] }
+    pages += %w[imprint privacy].map { [_1, @site.send(:fill, File.read(File.join(Berlinrb::Site::ROOT, _1, "index.html")), "/#{_1}/")] }
+    pages.each do |name, html|
+      script = html.index(%(localStorage.getItem("theme")))
+      assert script, "#{name} has the theme script"
+      assert_operator html.index(%(<meta name="theme-color" content="#141311")), :<, script, "#{name}: the script reads the theme-color metas"
+      assert_operator script, :<, html.index(%(<link rel="stylesheet")), "#{name}: the theme applies before the first paint"
+      footer = html[%r{<footer.*</footer>}m]
+      assert_includes footer, %(<button class="theme-toggle" type="button"><span class="theme-to-dark">), name
+      assert_includes footer, %(Light theme</span></button>), name
+    end
+  end
+
+  def test_dark_only_styles_also_follow_the_theme_toggle
+    css = File.read(File.join(Berlinrb::Site::ROOT, "styles.css")).gsub(%r{/\*.*?\*/}m, "")
+    rules = ->(text) { text.scan(/^\s*([^{}@]+?)\s*\{([^{}]*)\}/).map { |selectors, body| [selectors.split(/,\s*/), body.split.join(" ")] } }
+    blocks = css.scan(/^@media \(prefers-color-scheme: dark\) \{\n(.*?)^\}/m).flatten
+    refute_empty blocks
+    forced = rules.(css.gsub(/^@media.*?^\}/m, ""))
+    blocks.flat_map(&rules).each do |selectors, body|
+      selectors.each do |selector|
+        assert selector.start_with?(%(:root:not([data-theme="light"]) )), "#{selector} would ignore a chosen light theme"
+        dark = selector.sub(%(:root:not([data-theme="light"])), %(:root[data-theme="dark"]))
+        assert forced.any? { |s, b| s.include?(dark) && b == body }, "#{dark} { #{body} } is missing, so a chosen dark theme misses it"
+      end
+    end
   end
 
   def test_footers_link_to_the_discord_channel

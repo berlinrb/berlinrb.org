@@ -1,0 +1,30 @@
+<%# Inline and before the stylesheet, so a chosen theme applies before the first paint. It must follow the theme-color metas. -%>
+<script>
+  (() => {
+    const root = document.documentElement
+    const system = matchMedia("(prefers-color-scheme: dark)")
+    const metas = [...document.querySelectorAll('meta[name="theme-color"]')]
+    const scheme = (meta) => (meta.media.includes("dark") ? "dark" : "light")
+    const colors = Object.fromEntries(metas.map((meta) => [scheme(meta), meta.content]))
+    // Storage throws when the browser blocks it; the toggle then lasts for the page.
+    const stored = () => { try { return localStorage.getItem("theme") } catch { return null } }
+    const store = (theme) => { try { theme ? localStorage.setItem("theme", theme) : localStorage.removeItem("theme") } catch {} }
+    const preferred = () => (system.matches ? "dark" : "light")
+    const current = () => root.dataset.theme || preferred()
+    const apply = (theme) => {
+      if (theme === "light" || theme === "dark") root.dataset.theme = theme
+      else delete root.dataset.theme
+      metas.forEach((meta) => { meta.content = colors[root.dataset.theme || scheme(meta)] })
+    }
+    apply(stored())
+    addEventListener("storage", (event) => { if (event.key === "theme") apply(event.newValue) })
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".theme-toggle")) return
+      const next = current() === "dark" ? "light" : "dark"
+      // Picking what the system already asks for goes back to following the system.
+      const theme = next === preferred() ? null : next
+      store(theme)
+      apply(theme)
+    })
+  })()
+</script>

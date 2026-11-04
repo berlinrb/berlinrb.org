@@ -1,5 +1,6 @@
+<%# Two logos rather than a <picture>: a <source> media query sees only the system preference, not the theme toggle. -%>
 <header class="site-header">
-  <a class="site-logo" href="/" aria-label="Berlin.rb home"><picture><source srcset="/assets/logotype-dark.svg" media="(prefers-color-scheme: dark)"><img src="/assets/logotype.svg" alt="Berlin.rb" width="618" height="195"></picture></a>
+  <a class="site-logo" href="/" aria-label="Berlin.rb home"><img class="logo-light" src="/assets/logotype.svg" alt="Berlin.rb" width="618" height="195"><img class="logo-dark" src="/assets/logotype-dark.svg" alt="Berlin.rb" width="618" height="195"></a>
   <nav class="site-nav" aria-label="Main">
 <%- [["Meetups", "/meetups/"], ["Talks", "/talks/"], ["Photos", "/photos/"], ["Get involved", "/get-involved/"]].each do |label, href| -%>
     <a href="<%= href %>"<%= ' aria-current="page"' if current == href %>><%= label %></a>
