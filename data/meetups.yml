@@ -113,6 +113,11 @@
       decisions. One example is the choice between refactoring and a rewrite. Andrzej
       will also present the current state of the art when it comes to human legacy
       code vs AI slop.
+  - speaker: Lukas Rieder
+    title: Neat Discoveries in AI
+    abstract: A talk about runtimes I built around progressively weirder models, showcasing
+      their capabilities.
+    format: Talk (25–30 min)
   livestream_luma: r4oli4jh
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
@@ -136,6 +141,9 @@
     <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
   venue: Le Wagon Berlin - Coding Bootcamp
   address: Rudi-Dutschke-Straße 26, Berlin
+  signups_online: 19
+  signups_in_person: 54
+  livestream: KT4l-G_W-0I
 - number: 4
   date: '2026-12-08'
   starts_at: '18:30'
