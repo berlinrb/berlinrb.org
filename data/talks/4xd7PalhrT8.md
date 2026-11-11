@@ -5,7 +5,7 @@
 - [10:33](https://www.youtube.com/watch?v=4xd7PalhrT8&t=633s) Domain-driven design maps the business to the code
 - [16:35](https://www.youtube.com/watch?v=4xd7PalhrT8&t=995s) Domains, process managers and read models
 - [19:18](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1158s) The building blocks in Ruby
-- [22:38](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1358s) A new operation at a Frankfurt Airport warehouse
+- [22:38](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1358s) A new operation at CHI Cargo, Frankfurt Airport
 - [30:17](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1817s) Who still reads the code: the harness
 - [32:43](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1963s) Architecture rules with ArchSpec
 - [36:45](https://www.youtube.com/watch?v=4xd7PalhrT8&t=2205s) Mutation testing with Mutant
@@ -19,7 +19,7 @@
 
 ## Summary
 
-Andrzej Krzywda has run [Arkency](https://arkency.com), a consultancy for large legacy Rails applications, for almost twenty years. He argues that architecture still matters with AI, because agents don't deal well with unstructured codebases. Arkency models the business as domains that take commands and publish events, process managers that react to those events, and read models built from them, a vocabulary agents follow well. With it, a cargo client at Frankfurt Airport shipped a new repackaging operation in around two weeks. Because people will review less code, he relies on a harness: ArchSpec to enforce architecture rules and track known violations, and Mutant to prove test coverage, so agents can refactor large codebases safely.
+Andrzej Krzywda has run [Arkency](https://arkency.com), a consultancy for large legacy Rails applications, for almost twenty years. He argues that architecture still matters with AI, because agents don't deal well with unstructured codebases. Arkency models the business as domains that take commands and publish events, process managers that react to those events, and read models built from them, a vocabulary agents follow well. With it, CHI Cargo, a cargo handler at Frankfurt Airport, shipped a new repackaging operation in around two weeks. Because people will review less code, he relies on a harness: ArchSpec to enforce architecture rules and track known violations, and Mutant to prove test coverage, so agents can refactor large codebases safely.
 
 ### Six events, and a calmer view [0:21](https://www.youtube.com/watch?v=4xd7PalhrT8&t=21s)
 
@@ -60,9 +60,9 @@ Andrzej shows the building blocks in code:
 
 Commands and events combine like an algebra. Andrzej doesn't claim this is the only or best architecture, but agents handle it very well, because its vocabulary is concise English that the programmers, the business and the code share.
 
-### A new operation at a Frankfurt Airport warehouse [22:38](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1358s)
+### A new operation at CHI Cargo [22:38](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1358s)
 
-One Arkency client runs a cargo business at Frankfurt Airport, moving shipments from planes through its warehouse to trucks, and back. About three years ago it started a domain-driven transformation of its Rails application, then around ten years old, using Arkency's [Rails Event Store](https://railseventstore.org). Such transformations never reach a state where every department is cleanly separated, Andrzej says. They stay hybrid: events published from service objects, aggregates only where needed, read models that sometimes query other data.
+Arkency's client [CHI Cargo](https://chi-cargo.com) runs a cargo business at Frankfurt Airport, moving shipments from planes through its warehouse to trucks, and back. About three years ago it started a domain-driven transformation of its Rails application, then around ten years old, using Arkency's [Rails Event Store](https://railseventstore.org). Such transformations never reach a state where every department is cleanly separated, Andrzej says. They stay hybrid: events published from service objects, aggregates only where needed, read models that sometimes query other data.
 
 Then came a new requirement: repackaging shipments, so that pieces of one shipment go onto different pallets, called load units, depending on whether they go to Hungary, France or Poland. Time was short, so programmers acted as product owners. Two of them went to the warehouse, because the warehouse workers are the real domain experts, not the people in the offices. [26:09](https://www.youtube.com/watch?v=4xd7PalhrT8&t=1569s)
 
@@ -148,6 +148,7 @@ Short explanations of ideas the talk builds on, written by Berlin.rb.
 
 - [Arkency](https://arkency.com): Andrzej's consultancy for large and legacy Rails applications.
 - [Arkency blog](https://blog.arkency.com): where Arkency writes about DDD, events and Rails.
+- [CHI Cargo](https://chi-cargo.com): the Frankfurt Airport cargo handler from Andrzej's case study.
 - [Rails Event Store](https://railseventstore.org): Arkency's library for publishing and handling events in Rails apps, with process managers and read models.
 - [ecommerce](https://github.com/RailsEventStore/ecommerce): the sample application with all the building blocks, the agent skills and the incremental Mutant setup.
 - [ArchSpec](https://rubygems.org/gems/archspec): Carmine Paolino's static architecture linter for Ruby and Rails.
