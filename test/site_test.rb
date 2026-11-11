@@ -41,7 +41,7 @@ class SiteTest < Minitest::Test
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How", "abstract" => "Code is cheap now.", "video" => "ghi" },
                     { "speaker" => "Rafal Cymerys", "title" => "Let Your Software", "video" => "def", "slides" => SLIDES }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
-        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb", "slides" => "/slides/3/marco-roth.pdf" }, { "speaker" => "Alex Adam" }] }
+        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb", "abstract" => "Templates, parsed.", "slides" => "/slides/3/marco-roth.pdf" }, { "speaker" => "Alex Adam" }] }
     ])
     @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), root: @root, out: @out)
     @site.build
@@ -124,6 +124,14 @@ class SiteTest < Minitest::Test
     assert_match %r{\A<span class="tip"><button type="button" popovertarget="ai-note" style="anchor-name: --ai-note"><svg [^>]+ aria-hidden="true">.+</svg>Q &amp; A</button>}, tip
     assert tip.end_with?(%(<span id="ai-note" popover style="position-anchor: --ai-note"><a href="/">Note</a></span></span>))
     assert_raises(ArgumentError) { @site.render_tip("AI note", "Label", "Note") }
+  end
+
+  def test_a_summary_replaces_the_abstract_on_the_talk_page
+    summarised = read("talks/stephen-margheim-the-zarchitecture-how/index.html")
+    refute_includes summarised, "About the talk"
+    refute_includes summarised, "<p>Code is cheap now.</p>"
+    assert_includes read("talks/stephen-margheim-the-zarchitecture-how.md"), "## About the talk\n\nCode is cheap now."
+    assert_includes read("talks/marco-roth-herb/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
   end
 
   def test_recorded_talks_without_a_summary_only_gain_the_player

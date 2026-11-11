@@ -30,7 +30,7 @@
 <%= section["html"].gsub(/^/, "  ") %>
 </section>
 <%- end -%>
-<%- unless talk["abstract"].to_s.empty? -%>
+<%- unless talk["abstract"].to_s.empty? || sections.any? { _1["id"] == "summary" } -%>
 
 <section class="page-section prose" aria-labelledby="abstract-title">
   <h2 id="abstract-title">About the talk</h2>
