@@ -107,6 +107,7 @@
   talks:
   - speaker: Andrzej Krzywda
     format: Talk (40 min)
+    video: 4xd7PalhrT8
     title: Rails architecture in the age of AI
     abstract: After over 15 years of doing DDD in Rails at Arkency, Andrzej will reflect
       which parts still make sense with AI. The economy has changed and so do architectural
@@ -142,6 +143,9 @@
     <p><strong>Recording:</strong> the talks are published on our <a href="https://www.youtube.com/@berlinrb_org">YouTube channel</a> afterwards, so you can catch up if the time doesn&#39;t work for you.</p>
   venue: Le Wagon Berlin - Coding Bootcamp
   address: Rudi-Dutschke-Straße 26, Berlin
+  signups_online: 19
+  signups_in_person: 54
+  livestream: KT4l-G_W-0I
 - number: 4
   date: '2026-12-08'
   starts_at: '18:30'

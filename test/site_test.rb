@@ -37,11 +37,11 @@ class SiteTest < Minitest::Test
     meetups = Berlinrb::Meetups.new([
       { "number" => 1, "date" => "2026-09-08", "starts_at" => "18:30", "venue" => "ablefy", "signups_in_person" => 100, "signups_online" => 11, "about" => "<p>From Luma</p>",
         "talks" => [{ "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "video" => "abc" }] },
-      { "number" => 2, "date" => "2026-10-13", "about" => "<p><strong>Rafał Cymerys</strong>, then Stephen Margheim</p>",
+      { "number" => 2, "date" => "2026-10-13", "livestream" => "live2", "about" => "<p><strong>Rafał Cymerys</strong>, then Stephen Margheim</p>",
         "talks" => [{ "speaker" => "Stephen Margheim", "title" => "The ZARchitecture: How", "abstract" => "Code is cheap now.", "video" => "ghi" },
                     { "speaker" => "Rafal Cymerys", "title" => "Let Your Software", "video" => "def", "slides" => SLIDES }] },
       { "number" => 3, "date" => "2026-11-10", "luma" => "05tfdlpk",
-        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb", "slides" => "/slides/3/marco-roth.pdf" }, { "speaker" => "Alex Adam" }] }
+        "talks" => [{ "speaker" => "Marco Roth", "title" => "Herb", "abstract" => "Templates, parsed.", "slides" => "/slides/3/marco-roth.pdf" }, { "speaker" => "Alex Adam" }] }
     ])
     @site = Berlinrb::Site.new(meetups, today: Date.new(2026, 10, 14), root: @root, out: @out)
     @site.build
@@ -124,6 +124,20 @@ class SiteTest < Minitest::Test
     assert_match %r{\A<span class="tip"><button type="button" popovertarget="ai-note" style="anchor-name: --ai-note"><svg [^>]+ aria-hidden="true">.+</svg>Q &amp; A</button>}, tip
     assert tip.end_with?(%(<span id="ai-note" popover style="position-anchor: --ai-note"><a href="/">Note</a></span></span>))
     assert_raises(ArgumentError) { @site.render_tip("AI note", "Label", "Note") }
+  end
+
+  def test_a_summary_replaces_the_abstract_on_the_talk_page
+    talk = { "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "In his own words.", "video" => "abc" }
+    Dir.mktmpdir do |out|
+      Berlinrb::Site.new(Berlinrb::Meetups.new([{ "number" => 1, "date" => "2026-09-08", "talks" => [talk] }]), today: Date.new(2026, 10, 14), root: @root, out: out).build
+      page = File.read(File.join(out, "talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html"))
+      refute_includes page, "About the talk"
+      refute_includes page, "<p>In his own words.</p>"
+      assert_includes File.read(File.join(out, "talks/carmine-paolino-rubyllm-2-0-beyond-agents.md")), "## About the talk\n\nIn his own words."
+    end
+    # Without an opening paragraph to describe the talk, the abstract stays.
+    assert_includes read("talks/stephen-margheim-the-zarchitecture-how/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
+    assert_includes read("talks/marco-roth-herb/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
   end
 
   def test_recorded_talks_without_a_summary_only_gain_the_player
@@ -211,6 +225,29 @@ class SiteTest < Minitest::Test
     assert_includes talks, %(data-kind="talk")
     meetup = read("meetups/1/index.html")
     assert_includes meetup, "<dt>Recorded talks</dt>"
+  end
+
+  def test_talk_cards_open_the_talk_page_instead_of_youtube
+    link = %(<a class="card-link" href="/talks/carmine-paolino-rubyllm-2-0-beyond-agents/">)
+    featured = read("talks/index.html")[%r{<section class="featured-talk".*?</section>}m]
+    assert_includes featured, %(<a class="card-link" href="/talks/rafal-cymerys-let-your-software/">)
+    refute_includes featured, "youtube.com"
+    { "talks/index.html" => link, "meetups/1/index.html" => link,
+      "index.html" => %(<a class="card-link" href="/talks/stephen-margheim-the-zarchitecture-how/">) }.each do |path, card|
+      page = read(path)
+      assert page.include?(card), "#{path} links the card to the talk page"
+      assert page.include?(%(<span class="card-arrow"><svg)), "#{path} shows the card arrow"
+      cards = page.scan(%r{<article class="talk-card">.*?</article>|<section class="featured-talk".*?</section>|<ul class="latest-talks-list">.*?</ul>}m)
+      refute_empty cards, path
+      cards.each { refute_includes _1, "video-link", "#{path} cards have no play button" }
+    end
+    refute_includes read("meetups/3/index.html")[/<h3>Alex Adam<\/h3>.*?<\/article>/m], "card-arrow"
+  end
+
+  def test_livestream_cards_say_they_leave_for_youtube
+    card = read("talks/index.html")[%r{<li data-kind="livestream">.*?</li>}m]
+    assert_includes card, %(<a class="card-link" href="https://www.youtube.com/watch?v=live2">)
+    assert_includes card, %(d="M5.22 14.78) # arrow-up-right
   end
 
   def test_talks_and_meetups_have_markdown_versions_for_agents
