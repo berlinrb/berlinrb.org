@@ -84,7 +84,7 @@ This needs very good test coverage, because without it the agents are blind: the
 
 #### Mutation testing with Mutant [36:45](https://www.youtube.com/watch?v=4xd7PalhrT8&t=2205s)
 
-Andrzej calls mutation testing the only way to check whether coverage really is 100%. It tests the tests: it changes the code, for example a `+ 1` into a `+ 0`, runs the tests, and checks that one fails. Given a module, it works through its syntax tree and finds the operators no test covers. Andrzej uses and recommends Mutant, which costs $30 a month but has the largest number of mutations. Once the tests catch these, you can refactor more confidently and fix the ArchSpec violations. ArchSpec and Mutant together are tools for fixing an existing codebase.
+Andrzej calls mutation testing the only way to check whether coverage really is 100%. It tests the tests: it changes the code, for example a `+ 1` into a `+ 0`, runs the tests, and checks that one fails. Given a module, it mutates its syntax tree and, as Andrzej puts it, finds "all the operators that were not tested". Andrzej uses and recommends Mutant, which costs $30 a month but has the largest number of mutations. Once the tests catch these, you can refactor more confidently and fix the ArchSpec violations. ArchSpec and Mutant together are tools for fixing an existing codebase.
 
 ### Refactoring at AI scale [38:02](https://www.youtube.com/watch?v=4xd7PalhrT8&t=2282s)
 
