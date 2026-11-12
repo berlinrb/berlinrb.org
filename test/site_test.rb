@@ -87,7 +87,7 @@ class SiteTest < Minitest::Test
     assert_includes talk, %(<a class="video-link player-start" href="https://www.youtube.com/watch?v=abc">)
     assert_includes talk, %(<ul style="--rows: 2">)
     assert_includes talk, %(<li><a href="https://www.youtube.com/watch?v=abc&amp;t=0s">0:00</a> Intro</li>)
-    assert_includes talk, %(<h3>Agents <a class="timestamp" href="https://www.youtube.com/watch?v=abc&amp;t=90s">1:30</a></h3>)
+    assert_includes talk, %(<h3 id="agents">Agents <a class="timestamp" href="https://www.youtube.com/watch?v=abc&amp;t=90s">1:30</a><a class="section-link" href="#agents" aria-label="Link to this section: Agents">)
     assert_includes talk, %(<section class="page-section prose talk-notes" id="mentioned-in-the-talk")
     assert_includes talk, %(Written with AI</button><span id="ai-note" popover style="position-anchor: --ai-note">This summary was written with AI from the recording, then checked by Berlin.rb and Carmine Paolino.)
     assert_includes talk, "&lt;script&gt;alert(1)&lt;/script&gt;"
@@ -138,6 +138,30 @@ class SiteTest < Minitest::Test
     # Without an opening paragraph to describe the talk, the abstract stays.
     assert_includes read("talks/stephen-margheim-the-zarchitecture-how/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
     assert_includes read("talks/marco-roth-herb/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
+  end
+
+  def test_every_heading_in_a_summary_links_to_itself_with_an_id_of_its_own
+    File.write(File.join(@root, "data/talks/xyz.md"), <<~MD)
+      ## Summary
+
+      ### Takeaways [1:00](https://www.youtube.com/watch?v=xyz&t=60s)
+
+      #### Ruby & **Rails** with `map` [1:30](https://www.youtube.com/watch?v=xyz&t=90s)
+
+      ### Takeaways
+
+      ### Summary
+
+      ### 🚀
+
+      ## Background
+
+      - **Not a heading.** Text.
+    MD
+    headings = @site.summary_sections({ "video" => "xyz" }).flat_map { _1["html"].scan(%r{<(h[34]) id="([^"]+)">(.*?)</\1>}) }
+    assert_equal %w[takeaways ruby-rails-with-map takeaways-2 summary-2 section], headings.map { _2 }
+    assert_includes headings[1][2], %(<a class="timestamp" href="https://www.youtube.com/watch?v=xyz&amp;t=90s">1:30</a><a class="section-link" href="#ruby-rails-with-map" aria-label="Link to this section: Ruby &amp; Rails with map">)
+    headings.each { |_, id, inner| assert_equal 1, inner.scan(%(href="##{id}")).size, id }
   end
 
   def test_recorded_talks_without_a_summary_only_gain_the_player

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "cgi"
 require "erb"
 require "fileutils"
 require "json"
@@ -103,19 +104,40 @@ module Berlinrb
     # A recorded talk's written companion, data/talks/<video>.md, split at its
     # ## headings into the sections its page shows. Links to moments in the
     # recording become play buttons, except in the chapter list, which is
-    # nothing but those links.
+    # nothing but those links. Every heading within a section gets an id and
+    # a link to itself, so a part of the talk can be shared.
     def summary_sections(talk)
       file = talk["video"] && summary_file(talk)
       return [] unless file && File.exist?(file)
-      (@summaries ||= {})[file] ||= Markdown.sections(File.read(file)).map do |title, markdown|
-        id = Meetups.slug(title)
-        html = Markdown.html(markdown)
-        html = if id == "chapters"
-          html.sub("<ul>", %(<ul style="--rows: #{(html.scan("<li>").size / 2.0).ceil}">))
-        else
-          html.gsub(%(<a href="#{video_url(talk["video"])}&amp;t=), %(<a class="timestamp" href="#{video_url(talk["video"])}&amp;t=))
+      (@summaries ||= {})[file] ||= begin
+        parts = Markdown.sections(File.read(file)).map { |title, markdown| [Meetups.slug(title), title, markdown] }
+        taken = PAGE_IDS + parts.flat_map { |id, *| [id, "#{id}-title"] }
+        parts.map do |id, title, markdown|
+          html = Markdown.html(markdown)
+          html = if id == "chapters"
+            html.sub("<ul>", %(<ul style="--rows: #{(html.scan("<li>").size / 2.0).ceil}">))
+          else
+            link_headings(html.gsub(%(<a href="#{video_url(talk["video"])}&amp;t=), %(<a class="timestamp" href="#{video_url(talk["video"])}&amp;t=)), taken)
+          end
+          { "id" => id, "title" => title, "markdown" => markdown, "html" => html }
         end
-        { "id" => id, "title" => title, "markdown" => markdown, "html" => html }
+      end
+    end
+
+    # Ids a talk page uses outside its summary, which no heading may take.
+    PAGE_IDS = %w[chapters-title abstract-title ai-note].freeze
+
+    # The id comes from the heading's words without its play button, and is
+    # numbered when another heading on the page already has it.
+    def link_headings(html, taken)
+      html.gsub(%r{<(h[34])>(.*?)</\1>}) do
+        level, inner = $1, $2
+        title = inner.sub(%r{\s*<a class="timestamp".*?</a>}, "").gsub(/<[^>]+>/, "").strip
+        base = Meetups.slug(CGI.unescapeHTML(title)).then { _1.empty? ? "section" : _1 }
+        id, number = base, 1
+        id = "#{base}-#{number += 1}" while taken.include?(id)
+        taken << id
+        %(<#{level} id="#{id}">#{inner}#{render("section_link", id: id, title: title).strip}</#{level}>)
       end
     end
 

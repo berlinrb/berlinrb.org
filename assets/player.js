@@ -179,8 +179,28 @@
     const at = secondsIn(link.href)
     if (at === null) return
     event.preventDefault()
+    // A heading's play button also puts that heading's address in the
+    // address bar, ready to share.
+    const heading = link.closest(".talk-notes [id]:is(h3, h4)")
+    if (heading) history.replaceState(null, "", `#${heading.id}`)
     seek(at)
   })
+
+  // A link to a heading in the summary, opened or followed, sets the play
+  // button to that heading's moment. Nothing loads from YouTube until someone
+  // presses it, and the page stays where the link took it.
+  function cue() {
+    if (frame) return
+    const id = decodeURIComponent(location.hash.slice(1))
+    const heading = id && document.getElementById(id)
+    const at = heading?.matches(".talk-notes :is(h3, h4)") ? secondsIn(heading.querySelector(".timestamp")?.href) : null
+    if (at === null) return
+    pending = at
+    label.firstChild.textContent = `Play here from ${format(at)}`
+    float()
+  }
+  cue()
+  window.addEventListener("hashchange", cue)
 
   window.addEventListener("message", (event) => {
     if (event.origin !== youtube || !frame || event.source !== frame.contentWindow) return
