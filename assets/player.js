@@ -190,17 +190,19 @@
   // button to that heading's moment. Nothing loads from YouTube until someone
   // presses it, and the page stays where the link took it.
   function cue() {
-    if (frame) return
-    const id = decodeURIComponent(location.hash.slice(1))
-    const heading = id && document.getElementById(id)
+    if (frame || !location.hash) return
+    let heading
+    try {
+      heading = document.getElementById(decodeURIComponent(location.hash.slice(1)))
+    } catch {
+      return
+    }
     const at = heading?.matches(".talk-notes :is(h3, h4)") ? secondsIn(heading.querySelector(".timestamp")?.href) : null
     if (at === null) return
     pending = at
     label.firstChild.textContent = `Play here from ${format(at)}`
     float()
   }
-  cue()
-  window.addEventListener("hashchange", cue)
 
   window.addEventListener("message", (event) => {
     if (event.origin !== youtube || !frame || event.source !== frame.contentWindow) return
@@ -233,4 +235,7 @@
     inView = entry.intersectionRatio >= 0.5
     float()
   }, { threshold: [0, 0.5] }).observe(slot)
+
+  cue()
+  window.addEventListener("hashchange", cue)
 })()

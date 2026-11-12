@@ -17,13 +17,13 @@
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
       event.preventDefault()
       const url = new URL(link.href)
-      history.replaceState(null, "", url.hash)
       try {
         await navigator.clipboard.writeText(url.href)
       } catch {
         location.hash = url.hash
         return
       }
+      history.replaceState(null, "", url.hash)
       clearTimeout(timer)
       link.classList.add("is-copied")
       status.textContent = "Link copied"
