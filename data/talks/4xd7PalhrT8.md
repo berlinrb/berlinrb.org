@@ -84,7 +84,7 @@ This needs very good test coverage, because without it the agents are blind: the
 
 #### Mutation testing with Mutant [36:45](https://www.youtube.com/watch?v=4xd7PalhrT8&t=2205s)
 
-Mutation testing is the only way to check whether coverage really is 100%. It tests the tests: it changes the code, for example a `+ 1` into a `+ 0`, runs the tests, and checks that one fails. It does this for every node in the syntax tree, finding every operator no test covers. Andrzej uses and recommends Mutant, which costs $30 a month but has the largest number of mutations. With coverage proven this way, you can refactor confidently and fix the ArchSpec violations. ArchSpec and Mutant together are tools for fixing an existing codebase.
+Andrzej calls mutation testing the only way to check whether coverage really is 100%. It tests the tests: it changes the code, for example a `+ 1` into a `+ 0`, runs the tests, and checks that one fails. Given a module, it works through its syntax tree and finds the operators no test covers. Andrzej uses and recommends Mutant, which costs $30 a month but has the largest number of mutations. Once the tests catch these, you can refactor more confidently and fix the ArchSpec violations. ArchSpec and Mutant together are tools for fixing an existing codebase.
 
 ### Refactoring at AI scale [38:02](https://www.youtube.com/watch?v=4xd7PalhrT8&t=2282s)
 
@@ -106,7 +106,7 @@ Developers are becoming architects, platform engineers and also managers of agen
 
 ### Residual architecture [47:42](https://www.youtube.com/watch?v=4xd7PalhrT8&t=2862s)
 
-Architects also have to prepare for the unknown. Arkency's book club read Barry O'Reilly's [Residues](https://leanpub.com/residuality), which promotes residual architecture, an idea operating at a different level from DDD. You start with a basic architecture, Active Record or DDD, and come up with many stressors from outside: what could hit the system, what would happen, and which parts become attractors. The goal, hyperliminality, is to cover the possible scenarios, at least as an intellectual exercise in how you would fix each one.
+Architects also have to prepare for the unknown. Arkency's book club read Barry O'Reilly's [Residues](https://leanpub.com/residuality), which promotes residual architecture, an idea operating at a different level from DDD. You start with a basic architecture, Active Record or DDD, and come up with many stressors from outside: what could hit the system, what would happen, and which parts become attractors. The aim is to cover every type of problem rather than every possible scenario, at least as an intellectual exercise in how you would fix each one.
 
 The book's example is a network of electric vehicle charging stations, with stressors such as a car accident; stressors are often physical. For software, Andrzej asks: if it ever stops being safe to keep your website up, do you have one button to shut everything down, agreed with management, or will you run around in a panic in the middle of a Sunday night? A table of stressors against components shows which scenarios are most catastrophic, and which components fail together even when they aren't coupled in code, like a users microservice and a CRM. [50:15](https://www.youtube.com/watch?v=4xd7PalhrT8&t=3015s)
 
