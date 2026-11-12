@@ -127,10 +127,16 @@ class SiteTest < Minitest::Test
   end
 
   def test_a_summary_replaces_the_abstract_on_the_talk_page
-    summarised = read("talks/stephen-margheim-the-zarchitecture-how/index.html")
-    refute_includes summarised, "About the talk"
-    refute_includes summarised, "<p>Code is cheap now.</p>"
-    assert_includes read("talks/stephen-margheim-the-zarchitecture-how.md"), "## About the talk\n\nCode is cheap now."
+    talk = { "speaker" => "Carmine Paolino", "title" => "RubyLLM 2.0: Beyond Agents", "abstract" => "In his own words.", "video" => "abc" }
+    Dir.mktmpdir do |out|
+      Berlinrb::Site.new(Berlinrb::Meetups.new([{ "number" => 1, "date" => "2026-09-08", "talks" => [talk] }]), today: Date.new(2026, 10, 14), root: @root, out: out).build
+      page = File.read(File.join(out, "talks/carmine-paolino-rubyllm-2-0-beyond-agents/index.html"))
+      refute_includes page, "About the talk"
+      refute_includes page, "<p>In his own words.</p>"
+      assert_includes File.read(File.join(out, "talks/carmine-paolino-rubyllm-2-0-beyond-agents.md")), "## About the talk\n\nIn his own words."
+    end
+    # Without an opening paragraph to describe the talk, the abstract stays.
+    assert_includes read("talks/stephen-margheim-the-zarchitecture-how/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
     assert_includes read("talks/marco-roth-herb/index.html"), %(<h2 id="abstract-title">About the talk</h2>)
   end
 
