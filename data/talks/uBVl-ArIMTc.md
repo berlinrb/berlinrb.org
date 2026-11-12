@@ -86,7 +86,7 @@ Asked to explain the canned fish, Lukas told the story of Matthew Carlson, a You
 ### From the Q&A [29:05](https://www.youtube.com/watch?v=uBVl-ArIMTc&t=1745s)
 
 - **What about Apple's Siri voices?** An audience member who uses `say` a lot pointed out that Apple's default voice sounds like it's from 2001, because it is. In the settings you can download the Siri voices, about 400 MB, which were designed for phones with limited memory and power, are multilingual and sound good, and `say` can use them. Lukas didn't know, and might connect his runtime to them. [29:05](https://www.youtube.com/watch?v=uBVl-ArIMTc&t=1745s)
-- **Have you tried Microsoft's neural voices?** Another audience member built a Claude Code skill that reads Claude's answers aloud, with a small Swift app to control playback. It uses the neural voices behind Microsoft Edge's read-aloud feature, through a CLI someone else made. The voices need no API key and are very fast. Lukas will check them out. [30:38](https://www.youtube.com/watch?v=uBVl-ArIMTc&t=1838s)
+- **Have you tried Microsoft's neural voices?** Another audience member built a Claude Code skill that reads Claude's answers aloud, with a small Swift app to control playback. It uses the neural voices behind Microsoft Edge's read-aloud feature, through `edge-tts`, a CLI someone else made. The voices need no API key and are very fast. Lukas will check them out. [30:38](https://www.youtube.com/watch?v=uBVl-ArIMTc&t=1838s)
 - **Did you know macOS ships with a built-in LLM?** A third audience member pointed out the small language model that comes with the Mac, and recommended MLX as an insanely powerful way to run models. [31:49](https://www.youtube.com/watch?v=uBVl-ArIMTc&t=1909s)
 
 ## Background
@@ -124,3 +124,4 @@ Short explanations of ideas the talk builds on, written by Berlin.rb.
 - [TRIBE v2](https://github.com/facebookresearch/tribev2): Meta's model for predicting brain responses.
 - [Canned Fish Files](https://www.youtube.com/@CannedFishFiles): Matthew Carlson's YouTube channel about canned fish.
 - [Apple Foundation Models](https://developer.apple.com/documentation/foundationmodels): the framework for the on-device language model that ships with the Mac, raised in the Q&A.
+- [edge-tts](https://github.com/rany2/edge-tts): a Python CLI and library for the neural voices behind Microsoft Edge's read-aloud feature, raised in the Q&A.
