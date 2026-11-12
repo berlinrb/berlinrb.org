@@ -221,6 +221,12 @@ module Berlinrb
       render("talk_card", talk: talk, show_meetup: meetup).strip
     end
 
+    # The arrow at the foot of a card whose title link covers the whole card.
+    # It points up and out when the card leaves the site.
+    def render_card_arrow(external: false)
+      render("card_arrow", external: external).strip
+    end
+
     # A pill that opens a short note beside it. The note is HTML, so escape
     # what goes into it; the id names the pill's anchor, so each on a page
     # needs its own.

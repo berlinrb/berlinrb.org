@@ -1,17 +1,17 @@
 <article class="talk-card">
 <%- if talk["video"] -%>
-  <a class="video-link" href="<%= site.talk_path(talk) %>" tabindex="-1" aria-hidden="true">
+  <div class="talk-thumb">
 <%- if site.thumbnail?(talk["video"]) -%>
     <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720" loading="lazy">
 <%- end -%>
-  </a>
+  </div>
 <%- end -%>
   <div class="talk-card-body">
 <%- if show_meetup -%>
     <p class="talk-card-meta"><a href="<%= site.meetup_path(talk["meetup"]) %>">Berlin.rb #<%= talk["meetup"]["number"] %></a> &middot; <time datetime="<%= talk["meetup"]["date"] %>"><%= site.short_date(talk["meetup"]["date"]) %></time></p>
 <%- end -%>
 <%- if talk["title"] -%>
-    <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
+    <h3><a class="card-link" href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
     <p class="talk-card-speaker"><%= h talk["speaker"] %></p>
 <%- else -%>
     <h3><%= h talk["speaker"] %></h3>
@@ -19,6 +19,9 @@
 <%- end -%>
 <%- unless (blurb = site.blurb(talk)).empty? -%>
     <p class="talk-card-abstract"><%= h site.excerpt(blurb, 32) %></p>
+<%- end -%>
+<%- if talk["title"] -%>
+    <%= site.render_card_arrow %>
 <%- end -%>
   </div>
 </article>

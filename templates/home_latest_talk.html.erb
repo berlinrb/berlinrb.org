@@ -11,17 +11,18 @@
 <%- talks.each do |talk| -%>
     <li>
 <%- if talk["video"] -%>
-      <a class="video-link" href="<%= site.talk_path(talk) %>" tabindex="-1" aria-hidden="true">
+      <div class="talk-thumb">
 <%- if site.thumbnail?(talk["video"]) -%>
         <img src="<%= site.thumbnail(talk["video"]) %>" alt="" width="1280" height="720" loading="lazy">
 <%- end -%>
-      </a>
+      </div>
 <%- end -%>
-      <h3><a href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
+      <h3><a class="card-link" href="<%= site.talk_path(talk) %>"><%= h talk["title"] %></a></h3>
       <p class="latest-speaker"><%= h talk["speaker"] %></p>
 <%- unless (blurb = site.blurb(talk)).empty? -%>
       <p class="latest-abstract"><%= h site.excerpt(blurb, 26) %></p>
 <%- end -%>
+      <%= site.render_card_arrow %>
     </li>
 <%- end -%>
   </ul>
