@@ -1448,7 +1448,6 @@ a:hover {
 /* Each heading links to itself (assets/section-links.js). On screens with a
    pointer the link shows on hover or focus; on touch screens it stays. */
 .talk-notes :is(h3, h4)[id] {
-  width: fit-content;
   scroll-margin-top: 24px;
 }
 
@@ -1506,20 +1505,58 @@ a:hover {
   }
 }
 
-/* The heading a link points at glows for a moment, so the reader sees
-   which part was meant */
+/* The heading a link points at gets a ruby bar in the margin for a few
+   seconds, so the reader sees which part was meant. The text never moves. */
+.talk-notes :is(h3, h4)[id] {
+  position: relative;
+}
+
+.talk-notes :is(h3, h4)[id]::before {
+  position: absolute;
+  top: 0.1em;
+  bottom: 0.1em;
+  left: -16px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--ruby);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.talk-notes :is(h3, h4):target::before {
+  animation: target-mark 3.2s ease-out;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .talk-notes :is(h3, h4):target {
-    border-radius: 6px;
-    animation: target-glow 2.4s ease-out;
+  .talk-notes :is(h3, h4):target::before {
+    animation-name: target-mark-grow;
   }
 }
 
-@keyframes target-glow {
-  from,
-  30% {
-    background: color-mix(in srgb, var(--ruby) 12%, transparent);
-    box-shadow: 0 0 0 8px color-mix(in srgb, var(--ruby) 12%, transparent);
+@media (max-width: 639px) {
+  .talk-notes :is(h3, h4)[id]::before {
+    left: -11px;
+  }
+}
+
+@keyframes target-mark {
+  0%,
+  65% {
+    opacity: 1;
+  }
+}
+
+@keyframes target-mark-grow {
+  0% {
+    opacity: 1;
+    transform: scaleY(0);
+  }
+
+  12%,
+  65% {
+    opacity: 1;
+    transform: none;
   }
 }
 
