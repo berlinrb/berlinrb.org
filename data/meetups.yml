@@ -107,6 +107,7 @@
   talks:
   - speaker: Andrzej Krzywda
     format: Talk (40 min)
+    video: 4xd7PalhrT8
     title: Rails architecture in the age of AI
     abstract: After over 15 years of doing DDD in Rails at Arkency, Andrzej will reflect
       which parts still make sense with AI. The economy has changed and so do architectural
