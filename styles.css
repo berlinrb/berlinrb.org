@@ -1445,6 +1445,121 @@ a:hover {
   line-height: 1.3;
 }
 
+/* Each heading links to itself (assets/section-links.js). On screens with a
+   pointer the link shows on hover or focus; on touch screens it stays. */
+.talk-notes :is(h3, h4)[id] {
+  scroll-margin-top: 24px;
+}
+
+.section-link {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin: -4px 0 -4px 4px;
+  border-radius: 999px;
+  color: var(--muted);
+  vertical-align: middle;
+  transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.section-link svg {
+  grid-area: 1 / 1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.section-link:hover {
+  background: var(--glow-soft);
+  color: var(--ruby);
+}
+
+.section-link:focus-visible {
+  outline: 2px solid var(--ruby);
+  outline-offset: 1px;
+}
+
+.section-link-done,
+.section-link.is-copied .section-link-icon {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.section-link.is-copied {
+  color: var(--ruby);
+}
+
+.section-link.is-copied .section-link-done {
+  opacity: 1;
+  transform: none;
+}
+
+@media (hover: hover) {
+  .section-link {
+    opacity: 0;
+  }
+
+  :is(h3, h4):is(:hover, :target) > .section-link,
+  .section-link:focus-visible,
+  .section-link.is-copied {
+    opacity: 1;
+  }
+}
+
+/* The heading a link points at gets a ruby bar in the margin for a few
+   seconds, so the reader sees which part was meant. The text never moves. */
+.talk-notes :is(h3, h4)[id] {
+  position: relative;
+}
+
+.talk-notes :is(h3, h4)[id]::before {
+  position: absolute;
+  top: 0.1em;
+  bottom: 0.1em;
+  left: -16px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--ruby);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.talk-notes :is(h3, h4):target::before {
+  animation: target-mark 3.2s ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .talk-notes :is(h3, h4):target::before {
+    animation-name: target-mark-grow;
+  }
+}
+
+@media (max-width: 639px) {
+  .talk-notes :is(h3, h4)[id]::before {
+    left: -11px;
+  }
+}
+
+@keyframes target-mark {
+  0%,
+  65% {
+    opacity: 1;
+  }
+}
+
+@keyframes target-mark-grow {
+  0% {
+    opacity: 1;
+    transform: scaleY(0);
+  }
+
+  12%,
+  65% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .talk-notes ul {
   margin: 0 0 14px;
   max-width: 68ch;
