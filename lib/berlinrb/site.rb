@@ -328,13 +328,13 @@ module Berlinrb
         { title: "Photos \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
           path: "/photos/", image: past.lazy.map { photos(_1).first }.find(&:itself)&.fetch("src"), ld: [breadcrumbs([["Photos", "/photos/"]])] }
       when "meetups"
-        { title: "Meetups \u00b7 Berlin.rb", description: "Every Berlin.rb meetup, past and upcoming, with talks, recordings and photos.",
+        { title: "Ruby Meetups in Berlin \u00b7 Berlin.rb", description: "Every Berlin.rb Ruby meetup in Berlin, past and upcoming, with talks, recordings and photos.",
           path: "/meetups/", image: nil, ld: [breadcrumbs([["Meetups", "/meetups/"]])] }
       when "get_involved"
         { title: "Get involved \u00b7 Berlin.rb", description: "Give a talk at Berlin.rb, host a meetup at your office, or sponsor one. Tell us and an organizer gets back to you.",
           path: "/get-involved/", image: nil, ld: [breadcrumbs([["Get involved", "/get-involved/"]])] }
       when "talks"
-        { title: "Talks · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
+        { title: "Ruby and Rails Talks with Recordings · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
           path: "/talks/", image: nil, ld: [breadcrumbs([["Talks", "/talks/"]])] }
       end
     end

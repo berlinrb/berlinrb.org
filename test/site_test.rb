@@ -322,4 +322,10 @@ class SiteTest < Minitest::Test
     crumbs = graph.find { _1["@type"] == "BreadcrumbList" }["itemListElement"]
     assert_equal "https://berlinrb.org/meetups/", crumbs[1]["item"]
   end
+
+  def test_list_pages_say_what_they_list_in_their_titles
+    assert_includes read("index.html"), "<title>Berlin.rb &middot; Ruby and Rails Meetup for the Berlin Ruby Community</title>"
+    assert_includes read("meetups/index.html"), "<title>Ruby Meetups in Berlin · Berlin.rb</title>"
+    assert_includes read("talks/index.html"), "<title>Ruby and Rails Talks with Recordings · Berlin.rb</title>"
+  end
 end
