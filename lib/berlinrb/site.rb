@@ -235,6 +235,18 @@ module Berlinrb
       list.size > words ? "#{list.first(words).join(" ")}…" : list.join(" ")
     end
 
+    # Search results cut titles past about 65 characters and descriptions past
+    # about 160, so pages keep theirs within that.
+    TITLE_LIMIT = 65
+    DESCRIPTION_LIMIT = 160
+
+    # The text up to the last whole word that fits the limit, with an ellipsis.
+    def snippet(text, limit = DESCRIPTION_LIMIT)
+      text = text.to_s.split.join(" ")
+      return text if text.length <= limit
+      "#{text[0, limit].sub(/\s+\S*\z/, "").sub(/[\s,;:.]+\z/, "")}…"
+    end
+
     def render_gallery(meetup)
       render("gallery", meetup: meetup).strip
     end
@@ -277,7 +289,8 @@ module Berlinrb
         "eventStatus" => "https://schema.org/EventScheduled",
         "eventAttendanceMode" => meetup["livestream_luma"] ? "https://schema.org/MixedEventAttendanceMode" : "https://schema.org/OfflineEventAttendanceMode",
         "location" => place(meetup),
-        "organizer" => { "@id" => "#{ORIGIN}/#organization" },
+        "organizer" => { "@type" => "Organization", "@id" => "#{ORIGIN}/#organization", "name" => "Berlin.rb", "url" => "#{ORIGIN}/" },
+        "performer" => talks_for(meetup).map { { "@type" => "Person", "name" => _1["speaker"] } }.then { _1.empty? ? nil : _1 },
         "isAccessibleForFree" => true,
         "offers" => meetup["luma"] && { "@type" => "Offer", "url" => luma_url(meetup["luma"]), "price" => 0, "priceCurrency" => "EUR", "availability" => "https://schema.org/InStock" },
         "image" => "#{ORIGIN}/assets/og.png",
@@ -326,26 +339,41 @@ module Berlinrb
     def head(name, meetup: nil, talk: nil)
       case name
       when "meetup"
-        { title: "Berlin.rb ##{meetup["number"]}: #{talks_for(meetup).map { short_title(_1) || _1["speaker"] }.join(", ").then { _1.empty? ? short_date(meetup["date"]) : _1 }}", description: description(meetup),
+        { title: meetup_title(meetup), description: snippet(description(meetup)),
           path: meetup_path(meetup), alternate: markdown_url(meetup_path(meetup)), image: photos(meetup).first&.fetch("src") || talks_for(meetup).find { _1["video"] && thumbnail?(_1["video"]) }&.then { thumbnail(_1["video"]) },
-          ld: [event_ld(meetup), breadcrumbs([["Meetups", "/#past-meetups"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
+          ld: [event_ld(meetup), breadcrumbs([["Meetups", "/meetups/"], ["Berlin.rb ##{meetup["number"]}", meetup_path(meetup)]])] }
       when "talk"
-        { title: "#{talk["title"]} · #{talk["speaker"]} · Berlin.rb", description: excerpt(tldr(talk) || talk["abstract"], 30).then { _1.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : _1 },
+        { title: talk_title(talk), description: snippet(tldr(talk) || talk["abstract"]).then { _1.empty? ? "#{talk["title"]}, a talk by #{talk["speaker"]} at Berlin.rb ##{talk["meetup"]["number"]}." : _1 },
           path: talk_path(talk), alternate: markdown_url(talk_path(talk)), image: talk["video"] && thumbnail?(talk["video"]) ? thumbnail(talk["video"]) : nil,
           ld: [talk_ld(talk), breadcrumbs([["Berlin.rb ##{talk["meetup"]["number"]}", meetup_path(talk["meetup"])], [talk["title"], talk_path(talk)]])] }
       when "photos"
         { title: "Photos \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
           path: "/photos/", image: past.lazy.map { photos(_1).first }.find(&:itself)&.fetch("src"), ld: [breadcrumbs([["Photos", "/photos/"]])] }
       when "meetups"
-        { title: "Meetups \u00b7 Berlin.rb", description: "Every Berlin.rb meetup, past and upcoming, with talks, recordings and photos.",
+        { title: "Ruby Meetups in Berlin \u00b7 Berlin.rb", description: "Every Berlin.rb Ruby meetup in Berlin, past and upcoming, with talks, recordings and photos.",
           path: "/meetups/", image: nil, ld: [breadcrumbs([["Meetups", "/meetups/"]])] }
       when "get_involved"
         { title: "Get involved \u00b7 Berlin.rb", description: "Give a talk at Berlin.rb, host a meetup at your office, or sponsor one. Tell us and an organizer gets back to you.",
           path: "/get-involved/", image: nil, ld: [breadcrumbs([["Get involved", "/get-involved/"]])] }
       when "talks"
-        { title: "Talks · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
+        { title: "Ruby and Rails Talks with Recordings · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
           path: "/talks/", image: nil, ld: [breadcrumbs([["Talks", "/talks/"]])] }
       end
+    end
+
+    # "Berlin.rb #3: Herb, Hotwire Native", or the speakers when the talks'
+    # titles make it too long for search results.
+    def meetup_title(meetup)
+      talks = talks_for(meetup)
+      return "Berlin.rb ##{meetup["number"]}: #{short_date(meetup["date"])}" if talks.empty?
+      title = "Berlin.rb ##{meetup["number"]}: #{talks.map { short_title(_1) || _1["speaker"] }.join(", ")}"
+      title.length > TITLE_LIMIT ? "Berlin.rb ##{meetup["number"]}: #{talks.map { _1["speaker"] }.join(", ")}" : title
+    end
+
+    # A long title gives way to its short one: "HiFuMi · Paweł Strzałkowski · Berlin.rb".
+    def talk_title(talk)
+      title = "#{talk["title"]} · #{talk["speaker"]} · Berlin.rb"
+      title.length > TITLE_LIMIT ? "#{short_title(talk)} · #{talk["speaker"]} · Berlin.rb" : title
     end
 
     def talk_ld(talk)
