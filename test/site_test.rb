@@ -292,4 +292,34 @@ class SiteTest < Minitest::Test
     assert_includes sitemap, "https://berlinrb.org/meetups/1/"
     assert_includes sitemap, "https://berlinrb.org/talks/carmine-paolino-rubyllm-2-0-beyond-agents/"
   end
+  def test_titles_and_descriptions_fit_search_results
+    long = "word " * 50
+    snippet = @site.snippet(long)
+    assert_operator snippet.length, :<=, 160
+    assert snippet.end_with?("word…")
+    assert_equal "Short enough.", @site.snippet("Short  enough.")
+
+    meetups = Berlinrb::Meetups.new([
+      { "number" => 4, "date" => "2026-12-08", "about" => "<p>Luma</p>",
+        "talks" => [{ "speaker" => "Rafał Cymerys", "title" => "Let Your Software Write Its Own Code: Runtime Code Generation in Production", "video" => "def" },
+                    { "speaker" => "Stephen Margheim", "title" => "The ZARchitecture and why we evolved a fintech for AI-driven development", "abstract" => long }] }
+    ])
+    Berlinrb::Site.new(meetups, today: Date.new(2026, 12, 9), root: @root, out: @out).build
+    meetup = read("meetups/4/index.html")
+    assert_includes meetup, "<title>Berlin.rb #4: Rafał Cymerys, Stephen Margheim</title>"
+    assert_operator meetup[/<meta name="description" content="([^"]*)"/, 1].length, :<=, 160
+    talk = read("talks/rafal-cymerys-let-your-software-write-its-own-code-runtime-code-generation-in-production/index.html")
+    assert_includes talk, "<title>Let Your Software Write Its Own Code · Rafał Cymerys · Berlin.rb</title>"
+    talk = read("talks/stephen-margheim-the-zarchitecture-and-why-we-evolved-a-fintech-for-ai-driven-development/index.html")
+    assert_operator talk[/<meta name="description" content="([^"]*)"/, 1].length, :<=, 160
+  end
+
+  def test_events_name_their_organizer_and_speakers
+    graph = JSON.parse(read("meetups/2/index.html")[%r{<script type="application/ld\+json">(.*?)</script>}m, 1])["@graph"]
+    event = graph.find { _1["@type"] == "Event" }
+    assert_equal({ "@type" => "Organization", "@id" => "https://berlinrb.org/#organization", "name" => "Berlin.rb", "url" => "https://berlinrb.org/" }, event["organizer"])
+    assert_equal ["Rafal Cymerys", "Stephen Margheim"], event["performer"].map { _1["name"] }.sort
+    crumbs = graph.find { _1["@type"] == "BreadcrumbList" }["itemListElement"]
+    assert_equal "https://berlinrb.org/meetups/", crumbs[1]["item"]
+  end
 end
