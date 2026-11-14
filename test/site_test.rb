@@ -316,6 +316,23 @@ class SiteTest < Minitest::Test
     assert_includes sitemap, "https://berlinrb.org/meetups/1/"
     assert_includes sitemap, "https://berlinrb.org/talks/carmine-paolino-rubyllm-2-0-beyond-agents/"
   end
+
+  def test_sitemap_dates_pages_by_their_data_and_templates_to_the_second
+    commit = lambda do |path, time|
+      FileUtils.mkdir_p(File.dirname(File.join(@root, path)))
+      File.write(File.join(@root, path), time)
+      env = { "GIT_AUTHOR_DATE" => time, "GIT_COMMITTER_DATE" => time, "GIT_AUTHOR_NAME" => "t", "GIT_AUTHOR_EMAIL" => "t@example.com",
+              "GIT_COMMITTER_NAME" => "t", "GIT_COMMITTER_EMAIL" => "t@example.com" }
+      [%w[init -q], ["add", path], %w[-c commit.gpgsign=false commit -q -m change]].each do |args|
+        assert system(env, "git", "-C", @root, *args, out: File::NULL, err: File::NULL), "git #{args.first}"
+      end
+    end
+    commit.("data/meetups.yml", "2026-11-13T17:36:58+01:00")
+    commit.("templates/talk.html.erb", "2026-11-13T22:40:38+01:00")
+    @site.build
+
+    assert_includes read("sitemap.xml"), "<loc>https://berlinrb.org/meetups/1/</loc><lastmod>2026-11-13T21:40:38Z</lastmod>"
+  end
   def test_titles_and_descriptions_fit_search_results
     long = "word " * 50
     snippet = @site.snippet(long)
