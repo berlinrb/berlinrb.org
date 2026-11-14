@@ -4,6 +4,7 @@ require "cgi"
 require "erb"
 require "fileutils"
 require "json"
+require "time"
 require_relative "meetups"
 require_relative "markdown"
 require_relative "photos"
@@ -426,9 +427,17 @@ module Berlinrb
       (@written ||= []) << path
     end
 
+    # Every page's title, description and structured data are written here and
+    # in the templates, so a change to them counts as a change to every page.
+    RENDERED_BY = %w[lib/berlinrb/site.rb templates].freeze
+
+    # Each page's <lastmod> is the last commit to what it's built from, to the
+    # second, so IndexNow (.github/scripts/indexnow.rb) hears of a change made
+    # later on a day that already changed the page.
     def sitemap
-      pages = %w[index.html press/index.html imprint/index.html privacy/index.html].map { [_1.delete_suffix("index.html"), lastmod(_1)] }
-      data = lastmod("data/meetups.yml")
+      code = lastmod(*RENDERED_BY)
+      pages = %w[index.html press/index.html imprint/index.html privacy/index.html].map { [_1.delete_suffix("index.html"), [lastmod(_1), code].compact.max] }
+      data = [lastmod("data/meetups.yml"), code].compact.max
       pages += @meetups.map { [meetup_path(_1).delete_prefix("/"), data] }
       pages += talks.select { _1["title"] }.map do |talk|
         summary = lastmod(summary_path(talk)) if talk["video"] && File.exist?(summary_file(talk))
@@ -438,13 +447,13 @@ module Berlinrb
       pages << ["photos/", data]
       pages << ["meetups/", data]
       pages << ["get-involved/", data]
-      urls = pages.map { |path, date| "  <url><loc>#{ORIGIN}/#{path}</loc>#{date && "<lastmod>#{date}</lastmod>"}</url>" }
+      urls = pages.map { |path, time| "  <url><loc>#{ORIGIN}/#{path}</loc>#{time && "<lastmod>#{time.utc.iso8601}</lastmod>"}</url>" }
       %(<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n#{urls.join("\n")}\n</urlset>\n)
     end
 
-    def lastmod(path)
-      date = IO.popen(["git", "-C", @root, "log", "-1", "--format=%cs", "--", path], err: File::NULL, &:read).strip
-      date.empty? ? nil : date
+    def lastmod(*paths)
+      time = IO.popen(["git", "-C", @root, "log", "-1", "--format=%ct", "--", *paths], err: File::NULL, &:read).strip
+      time.empty? ? nil : Time.at(Integer(time))
     end
   end
 end
