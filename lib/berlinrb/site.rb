@@ -348,13 +348,13 @@ module Berlinrb
           path: talk_path(talk), alternate: markdown_url(talk_path(talk)), image: talk["video"] && thumbnail?(talk["video"]) ? thumbnail(talk["video"]) : nil,
           ld: [talk_ld(talk), breadcrumbs([["Berlin.rb ##{talk["meetup"]["number"]}", meetup_path(talk["meetup"])], [talk["title"], talk_path(talk)]])] }
       when "photos"
-        { title: "Photos \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
+        { title: "Ruby Meetup Photos from Berlin \u00b7 Berlin.rb", description: "Photos from every Berlin.rb, the Ruby meetup for the Berlin Ruby community.",
           path: "/photos/", image: past.lazy.map { photos(_1).first }.find(&:itself)&.fetch("src"), ld: [breadcrumbs([["Photos", "/photos/"]])] }
       when "meetups"
         { title: "Ruby Meetups in Berlin \u00b7 Berlin.rb", description: "Every Berlin.rb Ruby meetup in Berlin, past and upcoming, with talks, recordings and photos.",
           path: "/meetups/", image: nil, ld: [breadcrumbs([["Meetups", "/meetups/"]])] }
       when "get_involved"
-        { title: "Get involved \u00b7 Berlin.rb", description: "Give a talk at Berlin.rb, host a meetup at your office, or sponsor one. Tell us and an organizer gets back to you.",
+        { title: "Give a Ruby Talk or Host a Meetup in Berlin \u00b7 Berlin.rb", description: "Give a talk at Berlin.rb, host a meetup at your office, or sponsor one. Tell us and an organizer gets back to you.",
           path: "/get-involved/", image: nil, ld: [breadcrumbs([["Get involved", "/get-involved/"]])] }
       when "talks"
         { title: "Ruby and Rails Talks with Recordings · Berlin.rb", description: "Every talk given at Berlin.rb, the Ruby meetup for the Berlin Ruby community, with recordings.",
@@ -366,7 +366,7 @@ module Berlinrb
     # titles make it too long for search results.
     def meetup_title(meetup)
       talks = talks_for(meetup)
-      return "Berlin.rb ##{meetup["number"]}: #{short_date(meetup["date"])}" if talks.empty?
+      return "Berlin.rb ##{meetup["number"]}: Ruby Meetup in Berlin, #{short_date(meetup["date"])}" if talks.empty?
       title = "Berlin.rb ##{meetup["number"]}: #{talks.map { short_title(_1) || _1["speaker"] }.join(", ")}"
       title.length > TITLE_LIMIT ? "Berlin.rb ##{meetup["number"]}: #{talks.map { _1["speaker"] }.join(", ")}" : title
     end
