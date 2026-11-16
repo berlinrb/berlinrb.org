@@ -156,6 +156,12 @@
     format: Talk (40 min)
   - speaker: Marco Roth
     format: Talk (40 min)
+    title: Reactive Rails Views, No Rewrite Required
+    abstract: What if your existing Rails views could become reactive without rewriting
+      them? In this talk, we'll explore how ReActionView brings fine-grained reactivity
+      to HTML+ERB while staying compatible with Action View. We'll look at how existing
+      templates can become reactive, how updates are tracked and rendered, and what
+      this could mean for the future of the Rails view layer.
   livestream_luma: 80cv1zsp
   about: |-
     <p>Berlin.rb is a regular meetup for Berlin&#39;s Ruby community. Join us for talks, food and time to get to know each other.</p>
