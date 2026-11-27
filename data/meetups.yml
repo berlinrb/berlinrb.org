@@ -154,6 +154,15 @@
   talks:
   - speaker: Alex Adam
     format: Talk (40 min)
+    title: Who Builds the Traffic Lights? What the automobile teaches us about AI
+    abstract: |-
+      In 1900 cities ran on horses, and so did a lot of jobs. Then the car arrived. People were scared, some places banned it, and most of those jobs really did disappear. What came next is the part nobody predicted.
+
+      AI is now moving through our work the same way, and the fear sounds familiar. This talk takes the car seriously as an analogy: where it holds, where it breaks, and what the data says so far. Along the way, a few famous quotes turn out to be fake.
+
+      You'll leave with a map of the jobs that grow around a new technology, and a better idea of where they are for AI. For developers who are excited about AI, worried about it, or both.
+
+      If AI is the car, who builds the traffic lights?
   - speaker: Marco Roth
     format: Talk (40 min)
     title: Reactive Rails Views, No Rewrite Required
